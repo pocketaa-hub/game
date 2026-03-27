@@ -659,7 +659,7 @@ audio#bgm { display: none; }
 }
 
 
-body.popup-open { overflow: hidden; position: fixed; width: 100%; }
+body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: none; }
 .mission-open-wrap {
   display: flex;
   justify-content: center;
@@ -1594,6 +1594,44 @@ body.haptic-flash::after {
   .level-meta,.level-unlock { font-size:9px !important; }
 }
 
+/* === popup alignment stability patch === */
+.start-popup {
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) 12px;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+}
+.start-card {
+  width: min(368px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  margin: 0 auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+.start-card * { box-sizing: border-box; }
+.start-card-header { margin-bottom: 6px; }
+.start-card-sub { margin-bottom: 8px !important; }
+.mode-card { min-height: 118px; }
+.mode-card-meta { line-height: 1.25; }
+.mode-card-unlock { min-height: 28px; }
+.level-card { min-height: 88px; }
+.start-sub-actions { margin-top: 8px !important; }
+@media (max-width: 430px) {
+  .start-popup { padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px; }
+  .start-card { width: calc(100vw - 20px) !important; max-height: min(74dvh, 560px) !important; }
+  .mode-card { min-height: 108px; padding: 10px 8px; }
+  .mode-card-name { font-size: 20px !important; }
+  .mode-card-meta { font-size: 11px !important; }
+  .mode-card-unlock { font-size: 9px !important; min-height: 24px; }
+  .level-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 6px !important; }
+  .level-card { min-height: 78px !important; padding: 8px 5px !important; }
+  .level-name { font-size: 15px !important; }
+  .level-meta, .level-unlock { font-size: 8.5px !important; line-height: 1.15; }
+}
+
 </style>
 </head>
 <body>
@@ -1886,10 +1924,10 @@ body.haptic-flash::after {
 <div class="second-chance-popup" id="secondChancePopup">
   <div class="second-chance-card">
     <div class="second-chance-emoji">😮</div>
-    <div class="second-chance-title">한 번 더?</div>
-    <div class="second-chance-desc">이번 판에서 딱 1번만 다시 도전할 수 있어.<br>같은 라운드를 처음부터 다시 보여줄게.</div>
+    <div class="second-chance-title" id="secondChanceTitle">다시 도전할까?</div>
+    <div class="second-chance-desc" id="secondChanceDesc">같은 라운드를 처음부터 다시 보여줄게.<br>이번 재도전에는 ⭐ 1P가 필요해.</div>
     <div class="second-chance-btns">
-      <button class="second-chance-continue" onclick="useSecondChance()">한 번 더</button>
+      <button class="second-chance-continue" id="secondChanceConfirmBtn" onclick="useSecondChance()">⭐ 1P 사용</button>
       <button class="second-chance-cancel" onclick="declineSecondChance()">그만할래</button>
     </div>
   </div>
@@ -2601,10 +2639,10 @@ const UNLOCKED_MODE_KEY = 'limitgame_unlocked_mode_v2';
 const LAST_PLAY_KEY = 'limitgame_last_play_v2';
 const MODE_ORDER = ['easy','normal','hard','hell'];
 const MODE_DEFS = {
-  easy:   { key:'easy',   label:'EASY',   note:'3키 · 가장 편하게 시작', buttons:3, nextUnlockScore:20, nextMode:'normal' },
-  normal: { key:'normal', label:'NORMAL', note:'4키 · 기본 기억력 테스트', buttons:4, nextUnlockScore:20, nextMode:'hard' },
-  hard:   { key:'hard',   label:'HARD',   note:'5키 · 손이 바빠지는 구간', buttons:5, nextUnlockScore:20, nextMode:'hell' },
-  hell:   { key:'hell',   label:'HELL',   note:'6키 · 최상위 도전 모드', buttons:6, nextUnlockScore:null, nextMode:null },
+  easy:   { key:'easy',   label:'EASY',   note:'3키 · 입문용', buttons:3, nextUnlockScore:20, nextMode:'normal' },
+  normal: { key:'normal', label:'NORMAL', note:'4키 · 기본형', buttons:4, nextUnlockScore:20, nextMode:'hard' },
+  hard:   { key:'hard',   label:'HARD',   note:'5키 · 고속형', buttons:5, nextUnlockScore:20, nextMode:'hell' },
+  hell:   { key:'hell',   label:'HELL',   note:'6키 · 극한형', buttons:6, nextUnlockScore:null, nextMode:null },
 };
 const LEVELS = [
   { id:'baby',       name:'유아',   emoji:'🍼', scene:0, speedMul:1.0, unlockScore:5,  unlockText:'5라운드 달성 시 유치원 해금' },
@@ -2722,7 +2760,7 @@ function renderModeOptions() {
     const active = mode === difficulty;
     const unlockText = locked
       ? `${getModeConfig(MODE_ORDER[idx-1]).label} 대학원 20R 필요`
-      : (def.nextMode ? `대학원 20R → ${getModeConfig(def.nextMode).label}` : '최종 모드');
+      : (def.nextMode ? `대학원 20R 달성 시 ${getModeConfig(def.nextMode).label}` : '최종 모드');
     return `<button class="mode-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" onclick="setDifficulty('${mode}')">
       <div class="mode-card-top"><div class="mode-card-name">${def.label}</div><div>${locked ? '🔒' : '✅'}</div></div>
       <div class="mode-card-meta">${def.buttons}키 · ${def.note}</div>
@@ -3356,18 +3394,18 @@ function showSecondChancePopup() {
   const title = document.getElementById('secondChanceTitle');
   const desc = document.getElementById('secondChanceDesc');
   const btn = document.getElementById('secondChanceConfirmBtn');
-  if (title) title.textContent = retryCost === 1 ? '다시 도전할까?' : '한 번 더 밀어볼까?';
+  if (title) title.textContent = retryCost === 1 ? '다시 도전할까?' : '마지막으로 한 번 더 갈까?';
   if (desc) {
     if (retryCost == null) {
       desc.innerHTML = '이번 판에서는 더 이상 재도전할 수 없어.';
     } else if (canAfford(retryCost)) {
-      desc.innerHTML = `같은 라운드를 처음부터 다시 보여줄게.<br>이번 재도전에는 ⭐ ${retryCost}P가 필요해.`;
+      desc.innerHTML = `같은 라운드를 처음부터 다시 보여줄게.<br>${retryCost === 1 ? '첫 번째 재도전' : '두 번째이자 마지막 재도전'}에는 ⭐ ${retryCost}P가 필요해.`;
     } else {
       desc.innerHTML = `포인트가 부족해.<br>필요 포인트 ⭐ ${retryCost}P · 현재 ⭐ ${points}P`;
     }
   }
   if (btn) {
-    btn.textContent = retryCost != null ? `⭐ ${retryCost}P 사용` : '재도전 종료';
+    btn.textContent = retryCost != null ? (retryCost === 1 ? '⭐ 1P 사용하고 계속' : '⭐ 2P 사용하고 마지막 재도전') : '재도전 종료';
     btn.disabled = retryCost == null || !canAfford(retryCost);
     btn.style.opacity = btn.disabled ? '.5' : '1';
   }
@@ -3406,7 +3444,9 @@ function useSecondChance() {
 function declineSecondChance() {
   hideSecondChancePopup();
   pendingRetry = false;
-  gameOver();
+  secondChanceUsed = true;
+  setStatus('여기서 마무리할게.');
+  safeTimeout(() => gameOver(), 60);
 }
 
 function gameOver() {

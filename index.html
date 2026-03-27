@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -10,14 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  position: fixed;
-  overscroll-behavior: none;
-  touch-action: manipulation;
-}
+html, body { height: 100%; overflow: hidden; }
 
 body {
   min-height: 100vh;
@@ -409,8 +402,8 @@ audio#bgm { display: none; }
   position: fixed; inset: 0; z-index: 500;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-start;
-  overflow: hidden;
-  touch-action: manipulation;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   transition: opacity .7s ease;
   padding: 16px 0 28px;
 }
@@ -896,6 +889,82 @@ body.popup-open { overflow: hidden; }
   to   { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(.96); }
 }
 
+
+/* ══ 한 번 더 기회 팝업 ══ */
+.second-chance-popup {
+  position: fixed; inset: 0; z-index: 290;
+  background: rgba(0,0,0,.76);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+  backdrop-filter: blur(6px);
+}
+.second-chance-popup.visible { opacity: 1; pointer-events: all; }
+
+.second-chance-card {
+  background: #fffbee;
+  border: 4px solid #c88a30;
+  border-radius: 22px;
+  padding: 28px 24px 24px;
+  text-align: center;
+  max-width: 320px; width: 92%;
+  box-shadow: 0 8px 0 #8B6000, 0 16px 42px rgba(0,0,0,.45);
+}
+.second-chance-emoji {
+  font-size: 42px;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.second-chance-title {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 30px;
+  color: #8B2500;
+  line-height: 1.1;
+}
+.second-chance-desc {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #7a4a10;
+  line-height: 1.45;
+}
+.second-chance-note {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #a36b1d;
+}
+.second-chance-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+.second-chance-btn {
+  flex: 1;
+  border-radius: 12px;
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: transform .1s ease, box-shadow .1s ease, filter .1s ease;
+}
+.second-chance-btn:active {
+  transform: scale(.97);
+}
+.second-chance-confirm {
+  background: #ffe566;
+  color: #7a2e00;
+  border: 3px solid #c88a30;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 24px;
+  box-shadow: 0 4px 0 #8B6000;
+}
+.second-chance-cancel {
+  background: #eee2d2;
+  color: #6d4c41;
+  border: 2px solid #bcaaa4;
+  font-family: 'Gaegu', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  box-shadow: 0 3px 0 #b9a79d;
+}
+
 /* ══ 이름 입력 팝업 ══ */
 .name-popup {
   position: fixed; inset: 0; z-index: 300;
@@ -1256,13 +1325,6 @@ body.popup-open { overflow: hidden; }
 }
 .title-bg-slide.active { animation: titleBgDrift 10s ease-in-out infinite alternate; }
 .bg-scene.active { animation: gameBgDrift 14s ease-in-out infinite alternate; }
-@media (max-width: 768px) {
-  .bg-scene.active,
-  .title-bg-slide.active {
-    animation: none !important;
-    transform: none !important;
-  }
-}
 .title-char-f.active { animation: titleFloatLeft 3.8s ease-in-out infinite; }
 .title-char-m.active { animation: titleFloatRight 4s ease-in-out infinite; }
 .char-stage.active img { animation: charBob 4.2s ease-in-out infinite; }
@@ -1570,6 +1632,24 @@ body.haptic-flash::after {
     <div class="result-char-right"><img id="resultCharRight" src="male_0.png" alt=""></div>
   </div><!-- /result-chars -->
 </div><!-- /overlay -->
+
+
+<!-- ══ 한 번 더 기회 팝업 ══ -->
+<div class="second-chance-popup" id="secondChancePopup">
+  <div class="second-chance-card">
+    <div class="second-chance-emoji">😮</div>
+    <div class="second-chance-title">한 번 더 갈 수 있어</div>
+    <div class="second-chance-desc">
+      이번 판은 아직 안 끝났어.<br>
+      같은 순서를 한 번 더 보여줄게.
+    </div>
+    <div class="second-chance-note" id="secondChanceNote">이 기회는 게임당 한 번만 사용할 수 있어.</div>
+    <div class="second-chance-actions">
+      <button class="second-chance-btn second-chance-confirm" onclick="useSecondChance()">한 번 더</button>
+      <button class="second-chance-btn second-chance-cancel" onclick="declineSecondChance()">그만할래</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ 이름 입력 팝업 ══ -->
 <div class="name-popup" id="namePopup">
@@ -2317,6 +2397,7 @@ function titleNext() {
 titleTimer = setInterval(titleNext, 1800);
 
 function enterGame() {
+  closeSecondChancePopup();
   initAudio();
   playUiSound('start');
   pulseVibration([14, 24, 16]);
@@ -2344,6 +2425,7 @@ function enterGame() {
 }
 
 function goHome() {
+  closeSecondChancePopup();
   closeMissionPopup();
   clearAllTimers();
   gameState = STATE.IDLE;
@@ -2597,6 +2679,8 @@ renderDailyMissions();
 
 let activeTimers = [];
 let combo = 0;  // 연속 성공 라운드 수
+let secondChanceUsed = false;
+let pendingSecondChance = false;
 
 // 콤보 메시지 정의
 const COMBO_DATA = {
@@ -2654,6 +2738,9 @@ function startGame() {
   });
 
   sequence = []; playerIndex = 0; round = 0; combo = 0;
+  secondChanceUsed = false;
+  pendingSecondChance = false;
+  closeSecondChancePopup();
   updateRound(0);
   updateStageUI(0);
   updateComboBadge(0);
@@ -2698,6 +2785,7 @@ function handleInput(shape) {
   if (shape !== sequence[playerIndex]) {
     // 오답: shake + 전체 버튼 어둡게
     gameState = STATE.GAMEOVER;
+    pendingSecondChance = !secondChanceUsed;
     btn.classList.add('wrong');
     playUiSound('wrong');
     pulseVibration([50, 45, 70]);
@@ -2708,7 +2796,11 @@ function handleInput(shape) {
     setTimeout(() => {
       btn.classList.remove('wrong');
       document.querySelectorAll('.btn').forEach(b => b.style.opacity = '');
-      gameOver();
+      if (pendingSecondChance) {
+        showSecondChancePopup();
+      } else {
+        gameOver();
+      }
     }, 480);
     return;
   }
@@ -2745,6 +2837,49 @@ function handleInput(shape) {
     setStatus('맞아.');
     safeTimeout(nextRound, getDifficultyConfig().nextRoundDelay);
   }
+}
+
+
+function showSecondChancePopup() {
+  const popup = document.getElementById('secondChancePopup');
+  if (!popup) return;
+  popup.classList.add('visible');
+  document.body.classList.add('popup-open');
+  setStatus('아직 끝난 건 아니야.');
+}
+
+function closeSecondChancePopup() {
+  const popup = document.getElementById('secondChancePopup');
+  if (!popup) return;
+  popup.classList.remove('visible');
+  document.body.classList.remove('popup-open');
+}
+
+function useSecondChance() {
+  if (secondChanceUsed) return;
+  secondChanceUsed = true;
+  pendingSecondChance = false;
+  closeSecondChancePopup();
+  clearAllTimers();
+  playerIndex = 0;
+  document.querySelectorAll('.btn').forEach(b => {
+    b.classList.remove('lit', 'wrong', 'correct', 'tap', 'ripple');
+    b.style.opacity = '';
+  });
+  setStatus('이번엔 다시 보여줄게.');
+  gameState = STATE.SHOWING;
+  safeTimeout(() => {
+    playSequence(() => {
+      gameState = STATE.WAITING;
+      setStatus('다시 따라해봐.');
+    });
+  }, 420);
+}
+
+function declineSecondChance() {
+  pendingSecondChance = false;
+  closeSecondChancePopup();
+  gameOver();
 }
 
 function gameOver() {
@@ -2883,25 +3018,6 @@ function showComboToast(n) {
 
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
-</script>
-
-<script>
-document.addEventListener('gesturestart', function (e) {
-  e.preventDefault();
-}, { passive: false });
-
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function (e) {
-  const now = Date.now();
-  if (now - lastTouchEnd <= 300) {
-    e.preventDefault();
-  }
-  lastTouchEnd = now;
-}, { passive: false });
-
-document.addEventListener('dblclick', function (e) {
-  e.preventDefault();
-}, { passive: false });
 </script>
 </body>
 </html>

@@ -409,8 +409,11 @@ audio#bgm { display: none; }
   position: fixed; inset: 0; z-index: 500;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-start;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  width: 100%;
+  height: 100%;
   transition: opacity .7s ease;
   padding: 16px 0 28px;
 }
@@ -1572,21 +1575,43 @@ body.haptic-flash::after {
       <div class="start-card-title">🎮 도전 레벨 선택</div>
       <button class="start-close-btn" onclick="closeStartPopup()" aria-label="닫기">✕</button>
     </div>
-    <div class="start-card-sub" id="startCardSub">한 단계씩 해금된다. 잠긴 레벨은 목표를 달성하면 열린다.</div>
-
-    <div class="start-section-label">레벨</div>
-    <div class="level-grid" id="levelGrid"></div>
-
-    <div class="start-section-label">속도</div>
-    <div class="mode-chips start-mode-chips">
-      <button class="mode-chip" data-mode="easy" onclick="setDifficulty('easy')">1X</button>
-      <button class="mode-chip" data-mode="normal" onclick="setDifficulty('normal')">1.5X</button>
-      <button class="mode-chip" data-mode="hard" onclick="setDifficulty('hard')">2X</button>
+    <div class="start-card-sub" id="startCardSub">모드를 고르고, 다음 단계에서 세부 레벨을 선택해.</div>
+    <div class="start-steps">
+      <div class="start-step-chip active" id="stepChipMode">1. 모드</div>
+      <div class="start-step-chip" id="stepChipStage">2. 단계</div>
     </div>
-    <div class="mode-note" id="modeNote">기본 속도로 차분하게 시작</div>
 
-    <div class="start-actions">
-      <button class="start-confirm-btn" onclick="confirmStartGame()">이 레벨로 시작</button>
+    <div class="start-view active" id="startViewMode">
+      <div class="resume-chip" id="resumeChip" style="display:none;">
+        <div>
+          <div class="resume-title">최근 플레이 이어하기</div>
+          <div class="resume-value" id="resumeValue">EASY · 유아</div>
+        </div>
+        <button class="start-ghost-btn" id="resumeBtn" onclick="resumeLastPlay()">이어하기</button>
+      </div>
+      <div class="start-section-label">모드</div>
+      <div class="mode-level-grid" id="modeGrid"></div>
+      <div class="start-sub-actions">
+        <button class="start-ghost-btn" onclick="closeStartPopup()">닫기</button>
+        <button class="start-continue-btn" onclick="goToStageStep()">다음</button>
+      </div>
+    </div>
+
+    <div class="start-view" id="startViewStage">
+      <div class="resume-chip" id="stageInfoChip">
+        <div>
+          <div class="resume-title">선택한 모드</div>
+          <div class="resume-value" id="selectedModeSummary">EASY · 3키</div>
+        </div>
+        <button class="start-ghost-btn" onclick="goToModeStep()">모드 변경</button>
+      </div>
+      <div class="start-section-label">세부 단계</div>
+      <div class="level-grid" id="levelGrid"></div>
+      <div class="mode-note" id="modeNote">유아 1.0배 ~ 대학원 1.6배</div>
+      <div class="start-sub-actions">
+        <button class="start-back-btn" onclick="goToModeStep()">이전</button>
+        <button class="start-confirm-btn" onclick="confirmStartGame()">이 단계로 시작</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1600,8 +1625,6 @@ body.haptic-flash::after {
 
 <!-- 콤보 카운터 배지 -->
 <div class="combo-badge" id="comboBadge" style="opacity:0;pointer-events:none">🔥 0 콤보</div>
-
-
 <div class="point-badge" id="pointBadge">⭐ 0P</div>
 <div class="point-toast" id="pointToast">⭐ +1P</div>
 
@@ -1749,14 +1772,13 @@ body.haptic-flash::after {
 <div class="second-chance-popup" id="secondChancePopup">
   <div class="second-chance-card">
     <div class="second-chance-emoji">😮</div>
-    <div class="second-chance-title" id="secondChanceTitle">다시 도전할까?</div>
-    <div class="second-chance-desc" id="secondChanceDesc">같은 라운드를 처음부터 다시 보여줄게.<br>이번 재도전에는 ⭐ 1P가 필요해.</div>
+    <div class="second-chance-title">한 번 더?</div>
+    <div class="second-chance-desc">이번 판에서 딱 1번만 다시 도전할 수 있어.<br>같은 라운드를 처음부터 다시 보여줄게.</div>
     <div class="second-chance-btns">
-      <button class="second-chance-continue" id="secondChanceConfirmBtn" onclick="useSecondChance()">⭐ 1P 사용</button>
+      <button class="second-chance-continue" onclick="useSecondChance()">한 번 더</button>
       <button class="second-chance-cancel" onclick="declineSecondChance()">그만할래</button>
     </div>
   </div>
-</div>
 </div>
 
 <!-- ══ 이름 입력 팝업 ══ -->
@@ -1826,76 +1848,6 @@ body.haptic-flash::after {
 // ══ 배지 시스템 ══
 const BADGE_KEY = 'limitgame_badges';
 const GAME_STATS_KEY = 'limitgame_game_stats';
-
-const POINT_KEY = 'limitgame_points';
-const BADGE_POINT_REWARD = 5;
-const DAILY_POINT_REWARD = 1;
-const RETRY_COSTS = [1, 2];
-
-function getPoints() {
-  return Math.max(0, Number(localStorage.getItem(POINT_KEY) || 0));
-}
-
-let points = getPoints();
-
-function updatePointUI(bump = false) {
-  const badge = document.getElementById('pointBadge');
-  if (!badge) return;
-  badge.textContent = `⭐ ${points}P`;
-  if (bump) {
-    badge.classList.remove('bump');
-    void badge.offsetWidth;
-    badge.classList.add('bump');
-    setTimeout(() => badge.classList.remove('bump'), 260);
-  }
-}
-
-function showPointToast(amount, label = '') {
-  const toast = document.getElementById('pointToast');
-  if (!toast) return;
-  const prefix = amount >= 0 ? '+' : '-';
-  toast.textContent = `⭐ ${prefix}${Math.abs(amount)}P${label ? ' · ' + label : ''}`;
-  toast.style.display = '';
-  toast.classList.remove('hide');
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-    toast.classList.add('hide');
-    setTimeout(() => {
-      toast.classList.remove('hide');
-      toast.style.display = 'none';
-    }, 240);
-  }, 1200);
-}
-
-function addPoints(amount, label = '') {
-  amount = Number(amount || 0);
-  if (!amount) return;
-  points = Math.max(0, points + amount);
-  localStorage.setItem(POINT_KEY, String(points));
-  updatePointUI(true);
-  showPointToast(amount, label);
-}
-
-function canAfford(cost) {
-  return points >= Number(cost || 0);
-}
-
-function spendPoints(cost, label = '') {
-  cost = Number(cost || 0);
-  if (cost <= 0) return true;
-  if (!canAfford(cost)) return false;
-  points = Math.max(0, points - cost);
-  localStorage.setItem(POINT_KEY, String(points));
-  updatePointUI(true);
-  showPointToast(-cost, label);
-  return true;
-}
-
-function getRetryCost() {
-  return RETRY_COSTS[retryCount] ?? null;
-}
-
 
 const BADGE_DEFS = [
   // 일반
@@ -1984,7 +1936,7 @@ function updateGameStats(score, mode) {
     prevScore: null,
     bounceBack: false,
     last3Over5: false,
-    modeGames: { easy: 0, normal: 0, hard: 0 },
+    modeGames: { easy: 0, normal: 0, hard: 0, hell: 0 },
   }, prev);
 
   if (!stats.modeGames || typeof stats.modeGames !== 'object') {
@@ -1993,6 +1945,7 @@ function updateGameStats(score, mode) {
   stats.modeGames.easy = Number(stats.modeGames.easy || 0);
   stats.modeGames.normal = Number(stats.modeGames.normal || 0);
   stats.modeGames.hard = Number(stats.modeGames.hard || 0);
+  stats.modeGames.hell = Number(stats.modeGames.hell || 0);
 
   if (stats.todayKey !== todayKey) {
     stats.todayKey = todayKey;
@@ -2113,7 +2066,7 @@ function renderBadges() {
     const isEarned = !!earnedData;
     return `
       <div class="badge-item ${isEarned ? 'earned' : 'locked'}">
-        <div class="badge-point-tag">⭐ ${BADGE_POINT_REWARD}P</div>
+        <div class="badge-point-tag">⭐ 5P</div>
         <div class="badge-item-icon">${def.icon}</div>
         <div class="badge-item-name">${def.name}</div>
         <div class="badge-item-desc">${isEarned ? (earnedData.date || '획득 완료') : def.desc}</div>
@@ -2314,7 +2267,7 @@ function normalizeDailyState(raw) {
     longestStreak: 0,
     lastClearedDate: null,
     missions: buildDailyMissionSet(dateKey),
-    progress: { games: 0, totalRounds: 0, best: 0, maxCombo: 0, modeGames: { easy: 0, normal: 0, hard: 0 } },
+    progress: { games: 0, totalRounds: 0, best: 0, maxCombo: 0, modeGames: { easy: 0, normal: 0, hard: 0, hell: 0 } },
   }, raw || {});
 
   state.totalStamps = Number(state.totalStamps || 0);
@@ -2359,7 +2312,7 @@ function normalizeDailyState(raw) {
       lastClearedDate,
       dayCleared: false,
       missions: buildDailyMissionSet(dateKey),
-      progress: { games: 0, totalRounds: 0, best: 0, maxCombo: 0, modeGames: { easy: 0, normal: 0, hard: 0 } },
+      progress: { games: 0, totalRounds: 0, best: 0, maxCombo: 0, modeGames: { easy: 0, normal: 0, hard: 0, hell: 0 } },
     };
   }
 
@@ -2374,6 +2327,7 @@ function normalizeDailyState(raw) {
   state.progress.modeGames.easy = Number(state.progress.modeGames.easy || 0);
   state.progress.modeGames.normal = Number(state.progress.modeGames.normal || 0);
   state.progress.modeGames.hard = Number(state.progress.modeGames.hard || 0);
+  state.progress.modeGames.hell = Number(state.progress.modeGames.hell || 0);
 
   state.missions = state.missions.map(m => ({ id: m.id, completed: !!m.completed, completedAt: m.completedAt || null }));
   return state;
@@ -2431,7 +2385,7 @@ function renderDailyMissions() {
           <div class="daily-item-name">${def.name}</div>
           <div class="daily-item-desc">${def.desc}</div>
         </div>
-        <div class="daily-item-progress">${m.completed ? `완료 · ⭐${DAILY_POINT_REWARD}P` : `${missionProgressText(def, state.progress)} · ⭐${DAILY_POINT_REWARD}P`}</div>
+        <div class="daily-item-progress">${m.completed ? '완료 · ⭐1P' : `${missionProgressText(def, state.progress)} · ⭐1P`}</div>
       </div>`;
   }).join('');
 
@@ -2482,10 +2436,10 @@ function updateDailyMissions(score, maxCombo, mode) {
 
   saveDailyMissionState(state);
   renderDailyMissions();
-  renderLevelOptions();
-  applyLevelLayout();
-  ensureBgmReady();
-  playBgmFor('title');
+renderLevelOptions();
+applyLevelLayout();
+ensureBgmReady();
+playBgmFor('title');
   return { completedNow, state };
 }
 
@@ -2515,51 +2469,231 @@ function showMissionToast(missions, startDelay = 0) {
 }
 
 // ══ 난이도 시스템 ══
-const MODE_KEY = 'limitgame_mode';
-const DIFFICULTY = {
-  easy:   { label:'1X',   note:'기본 속도로 차분하게 시작', speed:1.0, showDelay:400, lightOn:540, gap:180, afterSeq:300, nextRoundDelay:900 },
-  normal: { label:'1.5X', note:'조금 더 빠르게 흘러가는 속도', speed:1.5, showDelay:260, lightOn:420, gap:130, afterSeq:220, nextRoundDelay:760 },
-  hard:   { label:'2X',   note:'순간 집중이 필요한 고속 모드', speed:2.0, showDelay:160, lightOn:300, gap:90, afterSeq:170, nextRoundDelay:650 },
+const MODE_KEY = 'limitgame_mode_v2';
+const LEVEL_KEY = 'limitgame_stage_v2';
+const UNLOCKED_STAGE_KEY = 'limitgame_unlocked_stages_v2';
+const UNLOCKED_MODE_KEY = 'limitgame_unlocked_mode_v2';
+const LAST_PLAY_KEY = 'limitgame_last_play_v2';
+const MODE_ORDER = ['easy','normal','hard','hell'];
+const MODE_DEFS = {
+  easy:   { key:'easy',   label:'EASY',   note:'3키 · 가장 편하게 시작', buttons:3, nextUnlockScore:20, nextMode:'normal' },
+  normal: { key:'normal', label:'NORMAL', note:'4키 · 기본 기억력 테스트', buttons:4, nextUnlockScore:20, nextMode:'hard' },
+  hard:   { key:'hard',   label:'HARD',   note:'5키 · 손이 바빠지는 구간', buttons:5, nextUnlockScore:20, nextMode:'hell' },
+  hell:   { key:'hell',   label:'HELL',   note:'6키 · 최상위 도전 모드', buttons:6, nextUnlockScore:null, nextMode:null },
 };
+const LEVELS = [
+  { id:'baby',       name:'유아',   emoji:'🍼', scene:0, speedMul:1.0, unlockScore:5,  unlockText:'5라운드 달성 시 유치원 해금' },
+  { id:'kinder',     name:'유치원', emoji:'🎒', scene:1, speedMul:1.1, unlockScore:7,  unlockText:'7라운드 달성 시 초등 해금' },
+  { id:'elementary', name:'초등',   emoji:'✏️', scene:2, speedMul:1.2, unlockScore:10, unlockText:'10라운드 달성 시 중등 해금' },
+  { id:'middle',     name:'중등',   emoji:'🚲', scene:3, speedMul:1.3, unlockScore:13, unlockText:'13라운드 달성 시 고등 해금' },
+  { id:'high',       name:'고등',   emoji:'📚', scene:4, speedMul:1.4, unlockScore:15, unlockText:'15라운드 달성 시 대학 해금' },
+  { id:'college',    name:'대학',   emoji:'🎓', scene:5, speedMul:1.5, unlockScore:20, unlockText:'20라운드 달성 시 대학원 해금' },
+  { id:'grad',       name:'대학원', emoji:'🔬', scene:6, speedMul:1.6, unlockScore:null, unlockText:'이 모드의 최종 단계' },
+];
+const LEVEL_BUTTONS = {
+  3: ['circle','triangle','square'],
+  4: ['circle','square','triangle','star'],
+  5: ['circle','square','diamond','triangle','star'],
+  6: ['circle','square','diamond','triangle','star','hex'],
+};
+const BASE_TIMING = { showDelay:400, lightOn:540, gap:180, afterSeq:300, nextRoundDelay:900 };
 let difficulty = localStorage.getItem(MODE_KEY) || 'easy';
-
+if (!MODE_DEFS[difficulty]) difficulty = 'easy';
+let selectedLevelIdx = parseInt(localStorage.getItem(LEVEL_KEY) || '0', 10);
+if (Number.isNaN(selectedLevelIdx)) selectedLevelIdx = 0;
+selectedLevelIdx = Math.min(Math.max(0, selectedLevelIdx), LEVELS.length - 1);
+let unlockedModeIdx = parseInt(localStorage.getItem(UNLOCKED_MODE_KEY) || '0', 10);
+if (Number.isNaN(unlockedModeIdx)) unlockedModeIdx = 0;
+unlockedModeIdx = Math.min(Math.max(0, unlockedModeIdx), MODE_ORDER.length - 1);
+function getUnlockedStageMap() {
+  try {
+    const obj = JSON.parse(localStorage.getItem(UNLOCKED_STAGE_KEY) || '{}');
+    if (obj && typeof obj === 'object') return obj;
+  } catch(e) {}
+  return {};
+}
+let unlockedStageMap = getUnlockedStageMap();
+function getModeConfig(mode = difficulty) { return MODE_DEFS[mode] || MODE_DEFS.easy; }
+function getSelectedLevel() { return LEVELS[selectedLevelIdx] || LEVELS[0]; }
+function getUnlockedStageIdx(mode = difficulty) {
+  const raw = Number(unlockedStageMap[mode]);
+  if (Number.isNaN(raw)) return 0;
+  return Math.min(Math.max(0, raw), LEVELS.length - 1);
+}
+if (selectedLevelIdx > getUnlockedStageIdx()) selectedLevelIdx = getUnlockedStageIdx();
+function saveProgressState() {
+  localStorage.setItem(MODE_KEY, difficulty);
+  localStorage.setItem(LEVEL_KEY, String(selectedLevelIdx));
+  localStorage.setItem(UNLOCKED_MODE_KEY, String(unlockedModeIdx));
+  localStorage.setItem(UNLOCKED_STAGE_KEY, JSON.stringify(unlockedStageMap));
+}
 function getDifficultyConfig() {
-  return DIFFICULTY[difficulty] || DIFFICULTY.easy;
+  const stage = getSelectedLevel();
+  const mul = Number(stage.speedMul || 1);
+  return {
+    label: getModeConfig().label,
+    note: `${getModeConfig().note} · ${stage.name} ${mul.toFixed(1)}배`,
+    speed: mul,
+    showDelay: Math.round(BASE_TIMING.showDelay / mul),
+    lightOn: Math.round(BASE_TIMING.lightOn / mul),
+    gap: Math.round(BASE_TIMING.gap / mul),
+    afterSeq: Math.round(BASE_TIMING.afterSeq / mul),
+    nextRoundDelay: Math.round(BASE_TIMING.nextRoundDelay / Math.min(mul, 1.35)),
+  };
 }
-
-function getSelectedLevel() {
-  return LEVELS[selectedLevelIdx] || LEVELS[0];
-}
-
-function getUnlockedLevels() {
-  return LEVELS.map((_, idx) => idx <= unlockedLevelIdx);
-}
-
 function updateStageBadge() {
   const badge = document.getElementById('stageBadge');
   if (!badge) return;
-  const level = getSelectedLevel();
-  badge.textContent = `${level.emoji} ${level.name} · ${level.buttons}버튼 · ${getDifficultyConfig().label}`;
+  const stage = getSelectedLevel();
+  const mode = getModeConfig();
+  badge.textContent = `${stage.emoji} ${mode.label} · ${stage.name} · ${mode.buttons}키 · ${stage.speedMul.toFixed(1)}배`;
 }
-
 function syncDifficultyUI() {
-  document.querySelectorAll('.mode-chip').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.mode === difficulty);
-  });
+  const summary = document.getElementById('selectedModeSummary');
+  if (summary) summary.textContent = `${getModeConfig().label} · ${getModeConfig().buttons}키`;
   const note = document.getElementById('modeNote');
-  if (note) note.textContent = getDifficultyConfig().note;
+  if (note) note.textContent = `${getModeConfig().label} · ${getModeConfig().buttons}키 · ${getSelectedLevel().name} ${getSelectedLevel().speedMul.toFixed(1)}배`;
   updateStageBadge();
 }
-
 function setDifficulty(mode) {
-  if (!DIFFICULTY[mode]) return;
-  initAudio();
-  playUiSound('tap');
+  if (!MODE_DEFS[mode]) return;
+  const idx = MODE_ORDER.indexOf(mode);
+  if (idx > unlockedModeIdx) return;
   difficulty = mode;
-  localStorage.setItem(MODE_KEY, mode);
+  selectedLevelIdx = Math.min(selectedLevelIdx, getUnlockedStageIdx(mode));
+  saveProgressState();
+  renderModeOptions();
+  renderLevelOptions();
   syncDifficultyUI();
 }
-
+function getLastPlay() {
+  try {
+    const obj = JSON.parse(localStorage.getItem(LAST_PLAY_KEY) || 'null');
+    if (obj && MODE_DEFS[obj.mode] && LEVELS[obj.levelIdx]) return obj;
+  } catch(e) {}
+  return null;
+}
+function saveLastPlay() {
+  localStorage.setItem(LAST_PLAY_KEY, JSON.stringify({ mode:difficulty, levelIdx:selectedLevelIdx }));
+}
+function renderResumeChip() {
+  const chip = document.getElementById('resumeChip');
+  const value = document.getElementById('resumeValue');
+  const last = getLastPlay();
+  if (!chip || !value) return;
+  if (!last || MODE_ORDER.indexOf(last.mode) > unlockedModeIdx || last.levelIdx > getUnlockedStageIdx(last.mode)) {
+    chip.style.display = 'none';
+    return;
+  }
+  chip.style.display = '';
+  value.textContent = `${getModeConfig(last.mode).label} · ${LEVELS[last.levelIdx].name}`;
+}
+function renderModeOptions() {
+  const grid = document.getElementById('modeGrid');
+  if (!grid) return;
+  grid.innerHTML = MODE_ORDER.map((mode, idx) => {
+    const def = getModeConfig(mode);
+    const locked = idx > unlockedModeIdx;
+    const active = mode === difficulty;
+    const unlockText = locked
+      ? `${getModeConfig(MODE_ORDER[idx-1]).label} · 대학원 20라운드 필요`
+      : (def.nextMode ? `대학원 20라운드 달성 시 ${getModeConfig(def.nextMode).label} 해금` : '최종 모드');
+    return `<button class="mode-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" onclick="setDifficulty('${mode}')">
+      <div class="mode-card-top"><div class="mode-card-name">${def.label}</div><div>${locked ? '🔒' : '✅'}</div></div>
+      <div class="mode-card-meta">${def.buttons}키 · ${def.note}</div>
+      <div class="mode-card-unlock">${unlockText}</div>
+    </button>`;
+  }).join('');
+  renderResumeChip();
+}
+function getStageLockedText(idx) {
+  if (idx <= 0) return '기본 단계';
+  const prev = LEVELS[idx - 1];
+  return `${prev.name} ${prev.unlockScore}라운드 달성 필요`;
+}
+function renderLevelOptions() {
+  const grid = document.getElementById('levelGrid');
+  if (!grid) return;
+  const unlockedIdx = getUnlockedStageIdx();
+  grid.innerHTML = LEVELS.map((level, idx) => {
+    const locked = idx > unlockedIdx;
+    const active = idx === selectedLevelIdx;
+    const unlockText = locked ? getStageLockedText(idx) : (level.unlockText || '최종 단계');
+    return `<button class="level-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" data-level="${idx}" onclick="chooseLevel(${idx})">
+      <div class="level-top"><div class="level-name">${level.emoji} ${level.name}</div><div class="level-lock">${locked ? '🔒' : '✅'}</div></div>
+      <div class="level-meta">${getModeConfig().buttons}키 · ${level.speedMul.toFixed(1)}배</div>
+      <div class="level-unlock">${unlockText}</div>
+    </button>`;
+  }).join('');
+  syncDifficultyUI();
+}
+function chooseLevel(idx) {
+  if (idx > getUnlockedStageIdx()) return;
+  selectedLevelIdx = idx;
+  saveProgressState();
+  renderLevelOptions();
+  syncDifficultyUI();
+}
+function goToModeStep() {
+  document.getElementById('startViewMode').classList.add('active');
+  document.getElementById('startViewStage').classList.remove('active');
+  document.getElementById('stepChipMode').classList.add('active');
+  document.getElementById('stepChipStage').classList.remove('active');
+  renderModeOptions();
+}
+function goToStageStep() {
+  document.getElementById('startViewMode').classList.remove('active');
+  document.getElementById('startViewStage').classList.add('active');
+  document.getElementById('stepChipMode').classList.remove('active');
+  document.getElementById('stepChipStage').classList.add('active');
+  renderLevelOptions();
+}
+function resumeLastPlay() {
+  const last = getLastPlay();
+  if (!last) return;
+  if (MODE_ORDER.indexOf(last.mode) > unlockedModeIdx || last.levelIdx > getUnlockedStageIdx(last.mode)) return;
+  difficulty = last.mode;
+  selectedLevelIdx = last.levelIdx;
+  saveProgressState();
+  goToStageStep();
+}
+function openStartPopup() {
+  initAudio();
+  playUiSound('tap');
+  renderModeOptions();
+  renderLevelOptions();
+  goToModeStep();
+  document.getElementById('startPopup').classList.add('visible');
+  document.body.classList.add('popup-open');
+}
+function closeStartPopup() {
+  document.getElementById('startPopup').classList.remove('visible');
+  document.body.classList.remove('popup-open');
+}
+function enterGame() { openStartPopup(); }
+function confirmStartGame() {
+  initAudio();
+  playUiSound('start');
+  pulseVibration([14, 24, 16]);
+  saveProgressState();
+  saveLastPlay();
+  closeStartPopup();
+  stopBgm();
+  clearInterval(titleTimer);
+  const ts = document.getElementById('titleScreen');
+  ts.classList.add('hidden');
+  const gw = document.getElementById('gameWrapper');
+  gw.style.display = 'flex';
+  gw.classList.remove('hidden');
+  gw.style.opacity = '0';
+  gw.style.transition = 'opacity .6s ease';
+  requestAnimationFrame(() => { gw.style.opacity = '1'; });
+  document.getElementById('overlay').style.display = '';
+  document.getElementById('comboToast').style.display = '';
+  applyLevelLayout();
+  setTimeout(() => { ts.style.display = 'none'; }, 700);
+  setTimeout(startGame, 400);
+}
 // ══ 타이틀 슬라이드 ══
 let titleIdx = 0;
 const TITLE_COUNT = 7;
@@ -2586,87 +2720,6 @@ function titleNext() {
 
 // 1.8초 단위 슬라이드
 titleTimer = setInterval(titleNext, 1800);
-
-function openStartPopup() {
-  initAudio();
-  playUiSound('tap');
-  renderLevelOptions();
-  syncDifficultyUI();
-  document.getElementById('startPopup').classList.add('visible');
-  document.body.classList.add('popup-open');
-}
-function closeStartPopup() {
-  document.getElementById('startPopup').classList.remove('visible');
-  document.body.classList.remove('popup-open');
-}
-function chooseLevel(idx) {
-  if (idx > unlockedLevelIdx) {
-    const card = document.querySelector(`.level-card[data-level="${idx}"]`);
-    if (card) {
-      card.classList.add('selected-locked');
-      setTimeout(() => card.classList.remove('selected-locked'), 480);
-    }
-    playUiSound('wrong');
-    return;
-  }
-  selectedLevelIdx = idx;
-  localStorage.setItem(LEVEL_KEY, String(selectedLevelIdx));
-  playUiSound('tap');
-  renderLevelOptions();
-  updateStageBadge();
-  applyLevelLayout();
-}
-function renderLevelOptions() {
-  const grid = document.getElementById('levelGrid');
-  if (!grid) return;
-  grid.innerHTML = LEVELS.map((level, idx) => {
-    const locked = idx > unlockedLevelIdx;
-    const active = idx === selectedLevelIdx;
-    const nextTarget = level.unlockScore ? `${level.unlockScore}라운드` : '최종 해금';
-    return `
-      <button class="level-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" data-level="${idx}" onclick="chooseLevel(${idx})">
-        <div class="level-top">
-          <div class="level-name">${level.emoji} ${level.name}</div>
-          <div class="level-lock">${locked ? '🔒' : '✅'}</div>
-        </div>
-        <div class="level-meta">${level.buttons}버튼 · ${idx === LEVELS.length - 1 ? '히든 모드' : `다음 해금 목표 ${nextTarget}`}</div>
-        <div class="level-unlock">${locked ? getLevelLockedText(idx) : level.unlockText}</div>
-      </button>
-    `;
-  }).join('');
-}
-function getLevelLockedText(idx) {
-  if (idx <= 0) return '기본 레벨';
-  const prev = LEVELS[idx - 1];
-  return `${prev.name}에서 ${prev.unlockScore}라운드 달성 필요`;
-}
-function enterGame() {
-  openStartPopup();
-}
-function confirmStartGame() {
-  initAudio();
-  playUiSound('start');
-  pulseVibration([14, 24, 16]);
-  closeStartPopup();
-  stopBgm();
-  clearInterval(titleTimer);
-  const ts = document.getElementById('titleScreen');
-  ts.classList.add('hidden');
-
-  const gw = document.getElementById('gameWrapper');
-  gw.style.display = 'flex';
-  gw.classList.remove('hidden');
-  gw.style.opacity = '0';
-  gw.style.transition = 'opacity .6s ease';
-  requestAnimationFrame(() => { gw.style.opacity = '1'; });
-
-  document.getElementById('overlay').style.display = '';
-  document.getElementById('comboToast').style.display = '';
-
-  applyLevelLayout();
-  setTimeout(() => { ts.style.display = 'none'; }, 700);
-  setTimeout(startGame, 400);
-}
 
 function goHome() {
   closeMissionPopup();
@@ -2874,25 +2927,7 @@ document.addEventListener('click', (e) => {
   if (startPopup && e.target === startPopup) closeStartPopup();
 });
 
-// ── 레벨 정의 ──
-const LEVEL_KEY = 'limitgame_level';
-const UNLOCKED_LEVEL_KEY = 'limitgame_unlocked_level';
-const LEVELS = [
-  { id:'baby',       name:'유아',   emoji:'🍼', scene:0, buttons:3, unlockScore:5,  unlockText:'5라운드 달성 시 유치원 해금' },
-  { id:'kinder',     name:'유치원', emoji:'🎒', scene:1, buttons:3, unlockScore:7,  unlockText:'7라운드 달성 시 초등 해금' },
-  { id:'elementary', name:'초등',   emoji:'✏️', scene:2, buttons:4, unlockScore:10, unlockText:'10라운드 달성 시 중등 해금' },
-  { id:'middle',     name:'중등',   emoji:'🚲', scene:3, buttons:4, unlockScore:13, unlockText:'13라운드 달성 시 고등 해금' },
-  { id:'high',       name:'고등',   emoji:'📚', scene:4, buttons:5, unlockScore:15, unlockText:'15라운드 달성 시 대학 해금' },
-  { id:'college',    name:'대학',   emoji:'🎓', scene:5, buttons:6, unlockScore:20, unlockText:'20라운드 달성 시 대학원 해금' },
-  { id:'grad',       name:'대학원', emoji:'🔬', scene:6, buttons:6, unlockScore:null, unlockText:'히든 모드' },
-];
-const LEVEL_BUTTONS = {
-  3: ['circle','triangle','square'],
-  4: ['circle','square','triangle','star'],
-  5: ['circle','square','diamond','triangle','star'],
-  6: ['circle','square','diamond','triangle','star','hex'],
-};
-
+// ── 메시지 정의 ──
 const MSGS = {
   "유아":   ["응애...", "아직 아기잖아."],
   "유치원": ["선생님한테 혼날 뻔.", "유치원도 쉽지 않네."],
@@ -2903,17 +2938,60 @@ const MSGS = {
   "대학원": ["논문보다 어렵다...", "지도교수님께 혼날 뻔."],
 };
 const DEFAULT_MSGS = ["아깝다.", "한 끗 차이였다.", "다시 하면 될 거 같은데."];
-
 const EMOJI  = { circle:'🔴', square:'🔵', triangle:'🟡', star:'🟢', diamond:'🟣', hex:'🟦' };
-let selectedLevelIdx = parseInt(localStorage.getItem(LEVEL_KEY) || '0', 10);
-let unlockedLevelIdx = parseInt(localStorage.getItem(UNLOCKED_LEVEL_KEY) || '0', 10);
-if (Number.isNaN(selectedLevelIdx)) selectedLevelIdx = 0;
-if (Number.isNaN(unlockedLevelIdx)) unlockedLevelIdx = 0;
-selectedLevelIdx = Math.min(Math.max(0, selectedLevelIdx), LEVELS.length - 1);
-unlockedLevelIdx = Math.min(Math.max(0, unlockedLevelIdx), LEVELS.length - 1);
-if (selectedLevelIdx > unlockedLevelIdx) selectedLevelIdx = unlockedLevelIdx;
+
+const POINT_KEY = 'limitgame_points_v1';
+const BADGE_POINT_REWARD = 5;
+const DAILY_POINT_REWARD = 1;
+const RETRY_COSTS = [1, 2];
+
+function getPoints() { return Math.max(0, Number(localStorage.getItem(POINT_KEY) || 0)); }
+let points = getPoints();
+function updatePointUI(bump = false) {
+  const badge = document.getElementById('pointBadge');
+  if (!badge) return;
+  badge.textContent = `⭐ ${points}P`;
+  if (bump) {
+    badge.classList.remove('bump'); void badge.offsetWidth; badge.classList.add('bump');
+    setTimeout(() => badge.classList.remove('bump'), 260);
+  }
+}
+function showPointToast(amount, label='') {
+  const toast = document.getElementById('pointToast');
+  if (!toast) return;
+  const prefix = amount >= 0 ? '+' : '-';
+  toast.textContent = `⭐ ${prefix}${Math.abs(amount)}P${label ? ' · ' + label : ''}`;
+  toast.style.display = '';
+  toast.classList.remove('hide');
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => { toast.classList.remove('hide'); toast.style.display = 'none'; }, 240);
+  }, 1200);
+}
+function addPoints(amount, label='') {
+  amount = Number(amount || 0);
+  if (!amount) return;
+  points = Math.max(0, points + amount);
+  localStorage.setItem(POINT_KEY, String(points));
+  updatePointUI(true);
+  showPointToast(amount, label);
+}
+function canAfford(cost) { return points >= Number(cost || 0); }
+function spendPoints(cost, label='') {
+  cost = Number(cost || 0);
+  if (cost <= 0) return true;
+  if (!canAfford(cost)) return false;
+  points = Math.max(0, points - cost);
+  localStorage.setItem(POINT_KEY, String(points));
+  updatePointUI(true);
+  showPointToast(-cost, label);
+  return true;
+}
 
 // ── 상태 머신 ──
+
 // IDLE → SHOWING → WAITING → GAMEOVER → IDLE
 const STATE = { IDLE:'idle', SHOWING:'showing', WAITING:'waiting', GAMEOVER:'gameover' };
 let gameState = STATE.IDLE;
@@ -2936,12 +3014,13 @@ if (__namePopup) __namePopup.classList.remove('visible');
 syncDifficultyUI();
 syncFeedbackUI();
 renderDailyMissions();
+renderModeOptions();
 renderLevelOptions();
 applyLevelLayout();
+updatePointUI();
 
 let activeTimers = [];
 let combo = 0;  // 연속 성공 라운드 수
-let secondChanceUsed = false;
 let retryCount = 0;
 let pendingRetry = false;
 
@@ -2953,7 +3032,6 @@ const COMBO_DATA = {
   20: { main:'20 콤보!!', sub:'대학원생 각이다',      stars:'🔥🔥🔥🔥🔥', },
 };
 
-updatePointUI();
 document.getElementById('best').textContent = best;
 
 // 클릭 이벤트 — 단 하나의 진입점
@@ -2982,12 +3060,12 @@ function clearAllTimers() {
 }
 
 function applyLevelLayout() {
-  const level = getSelectedLevel();
-  const activeFruits = LEVEL_BUTTONS[level.buttons] || LEVEL_BUTTONS[4];
+  const mode = getModeConfig();
+  const activeFruits = LEVEL_BUTTONS[mode.buttons] || LEVEL_BUTTONS[4];
   const grid = document.getElementById('gameGrid');
   if (grid) {
     grid.classList.remove('grid-3', 'grid-4', 'grid-5', 'grid-6');
-    grid.classList.add(`grid-${level.buttons}`);
+    grid.classList.add(`grid-${mode.buttons}`);
   }
   document.querySelectorAll('#gameGrid .btn').forEach(btn => {
     const fruit = btn.dataset.fruit;
@@ -2998,15 +3076,21 @@ function applyLevelLayout() {
   });
 }
 function tryUnlockNextLevel(finalScore) {
-  const level = getSelectedLevel();
-  if (!level || level.unlockScore == null) return null;
-  if (selectedLevelIdx >= LEVELS.length - 1) return null;
-  if (finalScore < level.unlockScore) return null;
-  const nextIdx = selectedLevelIdx + 1;
-  if (nextIdx <= unlockedLevelIdx) return null;
-  unlockedLevelIdx = nextIdx;
-  localStorage.setItem(UNLOCKED_LEVEL_KEY, String(unlockedLevelIdx));
-  return LEVELS[nextIdx];
+  const unlocked = [];
+  const currentStage = getSelectedLevel();
+  const currentUnlockedIdx = getUnlockedStageIdx();
+  if (currentStage.unlockScore != null && finalScore >= currentStage.unlockScore && selectedLevelIdx === currentUnlockedIdx && selectedLevelIdx < LEVELS.length - 1) {
+    unlockedStageMap[difficulty] = selectedLevelIdx + 1;
+    unlocked.push({ type:'stage', item: LEVELS[selectedLevelIdx + 1] });
+  }
+  const modeIdx = MODE_ORDER.indexOf(difficulty);
+  const mode = getModeConfig();
+  if (mode.nextMode && selectedLevelIdx === LEVELS.length - 1 && finalScore >= (mode.nextUnlockScore || 999) && modeIdx === unlockedModeIdx) {
+    unlockedModeIdx = Math.min(unlockedModeIdx + 1, MODE_ORDER.length - 1);
+    unlocked.push({ type:'mode', item: getModeConfig(MODE_ORDER[unlockedModeIdx]) });
+  }
+  saveProgressState();
+  return unlocked;
 }
 
 // ── 게임 흐름 ──
@@ -3015,7 +3099,6 @@ function startGame() {
   closeStartPopup();
   clearAllTimers();
   gameState = STATE.IDLE;
-  secondChanceUsed = false;
   retryCount = 0;
   pendingRetry = false;
   hideSecondChancePopup();
@@ -3137,6 +3220,10 @@ function handleInput(shape) {
 }
 
 
+function getRetryCost() {
+  if (retryCount >= RETRY_COSTS.length) return null;
+  return RETRY_COSTS[retryCount];
+}
 function showSecondChancePopup() {
   const popup = document.getElementById('secondChancePopup');
   if (!popup) return;
@@ -3161,13 +3248,11 @@ function showSecondChancePopup() {
   }
   popup.classList.add('visible');
 }
-
 function hideSecondChancePopup() {
   const popup = document.getElementById('secondChancePopup');
   if (!popup) return;
   popup.classList.remove('visible');
 }
-
 function replayCurrentRound() {
   clearAllTimers();
   playerIndex = 0;
@@ -3180,18 +3265,10 @@ function replayCurrentRound() {
     });
   }, 280);
 }
-
 function useSecondChance() {
-  if (!pendingRetry) {
-    hideSecondChancePopup();
-    return;
-  }
+  if (!pendingRetry) { hideSecondChancePopup(); return; }
   const retryCost = getRetryCost();
-  if (retryCost == null) {
-    hideSecondChancePopup();
-    gameOver();
-    return;
-  }
+  if (retryCost == null) { hideSecondChancePopup(); gameOver(); return; }
   if (!spendPoints(retryCost, '재도전')) {
     showSecondChancePopup();
     return;
@@ -3201,7 +3278,6 @@ function useSecondChance() {
   pendingRetry = false;
   replayCurrentRound();
 }
-
 function declineSecondChance() {
   hideSecondChancePopup();
   pendingRetry = false;
@@ -3218,7 +3294,7 @@ function gameOver() {
   const stage = getSelectedLevel();
   const finalStage = stage.name;
   const modeLabel = getDifficultyConfig().label;
-  const unlockedLevel = tryUnlockNextLevel(finalScore);
+  const unlockedRewards = tryUnlockNextLevel(finalScore);
 
   const newBest = finalScore > best;
   if (newBest) {
@@ -3235,21 +3311,26 @@ function gameOver() {
 
   document.getElementById('resultStageEmoji').textContent = stage.emoji;
   document.getElementById('resultStageName').textContent = finalStage + ' 수준';
-  document.getElementById('resultLine').textContent = `현재 레벨 ${finalStage} · ${stage.buttons}버튼 · ${modeLabel}`;
+  document.getElementById('resultLine').textContent = `현재 레벨 ${modeLabel} · ${finalStage} · ${getModeConfig().buttons}키`;
   document.getElementById('resultRound').textContent = finalScore;
   document.getElementById('resultBest').innerHTML = `최고기록 <span>${best}</span> 라운드${newBest ? ' 🎉' : ''}`;
   document.getElementById('resultSeq').textContent = sequence.map(f => EMOJI[f]).join(' ');
-  document.getElementById('resultMsg').textContent = unlockedLevel ? `🎉 ${unlockedLevel.name} 레벨이 열렸어! 다음 도전을 해보자.` : msg;
-  document.getElementById('resultSummaryMode').textContent = modeLabel;
+  const unlockMsg = unlockedRewards.length
+    ? unlockedRewards.map(entry => entry.type === 'mode'
+        ? `🎉 ${entry.item.label} 모드가 열렸어!`
+        : `🎉 ${entry.item.name} 단계가 열렸어!`).join(' ')
+    : '';
+  document.getElementById('resultMsg').textContent = unlockMsg || msg;
+  document.getElementById('resultSummaryMode').textContent = `${modeLabel} · ${getModeConfig().buttons}키`;
   document.getElementById('resultSummaryCombo').textContent = combo;
 
   document.getElementById('resultCharLeft').src = `female_${stage.scene}.png`;
   document.getElementById('resultCharRight').src = `male_${stage.scene}.png`;
 
   const newBadges = checkAndAwardBadges(finalScore, combo, newBest);
-  if (newBadges.length) addPoints(newBadges.length * BADGE_POINT_REWARD, '배지 보상');
   const missionUpdate = updateDailyMissions(finalScore, combo, difficulty);
   const newMissions = missionUpdate.completedNow;
+  if (newBadges.length) addPoints(newBadges.length * BADGE_POINT_REWARD, '배지 보상');
   if (newMissions.length) addPoints(newMissions.length * DAILY_POINT_REWARD, '일일 미션');
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
@@ -3291,7 +3372,7 @@ function gameOver() {
 // ── 헬퍼 ──
 function updateStageUI() {
   const stage = getSelectedLevel();
-  document.getElementById('stageBadge').textContent = `${stage.emoji} ${stage.name} · ${stage.buttons}버튼 · ${getDifficultyConfig().label}`;
+  document.getElementById('stageBadge').textContent = `${stage.emoji} ${getDifficultyConfig().label} · ${stage.name} · ${getModeConfig().buttons}키`;
 
   // 배경 씬 전환
   if (stage.scene !== currentSceneIdx) {

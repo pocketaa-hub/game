@@ -1419,59 +1419,93 @@ body.haptic-flash::after {
 }
 .start-popup.visible { opacity: 1; pointer-events: all; }
 .start-card {
-  width: min(420px, 94vw);
-  max-height: min(82vh, 720px);
-  overflow: auto;
+  width: min(400px, 94vw);
+  height: min(86vh, 690px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: rgba(255,251,238,.98);
   border: 4px solid #c88a30;
   border-radius: 22px;
   box-shadow: 0 8px 0 #8B6000, 0 20px 34px rgba(0,0,0,.35);
-  padding: 16px 16px 18px;
+  padding: 14px 14px 16px;
 }
 .start-card-header { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.start-card-title { font-family: 'Nanum Pen Script', cursive; font-size: 30px; color:#8B2500; }
-.start-card-sub { margin-top: 4px; margin-bottom: 12px; font-size: 13px; color:#8c6a2f; line-height: 1.35; }
+.start-card-title { font-family: 'Nanum Pen Script', cursive; font-size: 28px; color:#8B2500; line-height: 1; }
+.start-card-sub { margin-top: 4px; margin-bottom: 10px; font-size: 12px; color:#8c6a2f; line-height: 1.25; min-height: 30px; }
 .start-close-btn { appearance:none; border:none; background:transparent; cursor:pointer; font-size:22px; color:#8B2500; width:36px; height:36px; border-radius:999px; }
 .start-close-btn:active { transform: scale(.94); }
-.start-section-label { margin: 8px 0 8px; font-size: 15px; font-weight: 700; color:#6c3a00; }
-.level-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.level-card {
+.start-steps { display:flex; gap:8px; margin-bottom: 10px; }
+.start-step-chip {
+  flex:1; text-align:center; padding:7px 8px 8px; border-radius:999px;
+  background:#f3e6c8; border:2px solid #d7b67a; color:#8a5a00;
+  font-size:13px; font-weight:700;
+}
+.start-step-chip.active { background:#8B2500; border-color:#5c1800; color:#ffe566; }
+.start-view { display:none; flex:1; min-height:0; }
+.start-view.active { display:flex; flex-direction:column; }
+.start-section-label { margin: 2px 0 8px; font-size: 14px; font-weight: 700; color:#6c3a00; }
+.mode-level-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mode-card, .level-card {
   appearance:none; width:100%; text-align:left;
-  border: 3px solid #d5b16b; border-radius: 18px;
+  border: 2px solid #d5b16b; border-radius: 16px;
   background: linear-gradient(180deg, #fffaf0 0%, #f8e7b6 100%);
-  padding: 12px 12px 13px;
-  box-shadow: 0 4px 0 #c19643, 0 8px 14px rgba(0,0,0,.12);
+  padding: 9px 10px 10px;
+  box-shadow: 0 3px 0 #c19643, 0 6px 12px rgba(0,0,0,.10);
   cursor:pointer; transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
-.level-card:hover { transform: translateY(-1px); }
-.level-card:active { transform: translateY(2px) scale(.98); box-shadow: 0 1px 0 #c19643, 0 4px 8px rgba(0,0,0,.08); }
-.level-card.active {
+.mode-card:active, .level-card:active { transform: translateY(2px) scale(.98); box-shadow: 0 1px 0 #c19643, 0 4px 8px rgba(0,0,0,.08); }
+.mode-card.active, .level-card.active {
   border-color:#8a5a00;
   background: linear-gradient(180deg, #ffe566 0%, #f7c22d 100%);
-  box-shadow: 0 4px 0 #8a5a00, 0 10px 18px rgba(0,0,0,.18), 0 0 0 4px rgba(255,229,102,.22);
+  box-shadow: 0 3px 0 #8a5a00, 0 8px 16px rgba(0,0,0,.14), 0 0 0 3px rgba(255,229,102,.18);
 }
-.level-card.locked {
+.mode-card.locked, .level-card.locked {
   background: linear-gradient(180deg, #f3efe8 0%, #e2dbcf 100%);
   border-color:#cbbda5; color:#8f8474;
   box-shadow: 0 3px 0 #cbbda5, 0 6px 10px rgba(0,0,0,.08);
 }
+.mode-card.locked .mode-card-name,
+.mode-card.locked .mode-card-meta,
+.mode-card.locked .mode-card-unlock,
 .level-card.locked .level-name,
 .level-card.locked .level-meta,
 .level-card.locked .level-unlock { color:#8f8474; }
 .level-card.selected-locked { animation: shake .45s ease forwards; }
-.level-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.level-name { font-family:'Nanum Pen Script', cursive; font-size: 24px; color:#8B2500; line-height:1; }
-.level-meta { font-size: 12px; color:#7a4a10; margin-top: 4px; }
-.level-unlock { font-size: 11px; color:#8a5a00; margin-top: 6px; line-height:1.25; }
-.level-lock { font-size: 16px; }
-.start-actions { margin-top: 14px; }
-.start-confirm-btn {
-  width:100%; border: 3px solid #5c1800; border-radius:16px;
-  background:#8B2500; color:#ffe566; padding: 12px 0;
-  font-family:'Nanum Pen Script', cursive; font-size:30px; cursor:pointer;
+.mode-card-top, .level-top { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.mode-card-name { font-family:'Nanum Pen Script', cursive; font-size: 24px; color:#8B2500; line-height:1; }
+.mode-card-meta, .level-meta { font-size: 12px; color:#7a4a10; margin-top: 3px; line-height: 1.15; }
+.mode-card-unlock, .level-unlock { font-size: 10px; color:#8a5a00; margin-top: 4px; line-height:1.2; }
+.level-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.level-card { padding: 8px 8px 9px; border-radius: 14px; }
+.level-name { font-family:'Nanum Pen Script', cursive; font-size: 20px; color:#8B2500; line-height:1.02; }
+.level-lock { font-size: 14px; }
+.resume-chip {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  margin-bottom: 8px; padding: 9px 10px; border-radius: 14px;
+  background: rgba(255,248,220,.92); border:2px solid #e0bd5b;
+}
+.resume-title { font-size: 11px; color:#8a5a00; font-weight:700; line-height:1.1; }
+.resume-value { font-family:'Nanum Pen Script', cursive; font-size: 20px; color:#8B2500; line-height:1; margin-top:2px; }
+.start-sub-actions { display:flex; gap:8px; margin-top: auto; padding-top: 10px; }
+.start-ghost-btn, .start-back-btn, .start-continue-btn, .start-confirm-btn {
+  flex:1; border-radius:14px; padding: 10px 10px; cursor:pointer;
+}
+.start-ghost-btn, .start-back-btn {
+  border:2px solid #bcaaa4; background:#efe7e3; color:#6d4c41;
+  box-shadow: 0 3px 0 #b0a19b; font-family:'Gaegu', cursive; font-size:15px; font-weight:700;
+}
+.start-continue-btn, .start-confirm-btn {
+  border: 3px solid #5c1800;
+  background:#8B2500; color:#ffe566;
+  font-family:'Nanum Pen Script', cursive; font-size:24px;
   box-shadow: 0 4px 0 #3a0e00;
 }
-.start-confirm-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3a0e00; }
+.start-ghost-btn:active, .start-back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b0a19b; }
+.start-continue-btn:active, .start-confirm-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3a0e00; }
+.mode-note {
+  margin-top: 6px; font-size: 11px; color:#8a5a00; text-align:center; min-height: 14px;
+}
 .title-mode-picker-compact { gap: 10px; }
 .title-mode-picker-compact .title-mode-label {
   font-size: 14px;
@@ -1479,8 +1513,21 @@ body.haptic-flash::after {
   text-align: center;
 }
 @media (max-width: 430px) {
-  .level-grid { grid-template-columns: 1fr; }
-  .start-card-title { font-size: 28px; }
+  .start-card { width: min(392px, 95vw); height: min(84vh, 620px); padding: 12px 12px 14px; }
+  .start-card-title { font-size: 26px; }
+  .start-card-sub { font-size: 11px; min-height: 26px; }
+  .mode-level-grid { gap: 7px; }
+  .mode-card { padding: 8px 8px 9px; }
+  .mode-card-name { font-size: 22px; }
+  .mode-card-meta { font-size: 11px; }
+  .mode-card-unlock { font-size: 9px; }
+  .level-grid { gap: 6px; }
+  .level-card { padding: 7px 7px 8px; }
+  .level-name { font-size: 18px; }
+  .level-meta { font-size: 10px; }
+  .level-unlock { font-size: 9px; }
+  .resume-value { font-size: 18px; }
+  .start-continue-btn, .start-confirm-btn { font-size: 22px; }
 }
 
 </style>
@@ -1575,7 +1622,7 @@ body.haptic-flash::after {
       <div class="start-card-title">🎮 도전 레벨 선택</div>
       <button class="start-close-btn" onclick="closeStartPopup()" aria-label="닫기">✕</button>
     </div>
-    <div class="start-card-sub" id="startCardSub">모드를 고르고, 다음 단계에서 세부 레벨을 선택해.</div>
+    <div class="start-card-sub" id="startCardSub">1/2에서 모드, 2/2에서 세부 단계를 고르면 바로 시작돼.</div>
     <div class="start-steps">
       <div class="start-step-chip active" id="stepChipMode">1. 모드</div>
       <div class="start-step-chip" id="stepChipStage">2. 단계</div>
@@ -2596,8 +2643,8 @@ function renderModeOptions() {
     const locked = idx > unlockedModeIdx;
     const active = mode === difficulty;
     const unlockText = locked
-      ? `${getModeConfig(MODE_ORDER[idx-1]).label} · 대학원 20라운드 필요`
-      : (def.nextMode ? `대학원 20라운드 달성 시 ${getModeConfig(def.nextMode).label} 해금` : '최종 모드');
+      ? `${getModeConfig(MODE_ORDER[idx-1]).label} 졸업 필요`
+      : (def.nextMode ? `${getModeConfig(def.nextMode).label} 해금 도전` : '최종 모드');
     return `<button class="mode-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" onclick="setDifficulty('${mode}')">
       <div class="mode-card-top"><div class="mode-card-name">${def.label}</div><div>${locked ? '🔒' : '✅'}</div></div>
       <div class="mode-card-meta">${def.buttons}키 · ${def.note}</div>
@@ -2609,7 +2656,7 @@ function renderModeOptions() {
 function getStageLockedText(idx) {
   if (idx <= 0) return '기본 단계';
   const prev = LEVELS[idx - 1];
-  return `${prev.name} ${prev.unlockScore}라운드 달성 필요`;
+  return `${prev.name} ${prev.unlockScore}R 필요`;
 }
 function renderLevelOptions() {
   const grid = document.getElementById('levelGrid');
@@ -2621,7 +2668,7 @@ function renderLevelOptions() {
     const unlockText = locked ? getStageLockedText(idx) : (level.unlockText || '최종 단계');
     return `<button class="level-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" data-level="${idx}" onclick="chooseLevel(${idx})">
       <div class="level-top"><div class="level-name">${level.emoji} ${level.name}</div><div class="level-lock">${locked ? '🔒' : '✅'}</div></div>
-      <div class="level-meta">${getModeConfig().buttons}키 · ${level.speedMul.toFixed(1)}배</div>
+      <div class="level-meta">${level.speedMul.toFixed(1)}배 · ${getModeConfig().buttons}키</div>
       <div class="level-unlock">${unlockText}</div>
     </button>`;
   }).join('');
@@ -2639,6 +2686,7 @@ function goToModeStep() {
   document.getElementById('startViewStage').classList.remove('active');
   document.getElementById('stepChipMode').classList.add('active');
   document.getElementById('stepChipStage').classList.remove('active');
+  document.getElementById('startCardSub').textContent = '1 / 2 · 먼저 버튼 수 기준 모드를 골라.';
   renderModeOptions();
 }
 function goToStageStep() {
@@ -2646,6 +2694,7 @@ function goToStageStep() {
   document.getElementById('startViewStage').classList.add('active');
   document.getElementById('stepChipMode').classList.remove('active');
   document.getElementById('stepChipStage').classList.add('active');
+  document.getElementById('startCardSub').textContent = '2 / 2 · 이어하기 또는 세부 단계 하나를 고르면 돼.';
   renderLevelOptions();
 }
 function resumeLastPlay() {

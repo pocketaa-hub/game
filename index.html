@@ -3247,7 +3247,7 @@ function nextRound() {
   playerIndex = 0; round++;
   updateRound(round);
   updateStageUI();
-  const activeFruits = LEVEL_BUTTONS[getSelectedLevel().buttons] || LEVEL_BUTTONS[4];
+  const activeFruits = LEVEL_BUTTONS[getModeConfig().buttons] || LEVEL_BUTTONS[4];
   sequence.push(activeFruits[Math.floor(Math.random() * activeFruits.length)]);
   setStatus('잘 봐.');
   gameState = STATE.SHOWING;   // ← 이 순간부터 클릭 불가

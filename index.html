@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -10,7 +10,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: fixed;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
 
 body {
   min-height: 100vh;
@@ -402,8 +409,8 @@ audio#bgm { display: none; }
   position: fixed; inset: 0; z-index: 500;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-start;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  touch-action: manipulation;
   transition: opacity .7s ease;
   padding: 16px 0 28px;
 }
@@ -1249,6 +1256,13 @@ body.popup-open { overflow: hidden; }
 }
 .title-bg-slide.active { animation: titleBgDrift 10s ease-in-out infinite alternate; }
 .bg-scene.active { animation: gameBgDrift 14s ease-in-out infinite alternate; }
+@media (max-width: 768px) {
+  .bg-scene.active,
+  .title-bg-slide.active {
+    animation: none !important;
+    transform: none !important;
+  }
+}
 .title-char-f.active { animation: titleFloatLeft 3.8s ease-in-out infinite; }
 .title-char-m.active { animation: titleFloatRight 4s ease-in-out infinite; }
 .char-stage.active img { animation: charBob 4.2s ease-in-out infinite; }
@@ -2869,6 +2883,25 @@ function showComboToast(n) {
 
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
+</script>
+
+<script>
+document.addEventListener('gesturestart', function (e) {
+  e.preventDefault();
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (e) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
+document.addEventListener('dblclick', function (e) {
+  e.preventDefault();
+}, { passive: false });
 </script>
 </body>
 </html>

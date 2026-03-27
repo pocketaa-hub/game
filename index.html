@@ -386,7 +386,7 @@ audio#bgm { display: none; }
 /* 콤보 카운터 배지 */
 .combo-badge {
   position: fixed;
-  top: 12px; right: 12px;
+  top: 56px; right: 12px;
   z-index: 50;
   background: rgba(139,37,0,.88);
   border: 2px solid #ffe566;
@@ -403,6 +403,65 @@ audio#bgm { display: none; }
 }
 .combo-badge.visible { opacity: 1; transform: scale(1); }
 .combo-badge.pulse-anim { animation: correctPop .3s ease; }
+
+/* 포인트 배지 */
+.point-badge {
+  position: fixed;
+  top: 12px; right: 12px;
+  z-index: 55;
+  background: rgba(255,251,238,.94);
+  border: 2px solid #ffe566;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 16px;
+  color: #8B2500;
+  box-shadow: 0 2px 8px rgba(0,0,0,.28);
+  transition: transform .22s ease, box-shadow .22s ease;
+  pointer-events: none;
+}
+.point-badge.bump {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px rgba(255,229,102,.18), 0 4px 12px rgba(0,0,0,.28);
+}
+
+.point-toast {
+  position: fixed;
+  top: 102px;
+  right: 12px;
+  z-index: 275;
+  min-width: 92px;
+  padding: 8px 12px 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff9d4 0%, #f5e29a 100%);
+  border: 2px solid #d1a12a;
+  color: #6a2800;
+  box-shadow: 0 8px 18px rgba(0,0,0,.18);
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 20px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+}
+.point-toast.show {
+  display: inline-flex;
+  animation: pointToastIn .24s ease forwards;
+}
+.point-toast.hide {
+  display: inline-flex;
+  animation: pointToastOut .24s ease forwards;
+}
+@keyframes pointToastIn {
+  from { opacity: 0; transform: translateY(-10px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pointToastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(.96); }
+}
 
 /* ══ 타이틀 화면 ══ */
 #titleScreen {
@@ -1210,12 +1269,28 @@ body.popup-open { overflow: hidden; position: fixed; width: 100%; }
   gap: 12px; margin-bottom: 16px;
 }
 .badge-item {
+  position: relative;
   display: flex; flex-direction: column;
   align-items: center; text-align: center;
   padding: 10px 6px; border-radius: 12px;
   border: 2px solid #e0c080;
   background: #fff9ee;
   transition: transform .1s;
+}
+.badge-point-tag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 42px;
+  padding: 3px 6px 4px;
+  border-radius: 999px;
+  background: rgba(255,248,220,.95);
+  border: 1px solid #e0bd5b;
+  color: #8B2500;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 14px;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 .badge-item.earned {
   background: linear-gradient(135deg, #fff9c4, #ffe082);
@@ -1603,6 +1678,10 @@ body.haptic-flash::after {
 <!-- 콤보 카운터 배지 -->
 <div class="combo-badge" id="comboBadge" style="opacity:0;pointer-events:none">🔥 0 콤보</div>
 
+<!-- 포인트 배지 -->
+<div class="point-badge" id="pointBadge">⭐ 0P</div>
+<div class="point-toast" id="pointToast">⭐ +1P</div>
+
 <!-- 배경 레이어 -->
 <div class="bg" id="bg">
 <div class="bg-scene active" id="scene-0" style="background-image:url('bg_0.jpg')"></div>
@@ -1747,10 +1826,10 @@ body.haptic-flash::after {
 <div class="second-chance-popup" id="secondChancePopup">
   <div class="second-chance-card">
     <div class="second-chance-emoji">😮</div>
-    <div class="second-chance-title">한 번 더?</div>
-    <div class="second-chance-desc">이번 판에서 딱 1번만 다시 도전할 수 있어.<br>같은 라운드를 처음부터 다시 보여줄게.</div>
+    <div class="second-chance-title" id="secondChanceTitle">다시 도전할까?</div>
+    <div class="second-chance-desc" id="secondChanceDesc">같은 라운드를 처음부터 다시 보여줄게.</div>
     <div class="second-chance-btns">
-      <button class="second-chance-continue" onclick="useSecondChance()">한 번 더</button>
+      <button class="second-chance-continue" id="secondChanceConfirmBtn" onclick="useSecondChance()">⭐ 1P 사용</button>
       <button class="second-chance-cancel" onclick="declineSecondChance()">그만할래</button>
     </div>
   </div>
@@ -1823,6 +1902,79 @@ body.haptic-flash::after {
 // ══ 배지 시스템 ══
 const BADGE_KEY = 'limitgame_badges';
 const GAME_STATS_KEY = 'limitgame_game_stats';
+const POINT_KEY = 'limitgame_points';
+const BADGE_POINT_REWARD = 5;
+const DAILY_POINT_REWARD = 1;
+const RETRY_COSTS = [1, 2];
+
+
+function getPoints() {
+  return Math.max(0, Number(localStorage.getItem(POINT_KEY) || 0));
+}
+
+let points = getPoints();
+
+function updatePointUI(bump = false) {
+  const badge = document.getElementById('pointBadge');
+  if (!badge) return;
+  badge.textContent = `⭐ ${points}P`;
+  if (bump) {
+    badge.classList.remove('bump');
+    void badge.offsetWidth;
+    badge.classList.add('bump');
+    setTimeout(() => badge.classList.remove('bump'), 260);
+  }
+}
+
+function showPointToast(amount, label = '') {
+  const toast = document.getElementById('pointToast');
+  if (!toast) return;
+  const prefix = amount >= 0 ? '+' : '-';
+  toast.textContent = `⭐ ${prefix}${Math.abs(amount)}P${label ? ' · ' + label : ''}`;
+  toast.style.display = '';
+  toast.classList.remove('hide');
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.classList.remove('hide');
+      toast.style.display = 'none';
+    }, 240);
+  }, 1200);
+}
+
+function savePoints() {
+  localStorage.setItem(POINT_KEY, String(points));
+  updatePointUI();
+}
+
+function addPoints(amount, label = '') {
+  if (!amount) return;
+  points = Math.max(0, points + Number(amount));
+  localStorage.setItem(POINT_KEY, String(points));
+  updatePointUI(true);
+  showPointToast(amount, label);
+}
+
+function canAfford(cost) {
+  return points >= Number(cost || 0);
+}
+
+function spendPoints(cost, label = '') {
+  cost = Number(cost || 0);
+  if (cost <= 0) return true;
+  if (!canAfford(cost)) return false;
+  points = Math.max(0, points - cost);
+  localStorage.setItem(POINT_KEY, String(points));
+  updatePointUI(true);
+  showPointToast(-cost, label);
+  return true;
+}
+
+function getRetryCost() {
+  return RETRY_COSTS[retryCount] ?? null;
+}
 
 const BADGE_DEFS = [
   // 일반
@@ -1978,7 +2130,7 @@ function showBadgeToast(badges) {
     const b = badges[i++];
     const toast = document.getElementById('badgeToast');
     document.getElementById('badgeToastIcon').textContent = b.icon;
-    document.getElementById('badgeToastName').textContent = b.name;
+    document.getElementById('badgeToastName').textContent = `${b.name} · ⭐5P`;
     toast.style.display = '';
     toast.classList.remove('hide');
     toast.classList.add('show');
@@ -2040,6 +2192,7 @@ function renderBadges() {
     const isEarned = !!earnedData;
     return `
       <div class="badge-item ${isEarned ? 'earned' : 'locked'}">
+        <div class="badge-point-tag">⭐ 5P</div>
         <div class="badge-item-icon">${def.icon}</div>
         <div class="badge-item-name">${def.name}</div>
         <div class="badge-item-desc">${isEarned ? (earnedData.date || '획득 완료') : def.desc}</div>
@@ -2357,7 +2510,7 @@ function renderDailyMissions() {
           <div class="daily-item-name">${def.name}</div>
           <div class="daily-item-desc">${def.desc}</div>
         </div>
-        <div class="daily-item-progress">${m.completed ? '완료' : missionProgressText(def, state.progress)}</div>
+        <div class="daily-item-progress">${m.completed ? '완료 · ⭐1P' : `${missionProgressText(def, state.progress)} · ⭐1P`}</div>
       </div>`;
   }).join('');
 
@@ -2423,7 +2576,7 @@ function showMissionToast(missions, startDelay = 0) {
     const def = missions[idx++];
     const toast = document.getElementById('missionToast');
     document.getElementById('missionToastIcon').textContent = def.icon;
-    document.getElementById('missionToastName').textContent = def.name;
+    document.getElementById('missionToastName').textContent = `${def.name} · ⭐1P`;
     toast.style.display = '';
     toast.classList.remove('hide');
     toast.classList.add('show');
@@ -2599,6 +2752,8 @@ function goHome() {
   closeStartPopup();
   clearAllTimers();
   gameState = STATE.IDLE;
+  retryCount = 0;
+  pendingRetry = false;
 
   const overlay = document.getElementById('overlay');
   const namePopup = document.getElementById('namePopup');
@@ -2864,10 +3019,11 @@ syncFeedbackUI();
 renderDailyMissions();
 renderLevelOptions();
 applyLevelLayout();
+updatePointUI();
 
 let activeTimers = [];
 let combo = 0;  // 연속 성공 라운드 수
-let secondChanceUsed = false;
+let retryCount = 0;
 let pendingRetry = false;
 
 // 콤보 메시지 정의
@@ -2939,7 +3095,7 @@ function startGame() {
   closeStartPopup();
   clearAllTimers();
   gameState = STATE.IDLE;
-  secondChanceUsed = false;
+  retryCount = 0;
   pendingRetry = false;
   hideSecondChancePopup();
   // 모든 팝업 닫기
@@ -3014,7 +3170,8 @@ function handleInput(shape) {
     setTimeout(() => {
       btn.classList.remove('wrong');
       document.querySelectorAll('.btn').forEach(b => b.style.opacity = '');
-      if (!secondChanceUsed) {
+      const retryCost = getRetryCost();
+      if (retryCost != null) {
         pendingRetry = true;
         showSecondChancePopup();
       } else {
@@ -3062,6 +3219,25 @@ function handleInput(shape) {
 function showSecondChancePopup() {
   const popup = document.getElementById('secondChancePopup');
   if (!popup) return;
+  const retryCost = getRetryCost();
+  const title = document.getElementById('secondChanceTitle');
+  const desc = document.getElementById('secondChanceDesc');
+  const btn = document.getElementById('secondChanceConfirmBtn');
+  if (title) title.textContent = retryCost === 1 ? '다시 도전할까?' : '한 번 더 밀어볼까?';
+  if (desc) {
+    if (retryCost == null) {
+      desc.innerHTML = '이번 판에서는 더 이상 재도전할 수 없어.';
+    } else if (canAfford(retryCost)) {
+      desc.innerHTML = `같은 라운드를 처음부터 다시 보여줄게.<br>이번 재도전에는 ⭐ ${retryCost}P가 필요해.`;
+    } else {
+      desc.innerHTML = `포인트가 부족해.<br>필요 포인트 ⭐ ${retryCost}P · 현재 ⭐ ${points}P`;
+    }
+  }
+  if (btn) {
+    btn.textContent = retryCost != null ? `⭐ ${retryCost}P 사용` : '재도전 종료';
+    btn.disabled = retryCost == null || !canAfford(retryCost);
+    btn.style.opacity = btn.disabled ? '.5' : '1';
+  }
   popup.classList.add('visible');
 }
 
@@ -3085,9 +3261,22 @@ function replayCurrentRound() {
 }
 
 function useSecondChance() {
+  if (!pendingRetry) {
+    hideSecondChancePopup();
+    return;
+  }
+  const retryCost = getRetryCost();
+  if (retryCost == null) {
+    hideSecondChancePopup();
+    gameOver();
+    return;
+  }
+  if (!spendPoints(retryCost, '재도전')) {
+    showSecondChancePopup();
+    return;
+  }
   hideSecondChancePopup();
-  if (!pendingRetry) return;
-  secondChanceUsed = true;
+  retryCount += 1;
   pendingRetry = false;
   replayCurrentRound();
 }
@@ -3139,6 +3328,14 @@ function gameOver() {
   const newBadges = checkAndAwardBadges(finalScore, combo, newBest);
   const missionUpdate = updateDailyMissions(finalScore, combo, difficulty);
   const newMissions = missionUpdate.completedNow;
+
+  if (newMissions.length) {
+    addPoints(newMissions.length * DAILY_POINT_REWARD, `미션 ${newMissions.length}개 완료`);
+  }
+  if (newBadges.length) {
+    addPoints(newBadges.length * BADGE_POINT_REWARD, `배지 ${newBadges.length}개 획득`);
+  }
+
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
   const dailyTotalCount = missionUpdate.state.missions.length;

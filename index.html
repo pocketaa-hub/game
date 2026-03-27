@@ -386,8 +386,9 @@ audio#bgm { display: none; }
 /* 콤보 카운터 배지 */
 .combo-badge {
   position: fixed;
-  top: 12px; right: 12px;
-  z-index: 50;
+  top: calc(56px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  z-index: 5404;
   background: rgba(139,37,0,.88);
   border: 2px solid #ffe566;
   border-radius: 20px;
@@ -403,6 +404,65 @@ audio#bgm { display: none; }
 }
 .combo-badge.visible { opacity: 1; transform: scale(1); }
 .combo-badge.pulse-anim { animation: correctPop .3s ease; }
+
+/* 포인트 배지 */
+.point-badge {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  z-index: 5405;
+  background: rgba(255,251,238,.96);
+  border: 2px solid #ffe566;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-family: "Nanum Pen Script", cursive;
+  font-size: 18px;
+  color: #8B2500;
+  box-shadow: 0 2px 8px rgba(0,0,0,.28);
+  pointer-events: none;
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.point-badge.bump {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px rgba(255,229,102,.18), 0 4px 12px rgba(0,0,0,.28);
+}
+.point-toast {
+  position: fixed;
+  top: calc(100px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  z-index: 5406;
+  min-width: 88px;
+  padding: 7px 12px 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff9d4 0%, #f5e29a 100%);
+  border: 2px solid #d1a12a;
+  color: #6a2800;
+  box-shadow: 0 8px 18px rgba(0,0,0,.18);
+  font-family: "Nanum Pen Script", cursive;
+  font-size: 20px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+}
+.point-toast.show {
+  display: inline-flex;
+  animation: pointToastIn .24s ease forwards;
+}
+.point-toast.hide {
+  display: inline-flex;
+  animation: pointToastOut .24s ease forwards;
+}
+@keyframes pointToastIn {
+  from { opacity: 0; transform: translateY(-10px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes pointToastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(.96); }
+}
 
 /* ══ 타이틀 화면 ══ */
 #titleScreen {
@@ -659,7 +719,7 @@ audio#bgm { display: none; }
 }
 
 
-body.popup-open { overflow: hidden; position: fixed; width: 100%; left: 0; right: 0; top: 0; }
+body.popup-open { overflow: hidden; width: 100%; overscroll-behavior: none; touch-action: none; }
 .mission-open-wrap {
   display: flex;
   justify-content: center;
@@ -1412,19 +1472,21 @@ body.haptic-flash::after {
   position: fixed; inset: 0; z-index: 5200;
   background: rgba(0,0,0,.76);
   display: flex; align-items: center; justify-content: center;
-  padding-top: max(14px, env(safe-area-inset-top));
-  padding-right: max(14px, env(safe-area-inset-right));
-  padding-bottom: max(14px, env(safe-area-inset-bottom));
-  padding-left: max(14px, env(safe-area-inset-left));
+  padding-top: max(10px, env(safe-area-inset-top));
+  padding-right: max(10px, env(safe-area-inset-right));
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  padding-left: max(10px, env(safe-area-inset-left));
   opacity: 0; pointer-events: none;
   transition: opacity .25s ease;
   backdrop-filter: blur(6px);
+  overflow: hidden;
 }
 .start-popup.visible { opacity: 1; pointer-events: all; }
 .start-card {
-  width: min(400px, calc(100vw - 28px - env(safe-area-inset-left) - env(safe-area-inset-right)));
-  max-width: 400px;
-  height: min(86vh, 690px);
+  width: min(372px, calc(100vw - 20px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  max-width: 372px;
+  min-height: min(66vh, 500px);
+  max-height: min(78vh, 560px);
   margin: 0 auto;
   overflow: hidden;
   display: flex;
@@ -1433,24 +1495,24 @@ body.haptic-flash::after {
   border: 4px solid #c88a30;
   border-radius: 22px;
   box-shadow: 0 8px 0 #8B6000, 0 20px 34px rgba(0,0,0,.35);
-  padding: 14px 14px 16px;
+  padding: 12px 12px 14px;
 }
 .start-card-header { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.start-card-title { font-family: 'Nanum Pen Script', cursive; font-size: 28px; color:#8B2500; line-height: 1; }
-.start-card-sub { margin-top: 4px; margin-bottom: 10px; font-size: 12px; color:#8c6a2f; line-height: 1.25; min-height: 30px; }
+.start-card-title { font-family: 'Nanum Pen Script', cursive; font-size: 26px; color:#8B2500; line-height: 1; }
+.start-card-sub { margin-top: 4px; margin-bottom: 8px; font-size: 11px; color:#8c6a2f; line-height: 1.2; min-height: 24px; }
 .start-close-btn { appearance:none; border:none; background:transparent; cursor:pointer; font-size:22px; color:#8B2500; width:36px; height:36px; border-radius:999px; }
 .start-close-btn:active { transform: scale(.94); }
-.start-steps { display:flex; gap:8px; margin-bottom: 10px; }
+.start-steps { display:flex; gap:6px; margin-bottom: 8px; }
 .start-step-chip {
-  flex:1; text-align:center; padding:7px 8px 8px; border-radius:999px;
+  flex:1; text-align:center; padding:6px 8px 7px; border-radius:999px;
   background:#f3e6c8; border:2px solid #d7b67a; color:#8a5a00;
-  font-size:13px; font-weight:700;
+  font-size:12px; font-weight:700;
 }
 .start-step-chip.active { background:#8B2500; border-color:#5c1800; color:#ffe566; }
 .start-view { display:none; flex:1; min-height:0; }
 .start-view.active { display:flex; flex-direction:column; }
-.start-section-label { margin: 2px 0 8px; font-size: 14px; font-weight: 700; color:#6c3a00; }
-.mode-level-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.start-section-label { margin: 2px 0 6px; font-size: 13px; font-weight: 700; color:#6c3a00; }
+.mode-level-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .mode-card, .level-card {
   appearance:none; width:100%; text-align:left;
   border: 2px solid #d5b16b; border-radius: 16px;
@@ -1478,32 +1540,32 @@ body.haptic-flash::after {
 .level-card.locked .level-unlock { color:#8f8474; }
 .level-card.selected-locked { animation: shake .45s ease forwards; }
 .mode-card-top, .level-top { display:flex; align-items:center; justify-content:space-between; gap:6px; }
-.mode-card-name { font-family:'Nanum Pen Script', cursive; font-size: 24px; color:#8B2500; line-height:1; }
-.mode-card-meta, .level-meta { font-size: 12px; color:#7a4a10; margin-top: 3px; line-height: 1.15; }
-.mode-card-unlock, .level-unlock { font-size: 10px; color:#8a5a00; margin-top: 4px; line-height:1.2; }
-.level-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.level-card { padding: 8px 8px 9px; border-radius: 14px; }
-.level-name { font-family:'Nanum Pen Script', cursive; font-size: 20px; color:#8B2500; line-height:1.02; }
+.mode-card-name { font-family:'Nanum Pen Script', cursive; font-size: 22px; color:#8B2500; line-height:1; }
+.mode-card-meta, .level-meta { font-size: 11px; color:#7a4a10; margin-top: 2px; line-height: 1.12; }
+.mode-card-unlock, .level-unlock { font-size: 9px; color:#8a5a00; margin-top: 3px; line-height:1.15; }
+.level-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.level-card { padding: 7px 6px 8px; border-radius: 12px; }
+.level-name { font-family:'Nanum Pen Script', cursive; font-size: 17px; color:#8B2500; line-height:1.02; }
 .level-lock { font-size: 14px; }
 .resume-chip {
   display:flex; align-items:center; justify-content:space-between; gap:8px;
-  margin-bottom: 8px; padding: 9px 10px; border-radius: 14px;
+  margin-bottom: 6px; padding: 8px 9px; border-radius: 14px;
   background: rgba(255,248,220,.92); border:2px solid #e0bd5b;
 }
-.resume-title { font-size: 11px; color:#8a5a00; font-weight:700; line-height:1.1; }
-.resume-value { font-family:'Nanum Pen Script', cursive; font-size: 20px; color:#8B2500; line-height:1; margin-top:2px; }
-.start-sub-actions { display:flex; gap:8px; margin-top: auto; padding-top: 10px; }
+.resume-title { font-size: 10px; color:#8a5a00; font-weight:700; line-height:1.1; }
+.resume-value { font-family:'Nanum Pen Script', cursive; font-size: 18px; color:#8B2500; line-height:1; margin-top:2px; }
+.start-sub-actions { display:flex; gap:8px; margin-top: auto; padding-top: 8px; }
 .start-ghost-btn, .start-back-btn, .start-continue-btn, .start-confirm-btn {
-  flex:1; border-radius:14px; padding: 10px 10px; cursor:pointer;
+  flex:1; border-radius:14px; padding: 9px 10px; cursor:pointer;
 }
 .start-ghost-btn, .start-back-btn {
   border:2px solid #bcaaa4; background:#efe7e3; color:#6d4c41;
-  box-shadow: 0 3px 0 #b0a19b; font-family:'Gaegu', cursive; font-size:15px; font-weight:700;
+  box-shadow: 0 3px 0 #b0a19b; font-family:'Gaegu', cursive; font-size:14px; font-weight:700;
 }
 .start-continue-btn, .start-confirm-btn {
   border: 3px solid #5c1800;
   background:#8B2500; color:#ffe566;
-  font-family:'Nanum Pen Script', cursive; font-size:24px;
+  font-family:'Nanum Pen Script', cursive; font-size:22px;
   box-shadow: 0 4px 0 #3a0e00;
 }
 .start-ghost-btn:active, .start-back-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b0a19b; }
@@ -1518,21 +1580,21 @@ body.haptic-flash::after {
   text-align: center;
 }
 @media (max-width: 430px) {
-  .start-card { width: min(392px, calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right))); height: min(84vh, 620px); padding: 12px 12px 14px; margin: 0 auto; }
-  .start-card-title { font-size: 26px; }
-  .start-card-sub { font-size: 11px; min-height: 26px; }
-  .mode-level-grid { gap: 7px; }
-  .mode-card { padding: 8px 8px 9px; }
-  .mode-card-name { font-size: 22px; }
-  .mode-card-meta { font-size: 11px; }
-  .mode-card-unlock { font-size: 9px; }
-  .level-grid { gap: 6px; }
-  .level-card { padding: 7px 7px 8px; }
-  .level-name { font-size: 18px; }
-  .level-meta { font-size: 10px; }
-  .level-unlock { font-size: 9px; }
-  .resume-value { font-size: 18px; }
-  .start-continue-btn, .start-confirm-btn { font-size: 22px; }
+  .start-card { width: min(360px, calc(100vw - 16px - env(safe-area-inset-left) - env(safe-area-inset-right))); min-height: min(64vh, 460px); max-height: min(76vh, 520px); padding: 10px 10px 12px; margin: 0 auto; }
+  .start-card-title { font-size: 24px; }
+  .start-card-sub { font-size: 10px; min-height: 22px; }
+  .mode-level-grid { gap: 6px; }
+  .mode-card { padding: 7px 7px 8px; }
+  .mode-card-name { font-size: 20px; }
+  .mode-card-meta { font-size: 10px; }
+  .mode-card-unlock { font-size: 8px; }
+  .level-grid { grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .level-card { padding: 6px 5px 7px; }
+  .level-name { font-size: 15px; }
+  .level-meta { font-size: 9px; }
+  .level-unlock { font-size: 8px; }
+  .resume-value { font-size: 16px; }
+  .start-continue-btn, .start-confirm-btn { font-size: 20px; }
 }
 
 </style>
@@ -2648,8 +2710,8 @@ function renderModeOptions() {
     const locked = idx > unlockedModeIdx;
     const active = mode === difficulty;
     const unlockText = locked
-      ? `${getModeConfig(MODE_ORDER[idx-1]).label} 졸업 필요`
-      : (def.nextMode ? `${getModeConfig(def.nextMode).label} 해금 도전` : '최종 모드');
+      ? `${getModeConfig(MODE_ORDER[idx-1]).label} 20R`
+      : (def.nextMode ? `다음: ${getModeConfig(def.nextMode).label}` : '최종 모드');
     return `<button class="mode-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" onclick="setDifficulty('${mode}')">
       <div class="mode-card-top"><div class="mode-card-name">${def.label}</div><div>${locked ? '🔒' : '✅'}</div></div>
       <div class="mode-card-meta">${def.buttons}키 · ${def.note}</div>
@@ -2661,7 +2723,7 @@ function renderModeOptions() {
 function getStageLockedText(idx) {
   if (idx <= 0) return '기본 단계';
   const prev = LEVELS[idx - 1];
-  return `${prev.name} ${prev.unlockScore}R 필요`;
+  return `${prev.name} ${prev.unlockScore}R`;
 }
 function renderLevelOptions() {
   const grid = document.getElementById('levelGrid');
@@ -2670,7 +2732,7 @@ function renderLevelOptions() {
   grid.innerHTML = LEVELS.map((level, idx) => {
     const locked = idx > unlockedIdx;
     const active = idx === selectedLevelIdx;
-    const unlockText = locked ? getStageLockedText(idx) : (level.unlockText || '최종 단계');
+    const unlockText = locked ? getStageLockedText(idx) : (idx < LEVELS.length - 1 ? `다음 ${LEVELS[idx+1].name} ${level.unlockScore || ''}R` : '최종 단계');
     return `<button class="level-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" data-level="${idx}" onclick="chooseLevel(${idx})">
       <div class="level-top"><div class="level-name">${level.emoji} ${level.name}</div><div class="level-lock">${locked ? '🔒' : '✅'}</div></div>
       <div class="level-meta">${level.speedMul.toFixed(1)}배 · ${getModeConfig().buttons}키</div>

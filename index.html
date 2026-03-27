@@ -2897,29 +2897,21 @@ function showComboToast(n) {
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
 
-// ── 핀치줌 & 배경 흔들림 완전 차단 ──
+// ── 핀치줌 & 배경 흔들림 차단 (버튼 동작 유지) ──
 document.addEventListener('touchmove', function(e) {
-  if (e.touches.length > 1) e.preventDefault(); // 핀치줌 차단
+  if (e.touches.length > 1) e.preventDefault(); // 두 손가락 핀치줌만 차단
 }, { passive: false });
 
 document.addEventListener('gesturestart', function(e) {
   e.preventDefault(); // iOS Safari 제스처 확대 차단
-});
+}, { passive: false });
 
 document.addEventListener('gesturechange', function(e) {
   e.preventDefault();
-});
+}, { passive: false });
 
 document.addEventListener('gestureend', function(e) {
   e.preventDefault();
-});
-
-// 더블탭 확대 차단
-let lastTap = 0;
-document.addEventListener('touchend', function(e) {
-  const now = Date.now();
-  if (now - lastTap < 300) e.preventDefault();
-  lastTap = now;
 }, { passive: false });
 
 </body>

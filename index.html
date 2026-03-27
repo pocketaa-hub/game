@@ -902,6 +902,50 @@ body.popup-open { overflow: hidden; position: fixed; width: 100%; }
   to   { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(.96); }
 }
 
+
+
+/* ══ 한 번 더 기회 팝업 ══ */
+.second-chance-popup {
+  position: fixed; inset: 0; z-index: 290;
+  background: rgba(0,0,0,.72);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+  backdrop-filter: blur(6px);
+}
+.second-chance-popup.visible { opacity: 1; pointer-events: all; }
+.second-chance-card {
+  background: #fffbee;
+  border: 4px solid #c88a30;
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  text-align: center;
+  max-width: 320px; width: 90%;
+  box-shadow: 0 8px 0 #8B6000, 0 14px 40px rgba(0,0,0,.45);
+}
+.second-chance-emoji { font-size: 44px; line-height: 1; margin-bottom: 6px; }
+.second-chance-title {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 28px; color: #8B2500; margin-bottom: 4px;
+}
+.second-chance-desc { font-size: 14px; color: #8a5a00; line-height: 1.45; margin-bottom: 16px; }
+.second-chance-btns { display: flex; gap: 10px; }
+.second-chance-continue, .second-chance-cancel {
+  flex: 1; border-radius: 12px; cursor: pointer; padding: 10px 12px;
+}
+.second-chance-continue {
+  border: 3px solid #b7770d;
+  background: linear-gradient(180deg, #ffe566 0%, #f7c22d 100%);
+  color: #6a2800; box-shadow: 0 4px 0 #8a5a00;
+  font-family: 'Nanum Pen Script', cursive; font-size: 24px;
+}
+.second-chance-cancel {
+  border: 2px solid #bcaaa4; background: #efe7e3; color: #6d4c41;
+  box-shadow: 0 3px 0 #b0a19b; font-family: 'Gaegu', cursive; font-size: 16px;
+}
+.second-chance-continue:active { transform: translateY(2px); box-shadow: 0 1px 0 #8a5a00; }
+.second-chance-cancel:active { transform: translateY(2px); box-shadow: 0 1px 0 #b0a19b; }
+
 /* ══ 이름 입력 팝업 ══ */
 .name-popup {
   position: fixed; inset: 0; z-index: 300;
@@ -1585,6 +1629,20 @@ button, .btn, .start-btn, .mode-chip, .feedback-chip, .mission-open-btn, .missio
   </div><!-- /result-chars -->
 </div><!-- /overlay -->
 
+<!-- ══ 한 번 더 기회 팝업 ══ -->
+<div class="second-chance-popup" id="secondChancePopup">
+  <div class="second-chance-card">
+    <div class="second-chance-emoji">😢</div>
+    <div class="second-chance-title">아깝다</div>
+    <div class="second-chance-desc">이번 판에서는 한 번만 다시 도전할 수 있어.<br>같은 라운드를 처음부터 다시 보여줄게.</div>
+    <div class="second-chance-btns">
+      <button class="second-chance-continue" onclick="useSecondChance()">한 번 더</button>
+      <button class="second-chance-cancel" onclick="declineSecondChance()">그만할래</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- ══ 이름 입력 팝업 ══ -->
 <div class="name-popup" id="namePopup">
   <div class="name-card">
@@ -1832,6 +1890,7 @@ function openBadges() {
 
 function closeBadges() {
   document.getElementById('badgePopup').classList.remove('visible');
+  document.getElementById('secondChancePopup').classList.remove('visible');
 }
 
 
@@ -2591,6 +2650,8 @@ const STATE = { IDLE:'idle', SHOWING:'showing', WAITING:'waiting', GAMEOVER:'gam
 let gameState = STATE.IDLE;
 
 let sequence = [], playerIndex = 0, round = 0;
+let secondChanceUsed = false;
+let pendingRetry = false;
 let best = parseInt(localStorage.getItem('limitgame_best') || '0');
 let currentSceneIdx = 0;
 
@@ -2632,7 +2693,7 @@ document.querySelectorAll('.btn').forEach(b =>
   })
 );
 
-document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn').forEach(el => {
+document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .second-chance-continue, .second-chance-cancel').forEach(el => {
   el.addEventListener('pointerdown', () => { initAudio(); }, { passive:true });
 });
 
@@ -2659,6 +2720,7 @@ function startGame() {
   document.getElementById('namePopup').classList.remove('visible');
   document.getElementById('rankPopup').classList.remove('visible');
   document.getElementById('badgePopup').classList.remove('visible');
+  document.getElementById('secondChancePopup').classList.remove('visible');
   // gameWrapper 항상 보이게
   const gw = document.getElementById('gameWrapper');
   if (gw) { gw.style.display = 'flex'; gw.style.opacity = '1'; }
@@ -2668,6 +2730,8 @@ function startGame() {
   });
 
   sequence = []; playerIndex = 0; round = 0; combo = 0;
+  secondChanceUsed = false;
+  pendingRetry = false;
   updateRound(0);
   updateStageUI(0);
   updateComboBadge(0);
@@ -2722,7 +2786,12 @@ function handleInput(shape) {
     setTimeout(() => {
       btn.classList.remove('wrong');
       document.querySelectorAll('.btn').forEach(b => b.style.opacity = '');
-      gameOver();
+      if (!secondChanceUsed) {
+        pendingRetry = true;
+        showSecondChancePopup();
+      } else {
+        gameOver();
+      }
     }, 480);
     return;
   }
@@ -2761,8 +2830,50 @@ function handleInput(shape) {
   }
 }
 
+
+function showSecondChancePopup() {
+  const popup = document.getElementById('secondChancePopup');
+  if (!popup) return;
+  popup.classList.add('visible');
+}
+
+function hideSecondChancePopup() {
+  const popup = document.getElementById('secondChancePopup');
+  if (!popup) return;
+  popup.classList.remove('visible');
+}
+
+function replayCurrentRound() {
+  clearAllTimers();
+  playerIndex = 0;
+  gameState = STATE.SHOWING;
+  setStatus('한 번 더. 잘 봐.');
+  safeTimeout(() => {
+    playSequence(() => {
+      gameState = STATE.WAITING;
+      setStatus('따라해봐.');
+    });
+  }, 280);
+}
+
+function useSecondChance() {
+  hideSecondChancePopup();
+  if (!pendingRetry) return;
+  secondChanceUsed = true;
+  pendingRetry = false;
+  replayCurrentRound();
+}
+
+function declineSecondChance() {
+  hideSecondChancePopup();
+  pendingRetry = false;
+  gameOver();
+}
+
 function gameOver() {
   clearAllTimers();
+  hideSecondChancePopup();
+  pendingRetry = false;
   playUiSound('gameover');
 
   const finalScore = round;

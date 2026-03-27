@@ -2378,8 +2378,8 @@ function initAudio() {
   return audioCtx;
 }
 
-const SOUND_BOOST = 1.9;
-const SOUND_MAX_GAIN = 0.09;
+const SOUND_BOOST = 2.2;
+const SOUND_MAX_GAIN = 0.22;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
 
@@ -2409,17 +2409,17 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.08, 'triangle', 0.055);
-      playTone(659, 0.10, 'triangle', 0.05, 0.06);
+      playTone(523, 0.08, 'triangle', 0.11);
+      playTone(659, 0.10, 'triangle', 0.10, 0.06);
       break;
     case 'light':
-      playTone(660, 0.06, 'sine', 0.036);
+      playTone(660, 0.06, 'sine', 0.07);
       break;
     case 'tap':
-      playTone(540, 0.05, 'triangle', 0.05);
+      playTone(540, 0.05, 'triangle', 0.10);
       break;
     case 'correct':
-      playTone(523, 0.05, 'triangle', 0.045);
+      playTone(523, 0.05, 'triangle', 0.08);
       playTone(659, 0.08, 'triangle', 0.042, 0.05);
       break;
     case 'wrong':

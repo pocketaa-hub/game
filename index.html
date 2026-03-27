@@ -13,56 +13,20 @@
 html, body {
   height: 100%;
   width: 100%;
-  max-width: 100vw;
   overflow: hidden;
-  overflow: clip;
   position: fixed;
-  inset: 0;
   overscroll-behavior: none;
-  overscroll-behavior-x: none;
-  overscroll-behavior-y: none;
-  touch-action: none;
-  -webkit-overflow-scrolling: auto;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 body {
-  min-height: var(--app-height, 100vh);
-  height: var(--app-height, 100vh);
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Gaegu', cursive;
   overflow: hidden;
-  position: fixed;
-  inset: 0;
-}
-
-button,
-.btn,
-.start-btn,
-.restart-btn,
-.mode-chip,
-.feedback-chip,
-.level-card,
-.start-close-btn {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.bg,
-.game-wrapper,
-.container,
-#titleScreen,
-.title-content,
-.title-char-group,
-.overlay {
-  max-width: 100vw;
-  overscroll-behavior: none;
+  position: relative;
 }
 
 /* ── 배경 ── */
@@ -1420,15 +1384,6 @@ body.haptic-flash::after {
 }
 
 @media (max-width: 768px) {
-  .title-bg-slide.active,
-  .bg-scene.active,
-  .title-char-f.active,
-  .title-char-m.active,
-  .char-stage.active img {
-    animation: none !important;
-    transform: none !important;
-  }
-
   .game-wrapper {
     max-width: 100vw;
     padding: 0 4px 18px;
@@ -1675,6 +1630,63 @@ body.haptic-flash::after {
   .level-card { min-height: 78px !important; padding: 8px 5px !important; }
   .level-name { font-size: 15px !important; }
   .level-meta, .level-unlock { font-size: 8.5px !important; line-height: 1.15; }
+}
+
+
+.point-badge {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top, 0px) + 12px);
+  right: 12px;
+  z-index: 60;
+  min-width: 76px;
+  padding: 7px 12px 8px;
+  border-radius: 999px;
+  background: rgba(255,248,220,.96);
+  border: 2px solid #d7b04d;
+  color: #8B2500;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 22px;
+  line-height: 1;
+  box-shadow: 0 3px 10px rgba(0,0,0,.22);
+  pointer-events: none;
+}
+.point-badge.bump { animation: pointBadgeBump .26s ease; }
+@keyframes pointBadgeBump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12) translateY(-2px); }
+  100% { transform: scale(1); }
+}
+.point-toast {
+  position: fixed;
+  top: max(58px, env(safe-area-inset-top, 0px) + 58px);
+  right: 12px;
+  z-index: 61;
+  display: none;
+  max-width: min(70vw, 260px);
+  padding: 8px 12px 9px;
+  border-radius: 12px;
+  background: rgba(139,37,0,.94);
+  color: #ffe566;
+  border: 2px solid #c88a30;
+  box-shadow: 0 6px 16px rgba(0,0,0,.28);
+  font-family: 'Gaegu', cursive;
+  font-size: 14px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+.point-toast.show { display:block; animation: pointToastIn .22s ease forwards; }
+.point-toast.hide { animation: pointToastOut .2s ease forwards; }
+@keyframes pointToastIn {
+  from { opacity:0; transform: translateY(-6px); }
+  to { opacity:1; transform: translateY(0); }
+}
+@keyframes pointToastOut {
+  from { opacity:1; transform: translateY(0); }
+  to { opacity:0; transform: translateY(-6px); }
+}
+@media (max-width: 768px) {
+  .point-badge { top: max(10px, env(safe-area-inset-top, 0px) + 10px); right: 10px; font-size: 20px; padding: 6px 10px 7px; }
+  .point-toast { top: max(52px, env(safe-area-inset-top, 0px) + 52px); right: 10px; font-size: 13px; }
 }
 
 </style>
@@ -2041,6 +2053,44 @@ body.haptic-flash::after {
 
 
 <script>
+
+
+const STAGE_BEST_KEY = 'limitgame_stage_best_v1';
+function getStageBestMap() {
+  try {
+    const obj = JSON.parse(localStorage.getItem(STAGE_BEST_KEY) || '{}');
+    return obj && typeof obj === 'object' ? obj : {};
+  } catch (e) {
+    return {};
+  }
+}
+function saveStageBestMap(map) {
+  localStorage.setItem(STAGE_BEST_KEY, JSON.stringify(map || {}));
+}
+function getStageBest(mode, levelIdx) {
+  const map = getStageBestMap();
+  const modeMap = map && typeof map[mode] === 'object' ? map[mode] : {};
+  return Math.max(0, Number(modeMap[levelIdx] || 0));
+}
+function updateStageBest(mode, levelIdx, score) {
+  const map = getStageBestMap();
+  if (!map[mode] || typeof map[mode] !== 'object') map[mode] = {};
+  const prev = Math.max(0, Number(map[mode][levelIdx] || 0));
+  const next = Math.max(prev, Number(score || 0));
+  map[mode][levelIdx] = next;
+  saveStageBestMap(map);
+  return next;
+}
+function hasModeAllClear(mode) {
+  return LEVELS.every((_, idx) => getStageBest(mode, idx) >= 1);
+}
+function hasModeAll20(mode) {
+  return LEVELS.every((_, idx) => getStageBest(mode, idx) >= 20);
+}
+function getBadgeReward(def) {
+  if (def && typeof def.reward === 'number') return def.reward;
+  return BADGE_POINT_REWARD;
+}
 
 // ══ 배지 시스템 ══
 const BADGE_KEY = 'limitgame_badges';
@@ -3577,7 +3627,12 @@ function gameOver() {
   if (popup) popup.classList.remove('visible');
 
   window.setTimeout(() => {
-    openNamePopup(window._finalScore, window._finalStage);
+    try {
+      openNamePopup(window._finalScore, window._finalStage);
+    } catch (e) {
+      const overlay = document.getElementById('overlay');
+      if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
+    }
   }, newBadges.length ? 700 : 260);
 }
 
@@ -3663,25 +3718,7 @@ function showComboToast(n) {
 
 <script>
 (function() {
-  const setAppHeight = () => {
-    const h = window.innerHeight || document.documentElement.clientHeight || screen.height;
-    document.documentElement.style.setProperty('--app-height', `${h}px`);
-    window.scrollTo(0, 0);
-  };
-
-  setAppHeight();
-  window.addEventListener('resize', setAppHeight, { passive: true });
-  window.addEventListener('orientationchange', setAppHeight, { passive: true });
-  window.addEventListener('pageshow', setAppHeight, { passive: true });
-  window.addEventListener('load', setAppHeight, { passive: true });
-  document.addEventListener('scroll', () => window.scrollTo(0, 0), { passive: true });
-})();
-</script>
-
-<script>
-(function() {
   const allowTag = (el) => {
-
     if (!el) return false;
     const tag = (el.tagName || '').toLowerCase();
     return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
@@ -3731,24 +3768,10 @@ function showComboToast(n) {
     }
   }, { passive: false });
 
-  document.addEventListener('wheel', function(e) {
-    if (allowTag(e.target)) return;
-    e.preventDefault();
-  }, { passive: false });
-
   document.addEventListener('dblclick', function(e) {
     if (allowTag(e.target)) return;
     e.preventDefault();
   }, { passive: false });
-
-  document.addEventListener('contextmenu', function(e) {
-    if (allowTag(e.target)) return;
-    e.preventDefault();
-  }, { passive: false });
-
-  window.addEventListener('scroll', function() {
-    window.scrollTo(0, 0);
-  }, { passive: true });
 })();
 
 </script>

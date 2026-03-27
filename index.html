@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>기억의 한계: 1%의 도전</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
 
 body {
   min-height: 100vh;
@@ -41,6 +45,8 @@ body {
     background-position: 30% top;
   }
 }
+
+audio#bgm { display: none; }
 
 /* ── 게임 컨테이너 ── */
 .game-wrapper {
@@ -395,14 +401,18 @@ body {
 #titleScreen {
   position: fixed; inset: 0; z-index: 500;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  align-items: center; justify-content: flex-start;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   transition: opacity .7s ease;
+  padding: 16px 0 28px;
 }
 #titleScreen.hidden { opacity: 0; pointer-events: none; }
 
 /* 슬라이드 배경 */
 .title-bg-slide {
   position: absolute; inset: 0;
+  z-index: 1;
   background-size: cover;
   background-position: center top;
   opacity: 0;
@@ -414,7 +424,7 @@ body {
 #titleScreen::before {
   content: '';
   position: absolute; inset: 0;
-  background: #000;
+  background: rgba(0,0,0,.10);
   z-index: 0;
   pointer-events: none;
 }
@@ -434,12 +444,12 @@ body {
 
 /* 타이틀 콘텐츠 전체 (z-index 2로 오버레이 위에) */
 .title-content {
-  position: relative; z-index: 2;
+  position: relative; z-index: 3;
   display: flex; flex-direction: column;
   align-items: center;
   width: 100%;
-  /* 화면 중앙보다 살짝 아래 */
-  margin-top: 8vh;
+  margin-top: clamp(10px, 3vh, 28px);
+  padding-bottom: 18px;
 }
 
 /* 타이틀 텍스트 패널 */
@@ -475,6 +485,7 @@ body {
   margin: 0;
 }
 .title-char {
+  pointer-events: none;
   width: 110px; height: 240px;
   object-fit: contain; object-position: bottom;
   filter: drop-shadow(3px 6px 12px rgba(0,0,0,.4));
@@ -512,57 +523,6 @@ body {
 .start-btn:hover  { transform: translateX(-50%) translateY(-3px); box-shadow: 0 9px 0 #8B6000, 0 14px 28px rgba(0,0,0,.35); }
 .start-btn:active { transform: translateX(-50%) translateY(3px);  box-shadow: 0 3px 0 #8B6000; }
 
-/* 타이틀 오디오 버튼 */
-.title-audio-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 12px;
-}
-.audio-chip {
-  appearance: none;
-  border: 2px solid #c88a30;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #fffaf0 0%, #f8e7b6 100%);
-  color: #8B2500;
-  min-width: 128px;
-  padding: 10px 18px 11px;
-  font-family: 'Nanum Pen Script', cursive;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #b7770d, 0 8px 16px rgba(0,0,0,.16);
-  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease, background .12s ease, color .12s ease;
-}
-.audio-chip:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 0 #b7770d, 0 10px 18px rgba(0,0,0,.18);
-}
-.audio-chip:active {
-  transform: translateY(2px) scale(.98);
-  box-shadow: 0 2px 0 #b7770d, 0 5px 10px rgba(0,0,0,.12);
-}
-.audio-chip.active {
-  background: linear-gradient(180deg, #ffe566 0%, #f7c22d 100%);
-  color: #6a2800;
-  border-color: #b7770d;
-  box-shadow: 0 4px 0 #8a5a00, 0 10px 18px rgba(0,0,0,.22), 0 0 0 4px rgba(255,229,102,.25);
-}
-.audio-chip.muted {
-  background: linear-gradient(180deg, #f3ede1 0%, #e8dcc4 100%);
-  color: #7a6b55;
-  border-color: #cbb38b;
-  box-shadow: 0 4px 0 #ab9168, 0 8px 15px rgba(0,0,0,.12);
-}
-.audio-note {
-  font-size: 12px;
-  color: #ffefb9;
-  text-shadow: 0 1px 2px rgba(0,0,0,.45);
-  margin-top: 4px;
-}
-
 /* 인디케이터 */
 .title-dots {
   display: flex; gap: 8px; margin-top: 14px;
@@ -577,6 +537,356 @@ body {
 @keyframes startPulse {
   0%,100% { box-shadow: 0 6px 0 #8B6000, 0 10px 24px rgba(0,0,0,.3), 0 0 0 0 rgba(255,229,102,.5); }
   50%      { box-shadow: 0 6px 0 #8B6000, 0 10px 24px rgba(0,0,0,.3), 0 0 0 14px rgba(255,229,102,0); }
+}
+
+
+/* 속도 선택 */
+.title-mode-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.title-mode-label {
+  font-size: 15px;
+  color: #6c3a00;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255,255,255,.5);
+}
+.mode-chips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.mode-chip {
+  appearance: none;
+  border: 2px solid #c88a30;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffaf0 0%, #f8e7b6 100%);
+  color: #8B2500;
+  min-width: 62px;
+  padding: 8px 16px 9px;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .5px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b7770d, 0 8px 16px rgba(0,0,0,.16);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease, background .12s ease, color .12s ease;
+}
+.mode-chip:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 0 #b7770d, 0 10px 18px rgba(0,0,0,.18);
+}
+.mode-chip:active {
+  transform: translateY(2px) scale(.98);
+  box-shadow: 0 2px 0 #b7770d, 0 5px 10px rgba(0,0,0,.12);
+}
+.mode-chip.active {
+  background: linear-gradient(180deg, #ffe566 0%, #f7c22d 100%);
+  color: #6a2800;
+  border-color: #b7770d;
+  box-shadow: 0 4px 0 #8a5a00, 0 10px 18px rgba(0,0,0,.22), 0 0 0 4px rgba(255,229,102,.25);
+}
+.mode-note {
+  min-height: 22px;
+  font-size: 14px;
+  color: #5c2a00;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255,255,255,.5);
+}
+
+.title-feedback-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.feedback-chip {
+  appearance: none;
+  border: 2px solid #d2b073;
+  border-radius: 999px;
+  background: rgba(255,251,240,.92);
+  color: #7a4a10;
+  min-width: 84px;
+  padding: 7px 12px 8px;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #caa04d, 0 6px 12px rgba(0,0,0,.12);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease, opacity .12s ease;
+}
+.feedback-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 #caa04d, 0 8px 14px rgba(0,0,0,.15);
+}
+.feedback-chip:active {
+  transform: translateY(2px) scale(.98);
+  box-shadow: 0 1px 0 #caa04d, 0 4px 8px rgba(0,0,0,.1);
+}
+.feedback-chip.active {
+  background: linear-gradient(180deg, #fff1b7 0%, #ffd55c 100%);
+  color: #6a2800;
+  border-color: #b7770d;
+  box-shadow: 0 4px 0 #8a5a00, 0 8px 16px rgba(0,0,0,.18);
+}
+.feedback-chip.muted {
+  background: rgba(240,236,228,.9);
+  color: #9b8d79;
+  box-shadow: 0 2px 0 #cdbda5, 0 5px 10px rgba(0,0,0,.08);
+}
+.feedback-note {
+  margin-top: 3px;
+  font-size: 12px;
+  color: #8c6a2f;
+  text-align: center;
+}
+
+
+body.popup-open { overflow: hidden; }
+.mission-open-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.mission-open-btn {
+  appearance: none;
+  border: 3px solid #c88a30;
+  border-radius: 999px;
+  background: rgba(255,251,240,.94);
+  color: #7a4a10;
+  padding: 9px 18px 10px;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #caa04d, 0 8px 14px rgba(0,0,0,.14);
+}
+.mission-open-btn:active {
+  transform: translateY(2px) scale(.98);
+  box-shadow: 0 1px 0 #caa04d, 0 4px 8px rgba(0,0,0,.1);
+}
+.mission-open-meta {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #8a5a00;
+}
+.mission-popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0,0,0,.72);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .22s ease, visibility .22s ease;
+  z-index: 5000;
+}
+.mission-popup.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+.mission-card {
+  position: relative;
+  z-index: 5001;
+  width: min(360px, 92vw);
+  max-height: min(78vh, 620px);
+  overflow: auto;
+  padding: 14px 14px 16px;
+  border-radius: 20px;
+  border: 3px solid #c88a30;
+  background: rgba(255, 251, 238, 0.99);
+  box-shadow: 0 8px 0 #8B6000, 0 18px 28px rgba(0,0,0,.35);
+}
+.mission-card::-webkit-scrollbar { width: 8px; }
+.mission-card::-webkit-scrollbar-thumb { background: rgba(200,138,48,.45); border-radius: 999px; }
+.mission-card-header {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin-bottom: 10px;
+}
+.mission-card-title { font-family:'Nanum Pen Script', cursive; font-size:28px; color:#8B2500; }
+.mission-close-btn {
+  display:block; width:100%; margin-top: 12px;
+  border: 3px solid #b05a14; border-radius: 16px;
+  background:#a53700; color:#ffe8b0; padding:10px 0;
+  font-family:'Nanum Pen Script', cursive; font-size:28px; cursor:pointer;
+  box-shadow: 0 4px 0 #6e1f00;
+}
+.mission-close-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #6e1f00; }
+
+/* ══ 오늘의 미션 ══ */
+.daily-panel {
+  width: min(340px, 90vw);
+  margin-top: 14px;
+  padding: 12px 14px 13px;
+  border-radius: 18px;
+  border: 3px solid #c88a30;
+  background: rgba(255, 251, 238, 0.94);
+  box-shadow: 0 6px 0 #8B6000, 0 12px 24px rgba(0,0,0,.18);
+  backdrop-filter: blur(4px);
+}
+.daily-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.daily-panel-title {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 22px;
+  color: #8B2500;
+  letter-spacing: .5px;
+}
+.daily-panel-stamp {
+  font-size: 12px;
+  color: #8a5a00;
+  background: #fff4cf;
+  border: 1px solid #e0bd5b;
+  border-radius: 999px;
+  padding: 4px 9px;
+  white-space: nowrap;
+}
+.daily-list {
+  display: grid;
+  gap: 8px;
+}
+.daily-item {
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  border: 2px solid rgba(200,138,48,.45);
+  background: rgba(255,255,255,.72);
+}
+.daily-item.done {
+  background: linear-gradient(180deg, #fff9d9 0%, #eefad8 100%);
+  border-color: #dcb54d;
+}
+.daily-item-icon {
+  font-size: 20px;
+  text-align: center;
+}
+.daily-item-main {
+  min-width: 0;
+}
+.daily-item-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #6a2800;
+  line-height: 1.1;
+}
+.daily-item-desc {
+  font-size: 12px;
+  color: #8c6a2f;
+  margin-top: 2px;
+}
+.daily-item-progress {
+  font-size: 12px;
+  color: #8a5a00;
+  min-width: 48px;
+  text-align: right;
+}
+.daily-item.done .daily-item-progress {
+  color: #2f7a1c;
+  font-weight: 700;
+}
+.daily-panel-foot {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: #8c6a2f;
+}
+
+.result-daily {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #8a5a00;
+  line-height: 1.35;
+}
+.result-daily strong {
+  color: #8B2500;
+}
+.result-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+.result-summary-item {
+  background: rgba(255,255,255,.78);
+  border: 2px solid #e0c080;
+  border-radius: 12px;
+  padding: 8px 6px;
+}
+.result-summary-label {
+  font-size: 11px;
+  color: #9b6a20;
+  line-height: 1.1;
+}
+.result-summary-value {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 21px;
+  color: #8B2500;
+  line-height: 1.1;
+  margin-top: 3px;
+}
+
+.mission-toast {
+  position: fixed;
+  left: 50%;
+  top: 120px;
+  transform: translateX(-50%) translateY(-20px);
+  min-width: 220px;
+  max-width: 82vw;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: linear-gradient(180deg, #fff9d4 0%, #f5e29a 100%);
+  border: 3px solid #d1a12a;
+  color: #6a2800;
+  box-shadow: 0 8px 24px rgba(0,0,0,.24);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 280;
+  opacity: 0;
+  pointer-events: none;
+}
+.mission-toast.show {
+  display: inline-flex;
+  animation: missionToastIn .28s ease forwards;
+}
+.mission-toast.hide {
+  display: inline-flex;
+  animation: missionToastOut .28s ease forwards;
+}
+.mission-toast-icon { font-size: 20px; }
+.mission-toast-label { font-size: 12px; color: #8a5a00; }
+.mission-toast-name {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 20px;
+  letter-spacing: .5px;
+}
+@keyframes missionToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+@keyframes missionToastOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(.96); }
 }
 
 /* ══ 이름 입력 팝업 ══ */
@@ -646,7 +956,7 @@ body {
 
 /* ══ 랭킹 팝업 ══ */
 .rank-popup {
-  position: fixed; inset: 0; z-index: 300;
+  position: fixed; inset: 0; z-index: 310;
   background: rgba(0,0,0,.82);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
@@ -718,6 +1028,29 @@ body {
 }
 .rank-close-btn:active { transform: scale(.97); }
 
+
+.rank-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rank-tab {
+  flex: 1;
+  border: 2px solid #c88a30;
+  border-radius: 999px;
+  background: #fff9ee;
+  color: #8B2500;
+  padding: 6px 10px;
+  font-family: 'Gaegu', cursive;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rank-tab.active {
+  background: #8B2500;
+  color: #ffe566;
+}
+
 /* 결과 화면 랭킹 버튼 */
 .rank-open-btn {
   display: block; width: 100%; margin-top: 8px;
@@ -767,7 +1100,7 @@ body {
 
 /* 배지 팝업 */
 .badge-popup {
-  position: fixed; inset: 0; z-index: 300;
+  position: fixed; inset: 0; z-index: 315;
   background: rgba(0,0,0,.82);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
@@ -791,6 +1124,35 @@ body {
   font-size: 24px; color: #8B2500;
   text-align: center; margin-bottom: 16px;
   border-bottom: 2px solid #e0c080; padding-bottom: 10px;
+}
+.badge-card-summary {
+  text-align: center;
+  margin: -4px 0 14px;
+  font-size: 13px;
+  color: #9b6a20;
+}
+.badge-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 14px;
+  flex-wrap: wrap;
+}
+.badge-tab {
+  flex: 1;
+  min-width: 68px;
+  border: 2px solid #c88a30;
+  border-radius: 999px;
+  background: #fff9ee;
+  color: #8B2500;
+  padding: 6px 10px;
+  font-family: 'Gaegu', cursive;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.badge-tab.active {
+  background: #8B2500;
+  color: #ffe566;
 }
 .badge-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
@@ -846,53 +1208,131 @@ body {
   animation: pulse .8s ease-in-out infinite;
 }
 
-@media (max-width: 430px) {
+
+/* ══ 다음 단계: 미세 움직임 + 모바일 캐릭터 보정 ══ */
+@keyframes titleBgDrift {
+  0%   { transform: scale(1.02) translate3d(0, 0, 0); }
+  100% { transform: scale(1.08) translate3d(-1.5%, -1%, 0); }
+}
+@keyframes gameBgDrift {
+  0%   { transform: scale(1.01) translate3d(0, 0, 0); }
+  100% { transform: scale(1.05) translate3d(1.2%, -0.8%, 0); }
+}
+@keyframes titleFloatLeft {
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  50%     { transform: translateY(-8px) rotate(1.2deg); }
+}
+@keyframes titleFloatRight {
+  0%,100% { transform: scaleX(-1) translateY(0) rotate(-1deg); }
+  50%     { transform: scaleX(-1) translateY(-8px) rotate(1.2deg); }
+}
+@keyframes charBob {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-6px); }
+}
+@keyframes hapticFlash {
+  0% { opacity: 0; }
+  35% { opacity: .18; }
+  100% { opacity: 0; }
+}
+@keyframes hapticShake {
+  0%,100% { transform: translate3d(0,0,0); }
+  20% { transform: translate3d(-2px, 0, 0); }
+  40% { transform: translate3d(2px, 0, 0); }
+  60% { transform: translate3d(-1px, 0, 0); }
+  80% { transform: translate3d(1px, 0, 0); }
+}
+.title-bg-slide,
+.bg-scene {
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+.title-bg-slide.active { animation: titleBgDrift 10s ease-in-out infinite alternate; }
+.bg-scene.active { animation: gameBgDrift 14s ease-in-out infinite alternate; }
+.title-char-f.active { animation: titleFloatLeft 3.8s ease-in-out infinite; }
+.title-char-m.active { animation: titleFloatRight 4s ease-in-out infinite; }
+.char-stage.active img { animation: charBob 4.2s ease-in-out infinite; }
+body.haptic-shake { animation: hapticShake .24s linear; }
+body.haptic-flash::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 248, 220, .65);
+  pointer-events: none;
+  z-index: 9999;
+  animation: hapticFlash .18s ease-out;
+}
+
+@media (max-width: 768px) {
   .game-wrapper {
-    padding: 0 8px 12px;
+    max-width: 100vw;
+    padding: 0 4px 18px;
+    align-items: flex-end;
+    position: relative;
   }
   .char-panel {
+    width: 104px;
+    height: 250px;
     position: absolute;
-    bottom: 44px;
-    width: 92px;
-    height: 220px;
-    opacity: .92;
+    bottom: 18px;
     z-index: 2;
+    opacity: .92;
   }
-  #charLeft { left: -2px; transform: none; }
-  #charRight { right: -2px; transform: none; }
+  #charLeft { left: 4px; transform: none; }
+  #charRight { right: 4px; transform: none; }
   .container {
-    padding: 12px 10px 30px;
+    max-width: 360px;
+    padding-left: 8px;
+    padding-right: 8px;
+    position: relative;
+    z-index: 5;
   }
-  .grid {
-    margin-top: 4px;
-  }
-  .status-bubble {
-    margin-top: 8px;
-    min-height: 36px;
+  #status {
+    margin-top: 16px;
+    transform: translateY(10px);
   }
   .title-char-group {
-    width: min(360px, 98vw);
-    height: 250px;
+    width: min(360px, 96vw);
+    height: 262px;
   }
   .title-char {
-    width: 118px;
-    height: 220px;
+    width: 116px;
+    height: 232px;
   }
-  .title-char-f { left: 14px; }
-  .title-char-m { right: 14px; }
-  .start-btn {
-    bottom: -8px;
-    padding: 14px 44px 12px;
+  .title-char-f { left: 24px; }
+  .title-char-m { right: 24px; }
+}
+
+@media (max-width: 430px) {
+  .game-wrapper {
+    padding: 0 8px 16px;
   }
-  .title-audio-row {
-    margin-top: 18px;
+  .char-panel {
+    width: 88px;
+    height: 214px;
+    bottom: 20px;
+    opacity: .9;
   }
-  .audio-chip {
-    min-width: 136px;
-    font-size: 22px;
-    padding: 10px 18px;
+  #charLeft { left: 0; transform: none; }
+  #charRight { right: 0; transform: none; }
+  .title-char-group {
+    width: min(360px, 98vw);
+    height: 228px;
+  }
+  .title-char {
+    width: 108px;
+    height: 212px;
+  }
+  .title-char-f { left: 8px; }
+  .title-char-m { right: 8px; }
+  .daily-panel {
+    width: min(330px, 92vw);
+  }
+  #status {
+    transform: translateY(12px);
   }
 }
+
 </style>
 </head>
 <body>
@@ -938,10 +1378,24 @@ body {
       <button class="start-btn" onclick="enterGame()">시 작</button>
     </div>
 
-    <div class="title-audio-row">
-      <button class="audio-chip active" id="bgmChip" onclick="toggleBGM()">🎵 BGM ON</button>
+    <div class="title-mode-picker">
+      <div class="title-mode-label">속도 선택</div>
+      <div class="mode-chips title-mode-chips">
+        <button class="mode-chip" data-mode="easy" onclick="setDifficulty('easy')">1X</button>
+        <button class="mode-chip" data-mode="normal" onclick="setDifficulty('normal')">1.5X</button>
+        <button class="mode-chip" data-mode="hard" onclick="setDifficulty('hard')">2X</button>
+      </div>
+      <div class="mode-note" id="modeNote">기본 속도로 차분하게 시작</div>
+      <div class="title-feedback-row">
+        <button class="feedback-chip" id="soundChip" onclick="toggleSound()">🔊 소리 ON</button>
+        <button class="feedback-chip" id="bgmChip" onclick="toggleBgm()">🎵 BGM ON</button>
+      </div>
+      <div class="feedback-note">효과음만 남기고 진동/시각 반응은 제외했다</div>
+      <div class="mission-open-wrap">
+        <button class="mission-open-btn" onclick="openMissionPopup()">📅 오늘의 미션 <span class="mission-open-meta" id="dailyStampCountMini">0 / 3 완료 · 스탬프 0</span></button>
+      </div>
     </div>
-    <div class="audio-note">배경음악은 타이틀과 결과 화면에서만 흐르고, 플레이 중에는 자동으로 멈춘다</div>
+
 
     <!-- 인디케이터 -->
     <div class="title-dots">
@@ -956,6 +1410,19 @@ body {
   </div>
 </div>
 
+
+<!-- ══ 오늘의 미션 팝업 ══ -->
+<div class="mission-popup" id="missionPopup">
+  <div class="mission-card">
+    <div class="mission-card-header">
+      <div class="mission-card-title">📅 오늘의 미션</div>
+      <div class="daily-panel-stamp" id="dailyStampCount">0 / 3 완료 · 누적 스탬프 0</div>
+    </div>
+    <div class="daily-list" id="dailyMissionList"></div>
+    <div class="daily-panel-foot" id="dailyMissionFoot">자정에 새로운 미션으로 바뀐다.</div>
+    <button class="mission-close-btn" onclick="closeMissionPopup()">닫기</button>
+  </div>
+</div>
 
 <!-- 콤보 토스트 -->
 <div class="combo-toast" id="comboToast" style="display:none">
@@ -999,7 +1466,7 @@ body {
       <div class="sign-sub">집중력이 먼저 꺼지는 기억력 테스트</div>
     </div>
 
-    <div class="stage-badge" id="stageBadge">🍼 유아</div>
+    <div class="stage-badge" id="stageBadge">🍼 유아 · 1X</div>
 
     <div class="stats-board">
       <div class="stat">
@@ -1069,18 +1536,26 @@ body {
     <div class="result-card">
     <div class="result-stage-emoji" id="resultStageEmoji">🍼</div>
     <div class="result-stage-name"  id="resultStageName">유아</div>
-    <div class="result-line">여기까지였네</div>
+    <div class="result-line" id="resultLine">여기까지였네</div>
     <div class="result-round" id="resultRound">0</div>
     <div class="result-unit">라운드</div>
     <div class="result-best"  id="resultBest">최고기록 <span>0</span> 라운드</div>
     <div class="result-seq"   id="resultSeq"></div>
     <div class="result-msg"   id="resultMsg">아깝다.</div>
+    <div class="result-summary">
+      <div class="result-summary-item"><div class="result-summary-label">속도</div><div class="result-summary-value" id="resultSummaryMode">1X</div></div>
+      <div class="result-summary-item"><div class="result-summary-label">최고 콤보</div><div class="result-summary-value" id="resultSummaryCombo">0</div></div>
+      <div class="result-summary-item"><div class="result-summary-label">새 배지</div><div class="result-summary-value" id="resultSummaryBadges">0</div></div>
+    </div>
+    <div class="result-daily" id="resultDaily"></div>
     <button class="restart-btn" onclick="startGame()">다시 시작</button>
+    <button class="rank-open-btn home-btn" onclick="goHome()">🏠 처음으로</button>
     <button class="rank-open-btn" onclick="openRanking()">🏆 명예의 전당 보기</button>
     <button class="badge-open-btn" onclick="openBadges()" id="badgeOpenBtn">🏅 나의 배지 보기</button>
     </div><!-- /result-card -->
     <div class="result-char-right"><img id="resultCharRight" src="male_0.png" alt=""></div>
   </div><!-- /result-chars -->
+</div><!-- /overlay -->
 
 <!-- ══ 이름 입력 팝업 ══ -->
 <div class="name-popup" id="namePopup">
@@ -1102,6 +1577,11 @@ body {
 <div class="rank-popup" id="rankPopup">
   <div class="rank-card">
     <div class="rank-header">🏆 명예의 전당</div>
+    <div class="rank-tabs">
+      <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('all')">전체</button>
+      <button class="rank-tab" id="rankTabToday" onclick="setRankTab('today')">오늘</button>
+      <button class="rank-tab" id="rankTabMine" onclick="setRankTab('mine')">내 기록</button>
+    </div>
     <div id="rankList"></div>
     <button class="rank-close-btn" onclick="closeRanking()">닫기</button>
   </div>
@@ -1114,109 +1594,99 @@ body {
   <span class="badge-toast-name" id="badgeToastName">이름</span>
 </div>
 
+<!-- ══ 미션 토스트 ══ -->
+<audio id="bgm" src="Layered Thoughts.mp3" loop preload="auto"></audio>
+<div class="mission-toast" id="missionToast">
+  <span class="mission-toast-icon" id="missionToastIcon">📅</span>
+  <span class="mission-toast-label">오늘 미션 완료!</span>
+  <span class="mission-toast-name" id="missionToastName">이름</span>
+</div>
+
 <!-- ══ 배지 팝업 ══ -->
 <div class="badge-popup" id="badgePopup">
   <div class="badge-card">
     <div class="badge-card-header">🏅 나의 배지</div>
+    <div class="badge-card-summary" id="badgeSummary"></div>
+    <div class="badge-tabs">
+      <button class="badge-tab active" id="badgeTabAll" onclick="setBadgeTab('all')">전체</button>
+      <button class="badge-tab" id="badgeTabGeneral" onclick="setBadgeTab('general')">일반</button>
+      <button class="badge-tab" id="badgeTabSpeed" onclick="setBadgeTab('speed')">속도</button>
+      <button class="badge-tab" id="badgeTabDaily" onclick="setBadgeTab('daily')">꾸준함</button>
+    </div>
     <div class="badge-grid" id="badgeGrid"></div>
     <button class="badge-close-btn" onclick="closeBadges()">닫기</button>
   </div>
 </div>
 
-</div>
-
-<audio id="bgmAudio" src="Layered Thoughts.mp3" loop preload="auto"></audio>
 
 <script>
 
 // ══ 배지 시스템 ══
 const BADGE_KEY = 'limitgame_badges';
-const BADGE_FAIL_KEY = 'limitgame_fail_streak';
-const BGM_KEY = 'limitgame_bgm_on';
-let bgmOn = localStorage.getItem(BGM_KEY) !== '0';
-const bgmAudio = document.getElementById('bgmAudio');
-let bgmUnlocked = false;
+const GAME_STATS_KEY = 'limitgame_game_stats';
 
-function ensureBGM() {
-  if (!bgmAudio) return null;
-  bgmAudio.volume = 0.28;
-  return bgmAudio;
-}
-
-function syncBgmUI() {
-  const chip = document.getElementById('bgmChip');
-  if (!chip) return;
-  chip.textContent = bgmOn ? '🎵 BGM ON' : '🎵 BGM OFF';
-  chip.classList.toggle('active', bgmOn);
-  chip.classList.toggle('muted', !bgmOn);
-}
-
-function playBGM(restart = false) {
-  const audio = ensureBGM();
-  if (!audio || !bgmOn) return;
-  if (restart) {
-    try { audio.currentTime = 0; } catch(e) {}
-  }
-  const p = audio.play();
-  if (p && p.then) p.then(() => { bgmUnlocked = true; }).catch(() => {});
-}
-
-function stopBGM(reset = false) {
-  const audio = ensureBGM();
-  if (!audio) return;
-  audio.pause();
-  if (reset) {
-    try { audio.currentTime = 0; } catch(e) {}
-  }
-}
-
-function unlockBGM() {
-  const audio = ensureBGM();
-  if (!audio || bgmUnlocked) return;
-  const p = audio.play();
-  if (p && p.then) {
-    p.then(() => {
-      audio.pause();
-      try { audio.currentTime = 0; } catch(e) {}
-      bgmUnlocked = true;
-      if (isTitleActive() || isOverlayVisible()) playBGM();
-    }).catch(() => {});
-  }
-}
-
-function isTitleActive() {
-  const ts = document.getElementById('titleScreen');
-  return !!ts && ts.style.display !== 'none' && !ts.classList.contains('hidden');
-}
-
-function isOverlayVisible() {
-  const ov = document.getElementById('overlay');
-  return !!ov && ov.classList.contains('visible');
-}
-
-function toggleBGM() {
-  bgmOn = !bgmOn;
-  localStorage.setItem(BGM_KEY, bgmOn ? '1' : '0');
-  if (bgmOn) {
-    unlockBGM();
-    if (isTitleActive() || isOverlayVisible()) playBGM();
-  } else {
-    stopBGM();
-  }
-  syncBgmUI();
-}
-
-// 배지 정의
 const BADGE_DEFS = [
-  { id:'first',    icon:'🌱', name:'첫걸음',       desc:'첫 게임 완료',             check: (s,f,c) => true },
-  { id:'stage5',   icon:'🥉', name:'5단계 돌파',    desc:'5라운드 이상 도달',        check: (s,f,c) => s >= 5 },
-  { id:'stage10',  icon:'🥈', name:'10단계 돌파',   desc:'10라운드 이상 도달',       check: (s,f,c) => s >= 10 },
-  { id:'stage15',  icon:'🥇', name:'15단계 돌파',   desc:'15라운드 이상 도달',       check: (s,f,c) => s >= 15 },
-  { id:'stage20',  icon:'💎', name:'20단계 돌파',   desc:'20라운드 이상 도달',       check: (s,f,c) => s >= 20 },
-  { id:'fail1',    icon:'😅', name:'1라운드 탈락',  desc:'1라운드에서 탈락',         check: (s,f,c) => s === 1 },
-  { id:'fail10',   icon:'🔥', name:'불굴의 의지',   desc:'5라운드 이내 10번 실패',   check: (s,f,c) => f >= 10 },
-  { id:'combo10',  icon:'⚡', name:'콤보 마스터',   desc:'10콤보 달성',              check: (s,f,c) => c >= 10 },
-  { id:'newbest',  icon:'👑', name:'신기록 달성',   desc:'최고기록 경신',            check: (s,f,c,nb) => nb },
+  // 일반
+  { id:'first_play',            icon:'🌱', name:'첫걸음',          desc:'첫 게임 완료',                        category:'general', check:(ctx)=> ctx.stats.totalGames >= 1 },
+  { id:'round1_end',            icon:'😅', name:'숨 고르기',        desc:'1라운드에서 게임 종료',               category:'general', check:(ctx)=> ctx.score === 1 },
+  { id:'combo10',               icon:'⚡', name:'콤보 마스터',      desc:'10콤보 달성',                        category:'general', check:(ctx)=> ctx.maxCombo >= 10 },
+  { id:'combo15',               icon:'🔥', name:'콤보 폭주',        desc:'15콤보 달성',                        category:'general', check:(ctx)=> ctx.maxCombo >= 15 },
+  { id:'combo20',               icon:'💥', name:'콤보 초신성',      desc:'20콤보 달성',                        category:'general', check:(ctx)=> ctx.maxCombo >= 20 },
+  { id:'bounce_back',           icon:'📈', name:'반등의 신호',      desc:'직전 2 이하 후 이번 8 이상',           category:'general', check:(ctx)=> ctx.stats.bounceBack },
+  { id:'games25',               icon:'🎟️', name:'열혈 참가자',      desc:'총 25판 플레이',                      category:'general', check:(ctx)=> ctx.stats.totalGames >= 25 },
+  { id:'games50',               icon:'🎮', name:'단골 도전자',      desc:'총 50판 플레이',                      category:'general', check:(ctx)=> ctx.stats.totalGames >= 50 },
+  { id:'games100',              icon:'🕹️', name:'게임 친구',        desc:'총 100판 플레이',                     category:'general', check:(ctx)=> ctx.stats.totalGames >= 100 },
+  { id:'games250',              icon:'🏆', name:'한계 탐험가',      desc:'총 250판 플레이',                     category:'general', check:(ctx)=> ctx.stats.totalGames >= 250 },
+  { id:'rounds100',             icon:'🏃', name:'마라토너',         desc:'누적 라운드 100 달성',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 100 },
+  { id:'rounds250',             icon:'🥾', name:'꾸준한 발걸음',    desc:'누적 라운드 250 달성',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 250 },
+  { id:'rounds500',             icon:'🧭', name:'기억의 순례자',    desc:'누적 라운드 500 달성',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 500 },
+  { id:'rounds1000',            icon:'👑', name:'기억의 군주',      desc:'누적 라운드 1000 달성',                category:'general', check:(ctx)=> ctx.stats.totalRounds >= 1000 },
+  { id:'low10',                 icon:'🧱', name:'연습벌레',         desc:'5라운드 이하 종료 10번 경험',          category:'general', check:(ctx)=> ctx.stats.lowRoundFinishes >= 10 },
+  { id:'steady3',               icon:'🧘', name:'꾸준한 손',        desc:'최근 3판 연속 5라운드 이상',           category:'general', check:(ctx)=> ctx.stats.last3Over5 },
+
+  // 속도별 단계
+  { id:'easy_5',                icon:'🥉', name:'1X 워밍업',        desc:'1X에서 5라운드 도달',                 category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 5 },
+  { id:'easy_10',               icon:'🥈', name:'1X 집중 시동',     desc:'1X에서 10라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 10 },
+  { id:'easy_15',               icon:'🥇', name:'1X 안정 질주',     desc:'1X에서 15라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 15 },
+  { id:'easy_20',               icon:'💎', name:'1X 기억 장인',     desc:'1X에서 20라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 20 },
+  { id:'easy_25',               icon:'🏰', name:'1X 고요한 제왕',   desc:'1X에서 25라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 25 },
+  { id:'easy_30',               icon:'🧠', name:'1X 완벽 기억왕',   desc:'1X에서 30라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 30 },
+
+  { id:'normal_5',              icon:'🚗', name:'1.5X 출발',        desc:'1.5X에서 5라운드 도달',               category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 5 },
+  { id:'normal_10',             icon:'🚀', name:'1.5X 추격자',      desc:'1.5X에서 10라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 10 },
+  { id:'normal_15',             icon:'🛰️', name:'1.5X 돌파자',      desc:'1.5X에서 15라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 15 },
+  { id:'normal_20',             icon:'🌠', name:'1.5X 가속 군단',   desc:'1.5X에서 20라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 20 },
+  { id:'normal_25',             icon:'🛡️', name:'1.5X 집중 기사',   desc:'1.5X에서 25라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 25 },
+  { id:'normal_30',             icon:'🏹', name:'1.5X 예리한 눈',   desc:'1.5X에서 30라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 30 },
+
+  { id:'hard_5',                icon:'🌪️', name:'2X 맛보기',        desc:'2X에서 5라운드 도달',                 category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 5 },
+  { id:'hard_10',               icon:'🎯', name:'2X 입문자',        desc:'2X에서 10라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 10 },
+  { id:'hard_15',               icon:'🛸', name:'2X 돌격대',        desc:'2X에서 15라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 15 },
+  { id:'hard_20',               icon:'☄️', name:'2X 폭풍 핵심',     desc:'2X에서 20라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 20 },
+  { id:'hard_25',               icon:'👾', name:'2X 초고속 괴수',   desc:'2X에서 25라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 25 },
+  { id:'hard_30',               icon:'🪐', name:'2X 정복자',        desc:'2X에서 30라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 30 },
+
+  { id:'speed2_plays5',         icon:'🌪️', name:'고속 단골',        desc:'2X 모드로 5판 플레이',                 category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.hard || 0) >= 5 },
+  { id:'speed15_plays10',       icon:'🧲', name:'1.5X 체질',        desc:'1.5X 모드로 10판 플레이',              category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.normal || 0) >= 10 },
+  { id:'speed1_plays20',        icon:'🪶', name:'기본기의 힘',      desc:'1X 모드로 20판 플레이',                category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.easy || 0) >= 20 },
+
+  // 꾸준함 / 일일 미션
+  { id:'daily_play3',           icon:'☀️', name:'오늘도 한 판',     desc:'오늘 3판 플레이',                     category:'daily', check:(ctx)=> ctx.stats.todayGames >= 3 },
+  { id:'daily_play10',          icon:'📅', name:'하루 10판',        desc:'하루 10판 플레이',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 10 },
+  { id:'daily_play30',          icon:'🗓️', name:'하루 30판',        desc:'하루 30판 플레이',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 30 },
+  { id:'daily_play50',          icon:'📛', name:'하루 50판',        desc:'하루 50판 플레이',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 50 },
+  { id:'daily_play100',         icon:'🏟️', name:'하루 100판',       desc:'하루 100판 플레이',                   category:'daily', check:(ctx)=> ctx.stats.todayGames >= 100 },
+  { id:'mission_day1',          icon:'✅', name:'미션 첫 완주',      desc:'일일 미션 1일 연속 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 1 },
+  { id:'mission_day3',          icon:'🥉', name:'3일 루틴',         desc:'일일 미션 3일 연속 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 3 },
+  { id:'mission_day7',          icon:'🥈', name:'1주 루틴',         desc:'일일 미션 7일 연속 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 7 },
+  { id:'mission_day30',         icon:'🥇', name:'1개월 루틴',       desc:'일일 미션 30일 연속 완료',             category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 30 },
+  { id:'mission_clear7',        icon:'🎖️', name:'7일 성실상',       desc:'일일 미션 누적 7일 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.clearedDays || 0) >= 7 },
+  { id:'mission_clear30',       icon:'🏅', name:'30일 성실상',      desc:'일일 미션 누적 30일 완료',             category:'daily', check:(ctx)=> Number(ctx.daily?.clearedDays || 0) >= 30 },
+  { id:'stamp25',               icon:'📮', name:'스탬프 수집가',    desc:'누적 스탬프 25개',                    category:'daily', check:(ctx)=> Number(ctx.daily?.totalStamps || 0) >= 25 },
+  { id:'stamp100',              icon:'📚', name:'스탬프 박물관',    desc:'누적 스탬프 100개',                   category:'daily', check:(ctx)=> Number(ctx.daily?.totalStamps || 0) >= 100 },
+  { id:'perfect_day',           icon:'🌟', name:'완벽한 하루',      desc:'오늘의 미션 3개 전부 완료',           category:'daily', check:(ctx)=> !!ctx.daily?.dayCleared },
+  { id:'daily_longest7',        icon:'🧿', name:'루틴 지킴이',      desc:'최장 연속 완료 7일 달성',              category:'daily', check:(ctx)=> Number(ctx.daily?.longestStreak || 0) >= 7 },
+  { id:'daily_longest30',       icon:'🪙', name:'루틴 전설',        desc:'최장 연속 완료 30일 달성',             category:'daily', check:(ctx)=> Number(ctx.daily?.longestStreak || 0) >= 30 },
 ];
 
 function getBadges() {
@@ -1224,45 +1694,85 @@ function getBadges() {
   catch(e) { return []; }
 }
 
-function getFailStreak() {
-  try {
-    const d = JSON.parse(localStorage.getItem(BADGE_FAIL_KEY) || '{"count":0,"scores":[]}');
-    return d;
-  } catch(e) { return {count:0, scores:[]}; }
+function getGameStats() {
+  try { return JSON.parse(localStorage.getItem(GAME_STATS_KEY) || '{}'); }
+  catch(e) { return {}; }
 }
 
-function updateFailStreak(score) {
-  const d = getFailStreak();
-  if (score <= 5) {
-    d.scores.push(score);
-    // 최근 기록만 유지
-    if (d.scores.length > 20) d.scores = d.scores.slice(-20);
-    // 최근 기록 중 5라운드 이내 실패 횟수
-    d.count = d.scores.filter(s => s <= 5).length;
+function updateGameStats(score, mode) {
+  const todayKey = new Date().toLocaleDateString('sv-SE');
+  const prev = getGameStats();
+  const stats = Object.assign({
+    totalGames: 0,
+    totalRounds: 0,
+    lowRoundFinishes: 0,
+    recentScores: [],
+    todayKey,
+    todayGames: 0,
+    prevScore: null,
+    bounceBack: false,
+    last3Over5: false,
+    modeGames: { easy: 0, normal: 0, hard: 0 },
+  }, prev);
+
+  if (!stats.modeGames || typeof stats.modeGames !== 'object') {
+    stats.modeGames = { easy: 0, normal: 0, hard: 0 };
   }
-  localStorage.setItem(BADGE_FAIL_KEY, JSON.stringify(d));
-  return d.count;
+  stats.modeGames.easy = Number(stats.modeGames.easy || 0);
+  stats.modeGames.normal = Number(stats.modeGames.normal || 0);
+  stats.modeGames.hard = Number(stats.modeGames.hard || 0);
+
+  if (stats.todayKey !== todayKey) {
+    stats.todayKey = todayKey;
+    stats.todayGames = 0;
+  }
+
+  stats.totalGames += 1;
+  stats.totalRounds += score;
+  stats.modeGames[mode] = Number(stats.modeGames[mode] || 0) + 1;
+  stats.todayGames += 1;
+
+  if (score <= 5) stats.lowRoundFinishes += 1;
+
+  stats.bounceBack = (typeof stats.prevScore === 'number' && stats.prevScore <= 2 && score >= 8);
+  stats.prevScore = score;
+
+  if (!Array.isArray(stats.recentScores)) stats.recentScores = [];
+  stats.recentScores.push(score);
+  if (stats.recentScores.length > 10) stats.recentScores = stats.recentScores.slice(-10);
+  stats.last3Over5 = stats.recentScores.length >= 3 && stats.recentScores.slice(-3).every(v => v >= 5);
+
+  localStorage.setItem(GAME_STATS_KEY, JSON.stringify(stats));
+  return stats;
 }
 
 function checkAndAwardBadges(score, maxCombo, isNewBest) {
-  const earned   = getBadges();
-  const earnedIds = earned.map(b => b.id);
-  const failCount = updateFailStreak(score);
+  const earned = getBadges();
+  const earnedIds = new Set(earned.map(b => b.id));
+  const stats = updateGameStats(score, difficulty);
+  const daily = getDailyMissionState();
+  const ctx = { score, maxCombo, isNewBest, stats, mode: difficulty, daily };
   const newBadges = [];
 
   for (const def of BADGE_DEFS) {
-    if (earnedIds.includes(def.id)) continue;
-    if (def.check(score, failCount, maxCombo, isNewBest)) {
+    if (earnedIds.has(def.id)) continue;
+    let ok = false;
+    try { ok = !!def.check(ctx); } catch(e) { ok = false; }
+    if (ok) {
       earned.push({ id: def.id, date: new Date().toLocaleDateString('ko-KR') });
+      earnedIds.add(def.id);
       newBadges.push(def);
     }
   }
+
   localStorage.setItem(BADGE_KEY, JSON.stringify(earned));
   return newBadges;
 }
 
 function showBadgeToast(badges) {
   if (!badges.length) return;
+  playUiSound('badge');
+  pulseVibration([18, 30, 18, 30, 30]);
   let i = 0;
   function next() {
     if (i >= badges.length) return;
@@ -1270,6 +1780,7 @@ function showBadgeToast(badges) {
     const toast = document.getElementById('badgeToast');
     document.getElementById('badgeToastIcon').textContent = b.icon;
     document.getElementById('badgeToastName').textContent = b.name;
+    toast.style.display = '';
     toast.classList.remove('hide');
     toast.classList.add('show');
     setTimeout(() => {
@@ -1278,15 +1789,16 @@ function showBadgeToast(badges) {
       setTimeout(() => {
         toast.classList.remove('hide');
         toast.style.display = 'none';
-        setTimeout(() => { toast.style.display = ''; next(); }, 50);
+        setTimeout(next, 60);
       }, 420);
-    }, 2000);
+    }, 1800);
   }
   next();
 }
 
 function openBadges() {
-  renderBadges();
+  closeMissionPopup();
+  setBadgeTab(badgeTab || 'all');
   document.getElementById('badgePopup').classList.add('visible');
 }
 
@@ -1294,18 +1806,43 @@ function closeBadges() {
   document.getElementById('badgePopup').classList.remove('visible');
 }
 
+
+let badgeTab = 'all';
+function setBadgeTab(tab) {
+  badgeTab = tab;
+  document.querySelectorAll('.badge-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.id === ({all:'badgeTabAll', general:'badgeTabGeneral', speed:'badgeTabSpeed', daily:'badgeTabDaily'})[tab]);
+  });
+  renderBadges();
+}
+
 function renderBadges() {
   const earned = getBadges();
-  const earnedIds = earned.map(b => b.id);
+  const earnedMap = new Map(earned.map(b => [b.id, b]));
   const grid = document.getElementById('badgeGrid');
-  grid.innerHTML = BADGE_DEFS.map(def => {
-    const isEarned = earnedIds.includes(def.id);
-    const earnedData = earned.find(b => b.id === def.id);
+  const source = badgeTab === 'all'
+    ? BADGE_DEFS
+    : BADGE_DEFS.filter(def => (def.category || 'general') === badgeTab);
+  const ordered = [...source].sort((a, b) => {
+    const ae = earnedMap.has(a.id) ? 0 : 1;
+    const be = earnedMap.has(b.id) ? 0 : 1;
+    return ae - be;
+  });
+  const summary = document.getElementById('badgeSummary');
+  if (summary) {
+    const earnedCount = source.filter(def => earnedMap.has(def.id)).length;
+    summary.textContent = badgeTab === 'all'
+      ? `${earned.length} / ${BADGE_DEFS.length} 획득`
+      : `${earnedCount} / ${source.length} 획득`;
+  }
+  grid.innerHTML = ordered.map(def => {
+    const earnedData = earnedMap.get(def.id);
+    const isEarned = !!earnedData;
     return `
       <div class="badge-item ${isEarned ? 'earned' : 'locked'}">
         <div class="badge-item-icon">${def.icon}</div>
         <div class="badge-item-name">${def.name}</div>
-        <div class="badge-item-desc">${isEarned ? (earnedData?.date || '') : def.desc}</div>
+        <div class="badge-item-desc">${isEarned ? (earnedData.date || '획득 완료') : def.desc}</div>
       </div>`;
   }).join('');
 }
@@ -1313,6 +1850,8 @@ function renderBadges() {
 
 // ══ 랭킹 시스템 ══
 const RANK_KEY = 'limitgame_ranking';
+const PLAYER_NAME_KEY = 'limitgame_last_player';
+let currentRankTab = 'all';
 
 function getRanking() {
   try { return JSON.parse(localStorage.getItem(RANK_KEY) || '[]'); }
@@ -1325,43 +1864,55 @@ function saveRanking(records) {
 
 function addRankRecord(name, score, stageName) {
   const records = getRanking();
+  const cleanName = (name || '익명').trim().slice(0, 10) || '익명';
+  const now = new Date();
   records.push({
-    name: name || '익명',
+    name: cleanName,
     score,
     stage: stageName,
-    date: new Date().toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'})
+    mode: difficulty,
+    modeLabel: getDifficultyConfig().label,
+    date: now.toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'}),
+    dateKey: now.toLocaleDateString('sv-SE'),
+    ts: now.getTime()
   });
-  records.sort((a, b) => b.score - a.score);
-  saveRanking(records.slice(0, 20));
+  records.sort((a, b) => (b.score - a.score) || (a.ts - b.ts));
+  saveRanking(records.slice(0, 50));
+  localStorage.setItem(PLAYER_NAME_KEY, cleanName);
 }
 
 function openNamePopup(score, stageName) {
   window._finalScore = score;
   window._finalStage = stageName;
   document.getElementById('nameScore').textContent = score;
-  document.getElementById('nameInput').value = '';
+  document.getElementById('nameInput').value = localStorage.getItem(PLAYER_NAME_KEY) || '';
   document.getElementById('namePopup').classList.add('visible');
   setTimeout(function() {
     var inp = document.getElementById('nameInput');
     if (inp) inp.focus();
-  }, 300);
+  }, 50);
 }
 
 function confirmName() {
   const name = document.getElementById('nameInput').value.trim() || '익명';
   addRankRecord(name, window._finalScore, window._finalStage);
   document.getElementById('namePopup').classList.remove('visible');
-  document.getElementById('overlay').classList.add('visible');
-  if (bgmOn) playBGM();
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = '';
+  overlay.classList.add('visible');
 }
 
 function skipName() {
   document.getElementById('namePopup').classList.remove('visible');
-  document.getElementById('overlay').classList.add('visible');
-  if (bgmOn) playBGM();
+  const overlay = document.getElementById('overlay');
+  overlay.style.display = '';
+  overlay.classList.add('visible');
 }
 
 function openRanking() {
+  closeMissionPopup();
+  currentRankTab = currentRankTab || 'all';
+  setRankTab(currentRankTab);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
 }
@@ -1370,25 +1921,359 @@ function closeRanking() {
   document.getElementById('rankPopup').classList.remove('visible');
 }
 
-function renderRanking() {
+function setRankTab(tab) {
+  currentRankTab = tab;
+  document.querySelectorAll('.rank-tab').forEach(btn => btn.classList.remove('active'));
+  const map = { all:'rankTabAll', today:'rankTabToday', mine:'rankTabMine' };
+  const active = document.getElementById(map[tab]);
+  if (active) active.classList.add('active');
+  renderRanking();
+}
+
+function getFilteredRecords() {
   const records = getRanking();
+  const todayKey = new Date().toLocaleDateString('sv-SE');
+  const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
+
+  if (currentRankTab === 'today') return records.filter(r => r.dateKey === todayKey);
+  if (currentRankTab === 'mine') return myName ? records.filter(r => r.name === myName) : [];
+  return records;
+}
+
+function renderRanking() {
+  const records = getFilteredRecords().slice(0, 10);
   const list = document.getElementById('rankList');
+  const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
   if (records.length === 0) {
-    list.innerHTML = '<div class="rank-empty">아직 기록이 없어.<br>첫 도전자가 되어봐!</div>';
+    const emptyMsg = currentRankTab === 'today'
+      ? '오늘 기록은 아직 없어.<br>첫 기록을 남겨봐!'
+      : currentRankTab === 'mine'
+      ? '아직 네 이름으로 저장된 기록이 없어.'
+      : '아직 기록이 없어.<br>첫 도전자가 되어봐!';
+    list.innerHTML = `<div class="rank-empty">${emptyMsg}</div>`;
     return;
   }
   const medals = ['🥇','🥈','🥉'];
   list.innerHTML = records.map((r, i) => `
-    <div class="rank-row">
+    <div class="rank-row ${myName && r.name === myName ? 'rank-me' : ''}">
       <div class="rank-pos">${i < 3 ? medals[i] : (i+1)}</div>
       <div class="rank-name">${r.name}</div>
-      <div class="rank-stage">${r.stage}</div>
+      <div class="rank-stage">${r.stage} · ${r.modeLabel || '편안'}</div>
       <div class="rank-score">${r.score}</div>
       <div class="rank-date">${r.date}</div>
     </div>
   `).join('');
 }
 
+
+
+// ══ 일일 미션 시스템 ══
+const DAILY_MISSION_KEY = 'limitgame_daily_missions_v1';
+const DAILY_MISSION_DEFS = [
+  { id:'play3', icon:'🎮', name:'세 판만 더', desc:'오늘 3판 플레이', target:3,
+    progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 3 },
+  { id:'rounds12', icon:'📚', name:'기억 예열', desc:'오늘 누적 12라운드', target:12,
+    progress:(p)=> Number(p.totalRounds || 0), check:(p)=> Number(p.totalRounds || 0) >= 12 },
+  { id:'combo5', icon:'⚡', name:'집중 스파크', desc:'오늘 5콤보 달성', target:5,
+    progress:(p)=> Number(p.maxCombo || 0), check:(p)=> Number(p.maxCombo || 0) >= 5 },
+  { id:'score5', icon:'🪜', name:'워밍업 성공', desc:'한 판 5라운드 도달', target:5,
+    progress:(p)=> Number(p.best || 0), check:(p)=> Number(p.best || 0) >= 5 },
+  { id:'score8', icon:'🏹', name:'집중선 돌파', desc:'한 판 8라운드 도달', target:8,
+    progress:(p)=> Number(p.best || 0), check:(p)=> Number(p.best || 0) >= 8 },
+  { id:'score12', icon:'👑', name:'오늘의 에이스', desc:'한 판 12라운드 도달', target:12,
+    progress:(p)=> Number(p.best || 0), check:(p)=> Number(p.best || 0) >= 12 },
+  { id:'modeNormal2', icon:'🚀', name:'1.5X 적응', desc:'1.5X 모드 2판 플레이', target:2,
+    progress:(p)=> Number(p.modeGames?.normal || 0), check:(p)=> Number(p.modeGames?.normal || 0) >= 2 },
+  { id:'modeHard1', icon:'🌪️', name:'2X 맛보기', desc:'2X 모드 1판 플레이', target:1,
+    progress:(p)=> Number(p.modeGames?.hard || 0), check:(p)=> Number(p.modeGames?.hard || 0) >= 1 },
+  { id:'modeHard2', icon:'🎯', name:'고속 적응', desc:'2X 모드 2판 플레이', target:2,
+    progress:(p)=> Number(p.modeGames?.hard || 0), check:(p)=> Number(p.modeGames?.hard || 0) >= 2 },
+];
+
+function getTodayKey() {
+  return new Date().toLocaleDateString('sv-SE');
+}
+
+function hashSeed(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h >>> 0);
+}
+
+function pickDailyMission(pool, seed, used) {
+  const choices = pool.filter(id => !used.has(id));
+  if (!choices.length) return pool[seed % pool.length];
+  return choices[seed % choices.length];
+}
+
+function buildDailyMissionSet(dateKey) {
+  const seed = hashSeed(dateKey);
+  const used = new Set();
+  const pools = [
+    ['play3', 'rounds12', 'combo5'],
+    ['score5', 'score8', 'score12'],
+    ['modeNormal2', 'modeHard1', 'modeHard2']
+  ];
+  return pools.map((pool, i) => {
+    const id = pickDailyMission(pool, Math.floor(seed / Math.pow(7, i + 1)), used);
+    used.add(id);
+    return { id, completed: false, completedAt: null };
+  });
+}
+
+function getDailyMissionDef(id) {
+  return DAILY_MISSION_DEFS.find(m => m.id === id);
+}
+
+function normalizeDailyState(raw) {
+  const dateKey = getTodayKey();
+  const state = Object.assign({
+    dateKey,
+    totalStamps: 0,
+    clearedDays: 0,
+    dayCleared: false,
+    currentStreak: 0,
+    longestStreak: 0,
+    lastClearedDate: null,
+    missions: buildDailyMissionSet(dateKey),
+    progress: { games: 0, totalRounds: 0, best: 0, maxCombo: 0, modeGames: { easy: 0, normal: 0, hard: 0 } },
+  }, raw || {});
+
+  state.totalStamps = Number(state.totalStamps || 0);
+  state.clearedDays = Number(state.clearedDays || 0);
+  state.currentStreak = Number(state.currentStreak || 0);
+  state.longestStreak = Number(state.longestStreak || 0);
+  state.dayCleared = !!state.dayCleared;
+  state.lastClearedDate = state.lastClearedDate || null;
+
+  const hasValidMissionSet = Array.isArray(state.missions)
+    && state.missions.length === 3
+    && state.missions.every(m => m && typeof m.id === 'string' && !!getDailyMissionDef(m.id));
+
+  if (state.dateKey !== dateKey || !hasValidMissionSet) {
+    const prevDate = state.dateKey;
+    const wasCleared = !!state.dayCleared;
+    let currentStreak = Number(state.currentStreak || 0);
+    let longestStreak = Number(state.longestStreak || 0);
+    let lastClearedDate = state.lastClearedDate || null;
+
+    if (wasCleared) {
+      if (lastClearedDate === prevDate) {
+        currentStreak = currentStreak || 1;
+      } else {
+        currentStreak = currentStreak || 1;
+        lastClearedDate = prevDate;
+      }
+      longestStreak = Math.max(longestStreak, currentStreak);
+    } else if (prevDate) {
+      const prev = new Date(prevDate + 'T00:00:00');
+      const now = new Date(dateKey + 'T00:00:00');
+      const diffDays = Math.round((now - prev) / 86400000);
+      if (diffDays > 1) currentStreak = 0;
+    }
+
+    return {
+      dateKey,
+      totalStamps: state.totalStamps,
+      clearedDays: state.clearedDays,
+      currentStreak,
+      longestStreak: Math.max(longestStreak, currentStreak),
+      lastClearedDate,
+      dayCleared: false,
+      missions: buildDailyMissionSet(dateKey),
+      progress: { games: 0, totalRounds: 0, best: 0, maxCombo: 0, modeGames: { easy: 0, normal: 0, hard: 0 } },
+    };
+  }
+
+  if (!state.progress || typeof state.progress !== 'object') state.progress = {};
+  state.progress.games = Number(state.progress.games || 0);
+  state.progress.totalRounds = Number(state.progress.totalRounds || 0);
+  state.progress.best = Number(state.progress.best || 0);
+  state.progress.maxCombo = Number(state.progress.maxCombo || 0);
+  if (!state.progress.modeGames || typeof state.progress.modeGames !== 'object') {
+    state.progress.modeGames = { easy: 0, normal: 0, hard: 0 };
+  }
+  state.progress.modeGames.easy = Number(state.progress.modeGames.easy || 0);
+  state.progress.modeGames.normal = Number(state.progress.modeGames.normal || 0);
+  state.progress.modeGames.hard = Number(state.progress.modeGames.hard || 0);
+
+  state.missions = state.missions.map(m => ({ id: m.id, completed: !!m.completed, completedAt: m.completedAt || null }));
+  return state;
+}
+
+function getDailyMissionState() {
+  try {
+    return normalizeDailyState(JSON.parse(localStorage.getItem(DAILY_MISSION_KEY) || '{}'));
+  } catch (e) {
+    return normalizeDailyState({});
+  }
+}
+
+function saveDailyMissionState(state) {
+  localStorage.setItem(DAILY_MISSION_KEY, JSON.stringify(state));
+}
+
+function missionProgressText(def, progress) {
+  const value = Math.min(def.target, def.progress(progress));
+  return `${value}/${def.target}`;
+}
+
+function openMissionPopup() {
+  const popup = document.getElementById('missionPopup');
+  if (!popup) return;
+  popup.classList.add('visible');
+  document.body.classList.add('popup-open');
+}
+
+function closeMissionPopup() {
+  const popup = document.getElementById('missionPopup');
+  if (!popup) return;
+  popup.classList.remove('visible');
+  document.body.classList.remove('popup-open');
+}
+
+function renderDailyMissions() {
+  const state = getDailyMissionState();
+  const completed = state.missions.filter(m => m.completed).length;
+  const stamp = document.getElementById('dailyStampCount');
+  const mini = document.getElementById('dailyStampCountMini');
+  const list = document.getElementById('dailyMissionList');
+  const foot = document.getElementById('dailyMissionFoot');
+  if (!stamp || !mini || !list || !foot) return;
+
+  stamp.textContent = `${completed} / ${state.missions.length} 완료 · 누적 스탬프 ${state.totalStamps}`;
+  mini.textContent = `${completed} / ${state.missions.length} 완료 · 스탬프 ${state.totalStamps}`;
+  list.innerHTML = state.missions.map(m => {
+    const def = getDailyMissionDef(m.id);
+    if (!def) return '';
+    return `
+      <div class="daily-item ${m.completed ? 'done' : ''}">
+        <div class="daily-item-icon">${m.completed ? '✅' : def.icon}</div>
+        <div class="daily-item-main">
+          <div class="daily-item-name">${def.name}</div>
+          <div class="daily-item-desc">${def.desc}</div>
+        </div>
+        <div class="daily-item-progress">${m.completed ? '완료' : missionProgressText(def, state.progress)}</div>
+      </div>`;
+  }).join('');
+
+  foot.textContent = state.dayCleared
+    ? `오늘 미션 완료! 내일 새로운 도전이 열린다. · 완료한 날 ${state.clearedDays}일`
+    : `자정에 새로운 미션으로 바뀐다. · 완료한 날 ${state.clearedDays}일`;
+}
+
+function updateDailyMissions(score, maxCombo, mode) {
+  const state = getDailyMissionState();
+  const p = state.progress;
+  p.games += 1;
+  p.totalRounds += Number(score || 0);
+  p.best = Math.max(Number(p.best || 0), Number(score || 0));
+  p.maxCombo = Math.max(Number(p.maxCombo || 0), Number(maxCombo || 0));
+  if (!p.modeGames || typeof p.modeGames !== 'object') p.modeGames = { easy: 0, normal: 0, hard: 0 };
+  p.modeGames[mode] = Number(p.modeGames[mode] || 0) + 1;
+
+  const completedNow = [];
+  state.missions.forEach(m => {
+    if (m.completed) return;
+    const def = getDailyMissionDef(m.id);
+    if (def && def.check(p)) {
+      m.completed = true;
+      m.completedAt = Date.now();
+      state.totalStamps += 1;
+      completedNow.push(def);
+    }
+  });
+
+  if (!state.dayCleared && state.missions.length && state.missions.every(m => m.completed)) {
+    state.dayCleared = true;
+    state.clearedDays += 1;
+    const todayKey = getTodayKey();
+    if (state.lastClearedDate !== todayKey) {
+      if (state.lastClearedDate) {
+        const prev = new Date(state.lastClearedDate + 'T00:00:00');
+        const now = new Date(todayKey + 'T00:00:00');
+        const diffDays = Math.round((now - prev) / 86400000);
+        state.currentStreak = diffDays === 1 ? Number(state.currentStreak || 0) + 1 : 1;
+      } else {
+        state.currentStreak = 1;
+      }
+      state.lastClearedDate = todayKey;
+      state.longestStreak = Math.max(Number(state.longestStreak || 0), Number(state.currentStreak || 0));
+    }
+  }
+
+  saveDailyMissionState(state);
+  renderDailyMissions();
+ensureBgmReady();
+playBgmFor('title');
+  return { completedNow, state };
+}
+
+function showMissionToast(missions, startDelay = 0) {
+  if (!missions || !missions.length) return;
+  let idx = 0;
+  function next() {
+    if (idx >= missions.length) return;
+    const def = missions[idx++];
+    const toast = document.getElementById('missionToast');
+    document.getElementById('missionToastIcon').textContent = def.icon;
+    document.getElementById('missionToastName').textContent = def.name;
+    toast.style.display = '';
+    toast.classList.remove('hide');
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.classList.add('hide');
+      setTimeout(() => {
+        toast.classList.remove('hide');
+        toast.style.display = 'none';
+        setTimeout(next, 60);
+      }, 280);
+    }, 1500);
+  }
+  setTimeout(next, startDelay);
+}
+
+// ══ 난이도 시스템 ══
+const MODE_KEY = 'limitgame_mode';
+const DIFFICULTY = {
+  easy:   { label:'1X',   note:'기본 속도로 차분하게 시작', speed:1.0, showDelay:400, lightOn:540, gap:180, afterSeq:300, nextRoundDelay:900 },
+  normal: { label:'1.5X', note:'조금 더 빠르게 흘러가는 속도', speed:1.5, showDelay:260, lightOn:420, gap:130, afterSeq:220, nextRoundDelay:760 },
+  hard:   { label:'2X',   note:'순간 집중이 필요한 고속 모드', speed:2.0, showDelay:160, lightOn:300, gap:90, afterSeq:170, nextRoundDelay:650 },
+};
+let difficulty = localStorage.getItem(MODE_KEY) || 'easy';
+
+function getDifficultyConfig() {
+  return DIFFICULTY[difficulty] || DIFFICULTY.easy;
+}
+
+function updateStageBadge() {
+  const badge = document.getElementById('stageBadge');
+  if (!badge) return;
+  const stage = (typeof round !== 'undefined' && round > 0) ? getStage(round) : STAGES[0];
+  badge.textContent = `${stage.emoji} ${stage.name} · ${getDifficultyConfig().label}`;
+}
+
+function syncDifficultyUI() {
+  document.querySelectorAll('.mode-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === difficulty);
+  });
+  const note = document.getElementById('modeNote');
+  if (note) note.textContent = getDifficultyConfig().note;
+  updateStageBadge();
+}
+
+function setDifficulty(mode) {
+  if (!DIFFICULTY[mode]) return;
+  initAudio();
+  playUiSound('tap');
+  difficulty = mode;
+  localStorage.setItem(MODE_KEY, mode);
+  syncDifficultyUI();
+}
 
 // ══ 타이틀 슬라이드 ══
 let titleIdx = 0;
@@ -1418,7 +2303,10 @@ function titleNext() {
 titleTimer = setInterval(titleNext, 1800);
 
 function enterGame() {
-  stopBGM();
+  initAudio();
+  playUiSound('start');
+  pulseVibration([14, 24, 16]);
+  stopBgm();
   clearInterval(titleTimer);
   const ts = document.getElementById('titleScreen');
   ts.classList.add('hidden');
@@ -1426,6 +2314,7 @@ function enterGame() {
   // 게임 요소 표시
   const gw = document.getElementById('gameWrapper');
   gw.style.display = 'flex';
+  gw.classList.remove('hidden');
   gw.style.opacity = '0';
   gw.style.transition = 'opacity .6s ease';
   requestAnimationFrame(() => { gw.style.opacity = '1'; });
@@ -1439,6 +2328,209 @@ function enterGame() {
   setTimeout(() => { ts.style.display = 'none'; }, 700);
   setTimeout(startGame, 400);
 }
+
+function goHome() {
+  closeMissionPopup();
+  clearAllTimers();
+  gameState = STATE.IDLE;
+
+  const overlay = document.getElementById('overlay');
+  const namePopup = document.getElementById('namePopup');
+  const rankPopup = document.getElementById('rankPopup');
+  const badgePopup = document.getElementById('badgePopup');
+  if (overlay) overlay.classList.remove('visible');
+  if (namePopup) namePopup.classList.remove('visible');
+  if (rankPopup) rankPopup.classList.remove('visible');
+  if (badgePopup) badgePopup.classList.remove('visible');
+
+  const ts = document.getElementById('titleScreen');
+  if (ts) {
+    ts.style.display = 'flex';
+    // force reflow so hidden -> visible transition applies cleanly
+    void ts.offsetWidth;
+    ts.classList.remove('hidden');
+  }
+
+  const gw = document.getElementById('gameWrapper');
+  if (gw) { gw.style.display = 'none'; gw.style.opacity = '0'; }
+
+  if (titleTimer) clearInterval(titleTimer);
+  titleTimer = setInterval(titleNext, 1800);
+  playBgmFor('title');
+}
+
+// ══ 소리 / 진동 시스템 ══
+const SOUND_KEY = 'limitgame_sound_on';
+const VIBE_KEY = 'limitgame_vibration_on';
+let soundOn = localStorage.getItem(SOUND_KEY) !== '0';
+let vibrationOn = false;
+let audioCtx = null;
+
+function initAudio() {
+  if (audioCtx) {
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+    return audioCtx;
+  }
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  audioCtx = new Ctx();
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+  return audioCtx;
+}
+
+const SOUND_BOOST = 1.9;
+const SOUND_MAX_GAIN = 0.09;
+const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
+
+function triggerHapticFallback() {}
+
+function pulseVibration(pattern) { return; }
+
+function playTone(freq=440, duration=0.08, type='sine', volume=0.03, startDelay=0) {
+  const ctx = initAudio();
+  if (!ctx || !soundOn) return;
+  const now = ctx.currentTime + startDelay;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const targetVolume = Math.min(volume * SOUND_BOOST, SOUND_MAX_GAIN);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, now);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(targetVolume, now + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + duration + 0.03);
+}
+
+function playUiSound(kind) {
+  if (!soundOn) return;
+  switch (kind) {
+    case 'start':
+      playTone(523, 0.08, 'triangle', 0.055);
+      playTone(659, 0.10, 'triangle', 0.05, 0.06);
+      break;
+    case 'light':
+      playTone(660, 0.06, 'sine', 0.036);
+      break;
+    case 'tap':
+      playTone(540, 0.05, 'triangle', 0.05);
+      break;
+    case 'correct':
+      playTone(523, 0.05, 'triangle', 0.045);
+      playTone(659, 0.08, 'triangle', 0.042, 0.05);
+      break;
+    case 'wrong':
+      playTone(240, 0.12, 'sawtooth', 0.055);
+      playTone(180, 0.16, 'sawtooth', 0.05, 0.04);
+      break;
+    case 'combo':
+      playTone(659, 0.05, 'triangle', 0.045);
+      playTone(784, 0.07, 'triangle', 0.042, 0.05);
+      playTone(988, 0.09, 'triangle', 0.04, 0.11);
+      break;
+    case 'badge':
+      playTone(784, 0.07, 'triangle', 0.045);
+      playTone(988, 0.08, 'triangle', 0.042, 0.06);
+      playTone(1175, 0.12, 'triangle', 0.036, 0.12);
+      break;
+    case 'mission':
+      playTone(587, 0.06, 'triangle', 0.045);
+      playTone(784, 0.08, 'triangle', 0.042, 0.07);
+      break;
+    case 'gameover':
+      playTone(330, 0.1, 'triangle', 0.04);
+      playTone(262, 0.18, 'triangle', 0.042, 0.08);
+      break;
+  }
+}
+
+function syncFeedbackUI() {
+  const soundChip = document.getElementById('soundChip');
+  if (soundChip) {
+    soundChip.textContent = soundOn ? '🔊 소리 ON' : '🔇 소리 OFF';
+    soundChip.classList.toggle('active', soundOn);
+    soundChip.classList.toggle('muted', !soundOn);
+  }
+  updateBgmChip();
+}
+
+function toggleSound() {
+  soundOn = !soundOn;
+  localStorage.setItem(SOUND_KEY, soundOn ? '1' : '0');
+  if (soundOn) { initAudio(); playUiSound('tap'); }
+  syncFeedbackUI();
+}
+
+function toggleVibration() { return; }
+
+
+// ══ BGM 시스템 ══
+const BGM_KEY = 'limitgame_bgm_on';
+let bgmOn = localStorage.getItem(BGM_KEY) !== '0';
+let bgmState = 'title';
+const bgm = document.getElementById('bgm');
+const BGM_VOLUME = 0.24;
+
+function updateBgmChip() {
+  const chip = document.getElementById('bgmChip');
+  if (!chip) return;
+  let label = '🎵 BGM ON';
+  if (!bgmOn) label = '🎵 BGM OFF';
+  else if (bgmState === 'game') label = '🎵 BGM 대기';
+  chip.textContent = label;
+  chip.classList.toggle('active', bgmOn && bgmState !== 'game');
+  chip.classList.toggle('muted', !bgmOn || bgmState === 'game');
+}
+
+function ensureBgmReady() {
+  if (!bgm) return;
+  bgm.volume = BGM_VOLUME;
+  bgm.preload = 'auto';
+}
+
+function playBgmFor(state='title') {
+  bgmState = state;
+  if (!bgm) { updateBgmChip(); return; }
+  ensureBgmReady();
+  if (!bgmOn || state === 'game') {
+    bgm.pause();
+    updateBgmChip();
+    return;
+  }
+  const p = bgm.play();
+  if (p && typeof p.catch === 'function') p.catch(() => {});
+  updateBgmChip();
+}
+
+function stopBgm() {
+  bgmState = 'game';
+  if (bgm) bgm.pause();
+  updateBgmChip();
+}
+
+function toggleBgm() {
+  initAudio();
+  bgmOn = !bgmOn;
+  localStorage.setItem(BGM_KEY, bgmOn ? '1' : '0');
+  if (bgmOn) {
+    const ts = document.getElementById('titleScreen');
+    const titleVisible = ts && ts.style.display !== 'none' && !ts.classList.contains('hidden');
+    playBgmFor(titleVisible ? 'title' : (gameState === STATE.GAMEOVER ? 'result' : 'game'));
+  } else {
+    if (bgm) bgm.pause();
+    updateBgmChip();
+  }
+}
+
+document.addEventListener('pointerdown', () => { ensureBgmReady(); initAudio(); }, { passive:true, once:true });
+
+document.addEventListener('click', (e) => {
+  const popup = document.getElementById('missionPopup');
+  if (popup && e.target === popup) closeMissionPopup();
+});
 
 // ── 단계 정의 ──
 const STAGES = [
@@ -1473,6 +2565,22 @@ let gameState = STATE.IDLE;
 let sequence = [], playerIndex = 0, round = 0;
 let best = parseInt(localStorage.getItem('limitgame_best') || '0');
 let currentSceneIdx = 0;
+
+// 초기 화면 상태 고정
+const __title = document.getElementById('titleScreen');
+const __gw = document.getElementById('gameWrapper');
+if (__title) { __title.style.display = 'flex'; __title.classList.remove('hidden'); }
+if (__gw) { __gw.style.display = 'none'; __gw.style.opacity = '0'; }
+const __ov = document.getElementById('overlay');
+if (__ov) __ov.classList.remove('visible');
+const __namePopup = document.getElementById('namePopup');
+if (__namePopup) __namePopup.classList.remove('visible');
+
+// 핵심 상태 초기화 이후 UI 동기화
+syncDifficultyUI();
+syncFeedbackUI();
+renderDailyMissions();
+
 let activeTimers = [];
 let combo = 0;  // 연속 성공 라운드 수
 
@@ -1485,18 +2593,20 @@ const COMBO_DATA = {
 };
 
 document.getElementById('best').textContent = best;
-syncBgmUI();
-setTimeout(() => { if (bgmOn && isTitleActive()) playBGM(); }, 120);
-document.addEventListener('pointerdown', unlockBGM, { passive:true, once:true });
 
 // 클릭 이벤트 — 단 하나의 진입점
 document.querySelectorAll('.btn').forEach(b =>
   b.addEventListener('click', () => {
+    initAudio();
     // WAITING 상태에서만 입력 처리 (완전한 클릭 잠금)
     if (gameState !== STATE.WAITING) return;
     handleInput(b.dataset.fruit);
   })
 );
+
+document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn').forEach(el => {
+  el.addEventListener('pointerdown', () => { initAudio(); }, { passive:true });
+});
 
 function safeTimeout(fn, delay) {
   const id = setTimeout(fn, delay);
@@ -1511,7 +2621,7 @@ function clearAllTimers() {
 
 // ── 게임 흐름 ──
 function startGame() {
-  stopBGM();
+  closeMissionPopup();
   clearAllTimers();
   gameState = STATE.IDLE;
   // 모든 팝업 닫기
@@ -1535,6 +2645,7 @@ function startGame() {
   updateComboBadge(0);
   setStatus('— 시작 —');
   safeTimeout(nextRound, 900);
+  stopBgm();
 }
 
 function nextRound() {
@@ -1551,18 +2662,20 @@ function nextRound() {
 }
 
 function playSequence(cb) {
+  const cfg = getDifficultyConfig();
   let i = 0;
   function next() {
-    if (i >= sequence.length) { safeTimeout(cb, 300); return; }
+    if (i >= sequence.length) { safeTimeout(cb, cfg.afterSeq); return; }
     const shape = sequence[i++];
     const btn = document.getElementById('btn-' + shape);
     btn.classList.add('lit');
+    playUiSound('light');
     safeTimeout(() => {
       btn.classList.remove('lit');
-      safeTimeout(next, 180);
-    }, 540);
+      safeTimeout(next, cfg.gap);
+    }, cfg.lightOn);
   }
-  safeTimeout(next, 400);
+  safeTimeout(next, cfg.showDelay);
 }
 
 function handleInput(shape) {
@@ -1572,6 +2685,8 @@ function handleInput(shape) {
     // 오답: shake + 전체 버튼 어둡게
     gameState = STATE.GAMEOVER;
     btn.classList.add('wrong');
+    playUiSound('wrong');
+    pulseVibration([50, 45, 70]);
     document.querySelectorAll('.btn').forEach(b => {
       if (b !== btn) b.style.opacity = '.35';
     });
@@ -1586,6 +2701,8 @@ function handleInput(shape) {
 
   // 정답 tap + ripple
   btn.classList.add('tap', 'ripple');
+  playUiSound('tap');
+  pulseVibration(12);
   safeTimeout(() => {
     btn.classList.remove('tap');
     safeTimeout(() => btn.classList.remove('ripple'), 200);
@@ -1599,25 +2716,32 @@ function handleInput(shape) {
     updateComboBadge(combo);
 
     // 콤보 마일스톤 체크 (5, 10, 15, 20)
-    if (COMBO_DATA[combo]) showComboToast(combo);
+    if (COMBO_DATA[combo]) {
+      playUiSound('combo');
+      pulseVibration([12, 24, 18]);
+      showComboToast(combo);
+    } else {
+      playUiSound('correct');
+    }
 
     document.querySelectorAll('.btn').forEach(b => {
       b.classList.add('correct');
       safeTimeout(() => b.classList.remove('correct'), 380);
     });
     setStatus('맞아.');
-    safeTimeout(nextRound, 900);
+    safeTimeout(nextRound, getDifficultyConfig().nextRoundDelay);
   }
 }
 
 function gameOver() {
-  if (bgmOn) setTimeout(() => playBGM(true), 240);
-  // 1. 점수/단계 즉시 캡처 (어떤 리셋보다 먼저)
-  const finalScore = round;
-  const stage      = getStage(round);
-  const finalStage = stage.name;
+  clearAllTimers();
+  playUiSound('gameover');
 
-  // 2. 최고기록 업데이트
+  const finalScore = round;
+  const stage = getStage(Math.max(finalScore, 1));
+  const finalStage = stage.name;
+  const modeLabel = getDifficultyConfig().label;
+
   const newBest = finalScore > best;
   if (newBest) {
     best = finalScore;
@@ -1625,47 +2749,63 @@ function gameOver() {
     document.getElementById('best').textContent = best;
   }
 
-  // 3. 결과 화면 내용 세팅
   const msgs = MSGS[finalStage] || DEFAULT_MSGS;
-  const msg  = msgs[Math.floor(Math.random() * msgs.length)];
+  let msg = msgs[Math.floor(Math.random() * msgs.length)];
+  if (newBest && finalScore > 0) msg = '신기록이야. 지금 흐름 좋다.';
+  else if (finalScore >= 15) msg = '여기까지 오면 진짜 잘한 거다.';
+  else if (finalScore >= 10) msg = '조금만 더 가면 상위권이다.';
+
   document.getElementById('resultStageEmoji').textContent = stage.emoji;
-  document.getElementById('resultStageName').textContent  = finalStage + ' 수준';
-  document.getElementById('resultRound').textContent      = finalScore;
-  document.getElementById('resultBest').innerHTML =
-    `최고기록 <span>${best}</span> 라운드${newBest ? ' 🎉' : ''}`;
-  document.getElementById('resultSeq').textContent =
-    sequence.map(f => EMOJI[f]).join(' ');
+  document.getElementById('resultStageName').textContent = finalStage + ' 수준';
+  document.getElementById('resultLine').textContent = `여기까지였네 · ${modeLabel}`;
+  document.getElementById('resultRound').textContent = finalScore;
+  document.getElementById('resultBest').innerHTML = `최고기록 <span>${best}</span> 라운드${newBest ? ' 🎉' : ''}`;
+  document.getElementById('resultSeq').textContent = sequence.map(f => EMOJI[f]).join(' ');
   document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultSummaryMode').textContent = modeLabel;
+  document.getElementById('resultSummaryCombo').textContent = combo;
 
-  // 4. 결과 화면 캐릭터
-  const sceneIdx = stage.scene;
-  document.getElementById('resultCharLeft').src  = `female_${sceneIdx}.png`;
-  document.getElementById('resultCharRight').src = `male_${sceneIdx}.png`;
+  document.getElementById('resultCharLeft').src = `female_${stage.scene}.png`;
+  document.getElementById('resultCharRight').src = `male_${stage.scene}.png`;
 
-  // 5. 배지 체크
-  const isNewBest = newBest;
-  const newBadges = checkAndAwardBadges(finalScore, combo, isNewBest);
+  const newBadges = checkAndAwardBadges(finalScore, combo, newBest);
+  const missionUpdate = updateDailyMissions(finalScore, combo, difficulty);
+  const newMissions = missionUpdate.completedNow;
+  document.getElementById('resultSummaryBadges').textContent = newBadges.length;
+  const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
+  const dailyTotalCount = missionUpdate.state.missions.length;
 
-  // 6. 상태/라운드 리셋
   gameState = STATE.GAMEOVER;
-  updateRound(0);
   setStatus('— 준비 중 —');
 
-  // 배지 토스트 (팝업보다 먼저)
   if (newBadges.length) showBadgeToast(newBadges);
+  const missionDelay = newBadges.length ? Math.max(0, newBadges.length - 1) * 2280 + 1980 : 0;
+  if (newMissions.length) showMissionToast(newMissions, missionDelay);
 
-  // 6. 이름 입력 팝업 (독립 setTimeout)
+  const resultDaily = document.getElementById('resultDaily');
+  if (resultDaily) {
+    if (newMissions.length) {
+      resultDaily.innerHTML = `<strong>오늘 미션 ${newMissions.length}개 달성!</strong> · ${dailyDoneCount}/${dailyTotalCount} 완료 · 누적 스탬프 ${missionUpdate.state.totalStamps}`;
+    } else {
+      resultDaily.innerHTML = `오늘 미션 진행도 ${dailyDoneCount}/${dailyTotalCount} · 누적 스탬프 ${missionUpdate.state.totalStamps}`;
+    }
+  }
+
   window._finalScore = finalScore;
   window._finalStage = finalStage;
-  window.setTimeout(function() {
-    document.getElementById('nameScore').textContent = window._finalScore;
-    document.getElementById('nameInput').value = '';
-    document.getElementById('namePopup').classList.add('visible');
-    setTimeout(function() {
-      var inp = document.getElementById('nameInput');
-      if (inp) inp.focus();
-    }, 300);
-  }, 500);
+
+  const overlay = document.getElementById('overlay');
+  const popup = document.getElementById('namePopup');
+  playBgmFor('result');
+  if (overlay) {
+    overlay.classList.remove('visible');
+    overlay.style.display = 'none';
+  }
+  if (popup) popup.classList.remove('visible');
+
+  window.setTimeout(() => {
+    openNamePopup(window._finalScore, window._finalStage);
+  }, newBadges.length ? 700 : 260);
 }
 
 // ── 헬퍼 ──
@@ -1674,7 +2814,7 @@ function getStage(r) {
 }
 function updateStageUI(r) {
   const stage = r === 0 ? STAGES[0] : getStage(r);
-  document.getElementById('stageBadge').textContent = stage.emoji + ' ' + stage.name;
+  document.getElementById('stageBadge').textContent = `${stage.emoji} ${stage.name} · ${getDifficultyConfig().label}`;
 
   // 배경 씬 전환
   if (stage.scene !== currentSceneIdx) {

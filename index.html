@@ -2,24 +2,42 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#8B2500">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>기억의 한계: 1%의 도전</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { touch-action: manipulation; }
+html, body {
+  height: 100%; overflow: hidden;
+  position: fixed; width: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Gaegu', cursive;
   overflow: hidden;
   position: relative;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
+  overscroll-behavior: none;
+  background: #000;
 }
 
 /* ── 배경 ── */
@@ -1334,6 +1352,15 @@ body.haptic-flash::after {
 }
 
 </style>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/game/sw.js');
+    });
+  }
+</script>
 </head>
 <body>
 
@@ -2378,8 +2405,8 @@ function initAudio() {
   return audioCtx;
 }
 
-const SOUND_BOOST = 2.2;
-const SOUND_MAX_GAIN = 0.22;
+const SOUND_BOOST = 1.9;
+const SOUND_MAX_GAIN = 0.09;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
 
@@ -2409,17 +2436,17 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.08, 'triangle', 0.11);
-      playTone(659, 0.10, 'triangle', 0.10, 0.06);
+      playTone(523, 0.08, 'triangle', 0.055);
+      playTone(659, 0.10, 'triangle', 0.05, 0.06);
       break;
     case 'light':
-      playTone(660, 0.06, 'sine', 0.07);
+      playTone(660, 0.06, 'sine', 0.036);
       break;
     case 'tap':
-      playTone(540, 0.05, 'triangle', 0.10);
+      playTone(540, 0.05, 'triangle', 0.05);
       break;
     case 'correct':
-      playTone(523, 0.05, 'triangle', 0.08);
+      playTone(523, 0.05, 'triangle', 0.045);
       playTone(659, 0.08, 'triangle', 0.042, 0.05);
       break;
     case 'wrong':
@@ -2869,6 +2896,31 @@ function showComboToast(n) {
 
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
-</script>
+
+// ── 핀치줌 & 배경 흔들림 완전 차단 ──
+document.addEventListener('touchmove', function(e) {
+  if (e.touches.length > 1) e.preventDefault(); // 핀치줌 차단
+}, { passive: false });
+
+document.addEventListener('gesturestart', function(e) {
+  e.preventDefault(); // iOS Safari 제스처 확대 차단
+});
+
+document.addEventListener('gesturechange', function(e) {
+  e.preventDefault();
+});
+
+document.addEventListener('gestureend', function(e) {
+  e.preventDefault();
+});
+
+// 더블탭 확대 차단
+let lastTap = 0;
+document.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  if (now - lastTap < 300) e.preventDefault();
+  lastTap = now;
+}, { passive: false });
+
 </body>
 </html>

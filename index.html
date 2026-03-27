@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -10,16 +10,29 @@
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Gaegu', cursive;
   overflow: hidden;
-  position: relative;
+  position: fixed;
+  inset: 0;
+  width: 100%;
 }
 
 /* ── 배경 ── */
@@ -402,8 +415,8 @@ audio#bgm { display: none; }
   position: fixed; inset: 0; z-index: 500;
   display: flex; flex-direction: column;
   align-items: center; justify-content: flex-start;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  touch-action: manipulation;
   transition: opacity .7s ease;
   padding: 16px 0 28px;
 }
@@ -649,7 +662,7 @@ audio#bgm { display: none; }
 }
 
 
-body.popup-open { overflow: hidden; }
+body.popup-open { overflow: hidden; position: fixed; width: 100%; }
 .mission-open-wrap {
   display: flex;
   justify-content: center;
@@ -1334,99 +1347,18 @@ body.haptic-flash::after {
 }
 
 
-.grid {
-  display: grid;
-  gap: 12px;
-  width: 100%;
-}
-.grid.grid-3 { grid-template-columns: 1fr 1fr; }
-.grid.grid-4 { grid-template-columns: 1fr 1fr; }
-.grid.grid-5 { grid-template-columns: 1fr 1fr; }
-.grid.grid-6 { grid-template-columns: 1fr 1fr; }
-.btn.hidden-btn { display: none !important; }
-.grid.grid-5 #btn-diamond {
-  grid-column: 1 / span 2;
-  justify-self: center;
-  width: calc(50% - 6px);
-}
-.btn-diamond { background: linear-gradient(145deg,#ce93d8,#8e44ad); border: 3px solid #5b2c6f; box-shadow: 0 5px 0 #4a235a, 0 8px 16px rgba(142,68,173,.4); }
-.btn-hex     { background: linear-gradient(145deg,#80cbc4,#009688); border: 3px solid #00695c; box-shadow: 0 5px 0 #004d40, 0 8px 16px rgba(0,150,136,.36); }
-.btn-diamond.lit { box-shadow: 0 0 0 5px #ce93d8, 0 0 40px 8px rgba(206,147,216,.72), 0 12px 0 #4a235a; }
-.btn-hex.lit     { box-shadow: 0 0 0 5px #80cbc4, 0 0 40px 8px rgba(128,203,196,.72), 0 12px 0 #004d40; }
 
-.start-popup {
-  position: fixed; inset: 0; z-index: 5200;
-  background: rgba(0,0,0,.76);
-  display: flex; align-items: center; justify-content: center;
-  padding: 18px;
-  opacity: 0; pointer-events: none;
-  transition: opacity .25s ease;
-  backdrop-filter: blur(6px);
+button, .btn, .start-btn, .mode-chip, .feedback-chip, .mission-open-btn, .mission-close-btn, .name-confirm-btn, .name-skip-btn, .rank-close-btn, .badge-close-btn, .restart-btn, .rank-open-btn, .badge-open-btn, .level-card, .level-start-btn {
+  touch-action: manipulation;
 }
-.start-popup.visible { opacity: 1; pointer-events: all; }
-.start-card {
-  width: min(420px, 94vw);
-  max-height: min(82vh, 720px);
-  overflow: auto;
-  background: rgba(255,251,238,.98);
-  border: 4px solid #c88a30;
-  border-radius: 22px;
-  box-shadow: 0 8px 0 #8B6000, 0 20px 34px rgba(0,0,0,.35);
-  padding: 16px 16px 18px;
-}
-.start-card-header { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.start-card-title { font-family: 'Nanum Pen Script', cursive; font-size: 30px; color:#8B2500; }
-.start-card-sub { margin-top: 4px; margin-bottom: 12px; font-size: 13px; color:#8c6a2f; line-height: 1.35; }
-.start-close-btn { appearance:none; border:none; background:transparent; cursor:pointer; font-size:22px; color:#8B2500; width:36px; height:36px; border-radius:999px; }
-.start-close-btn:active { transform: scale(.94); }
-.start-section-label { margin: 8px 0 8px; font-size: 15px; font-weight: 700; color:#6c3a00; }
-.level-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.level-card {
-  appearance:none; width:100%; text-align:left;
-  border: 3px solid #d5b16b; border-radius: 18px;
-  background: linear-gradient(180deg, #fffaf0 0%, #f8e7b6 100%);
-  padding: 12px 12px 13px;
-  box-shadow: 0 4px 0 #c19643, 0 8px 14px rgba(0,0,0,.12);
-  cursor:pointer; transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-}
-.level-card:hover { transform: translateY(-1px); }
-.level-card:active { transform: translateY(2px) scale(.98); box-shadow: 0 1px 0 #c19643, 0 4px 8px rgba(0,0,0,.08); }
-.level-card.active {
-  border-color:#8a5a00;
-  background: linear-gradient(180deg, #ffe566 0%, #f7c22d 100%);
-  box-shadow: 0 4px 0 #8a5a00, 0 10px 18px rgba(0,0,0,.18), 0 0 0 4px rgba(255,229,102,.22);
-}
-.level-card.locked {
-  background: linear-gradient(180deg, #f3efe8 0%, #e2dbcf 100%);
-  border-color:#cbbda5; color:#8f8474;
-  box-shadow: 0 3px 0 #cbbda5, 0 6px 10px rgba(0,0,0,.08);
-}
-.level-card.locked .level-name,
-.level-card.locked .level-meta,
-.level-card.locked .level-unlock { color:#8f8474; }
-.level-card.selected-locked { animation: shake .45s ease forwards; }
-.level-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.level-name { font-family:'Nanum Pen Script', cursive; font-size: 24px; color:#8B2500; line-height:1; }
-.level-meta { font-size: 12px; color:#7a4a10; margin-top: 4px; }
-.level-unlock { font-size: 11px; color:#8a5a00; margin-top: 6px; line-height:1.25; }
-.level-lock { font-size: 16px; }
-.start-actions { margin-top: 14px; }
-.start-confirm-btn {
-  width:100%; border: 3px solid #5c1800; border-radius:16px;
-  background:#8B2500; color:#ffe566; padding: 12px 0;
-  font-family:'Nanum Pen Script', cursive; font-size:30px; cursor:pointer;
-  box-shadow: 0 4px 0 #3a0e00;
-}
-.start-confirm-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #3a0e00; }
-.title-mode-picker-compact { gap: 10px; }
-.title-mode-picker-compact .title-mode-label {
-  font-size: 14px;
-  max-width: min(320px, 84vw);
-  text-align: center;
-}
-@media (max-width: 430px) {
-  .level-grid { grid-template-columns: 1fr; }
-  .start-card-title { font-size: 28px; }
+
+@media (max-width: 768px) {
+  html, body {
+    height: 100dvh;
+  }
+  .game-wrapper, .container, #titleScreen, .title-content {
+    max-width: 100vw;
+  }
 }
 
 </style>
@@ -1474,8 +1406,14 @@ body.haptic-flash::after {
       <button class="start-btn" onclick="enterGame()">시 작</button>
     </div>
 
-    <div class="title-mode-picker title-mode-picker-compact">
-      <div class="title-mode-label">시작 버튼을 누르면 레벨과 속도를 고를 수 있어</div>
+    <div class="title-mode-picker">
+      <div class="title-mode-label">속도 선택</div>
+      <div class="mode-chips title-mode-chips">
+        <button class="mode-chip" data-mode="easy" onclick="setDifficulty('easy')">1X</button>
+        <button class="mode-chip" data-mode="normal" onclick="setDifficulty('normal')">1.5X</button>
+        <button class="mode-chip" data-mode="hard" onclick="setDifficulty('hard')">2X</button>
+      </div>
+      <div class="mode-note" id="modeNote">기본 속도로 차분하게 시작</div>
       <div class="title-feedback-row">
         <button class="feedback-chip" id="soundChip" onclick="toggleSound()">🔊 소리 ON</button>
         <button class="feedback-chip" id="bgmChip" onclick="toggleBgm()">🎵 BGM ON</button>
@@ -1511,32 +1449,6 @@ body.haptic-flash::after {
     <div class="daily-list" id="dailyMissionList"></div>
     <div class="daily-panel-foot" id="dailyMissionFoot">자정에 새로운 미션으로 바뀐다.</div>
     <button class="mission-close-btn" onclick="closeMissionPopup()">닫기</button>
-  </div>
-</div>
-
-<!-- ══ 시작 옵션 팝업 ══ -->
-<div class="start-popup" id="startPopup">
-  <div class="start-card">
-    <div class="start-card-header">
-      <div class="start-card-title">🎮 도전 레벨 선택</div>
-      <button class="start-close-btn" onclick="closeStartPopup()" aria-label="닫기">✕</button>
-    </div>
-    <div class="start-card-sub" id="startCardSub">한 단계씩 해금된다. 잠긴 레벨은 목표를 달성하면 열린다.</div>
-
-    <div class="start-section-label">레벨</div>
-    <div class="level-grid" id="levelGrid"></div>
-
-    <div class="start-section-label">속도</div>
-    <div class="mode-chips start-mode-chips">
-      <button class="mode-chip" data-mode="easy" onclick="setDifficulty('easy')">1X</button>
-      <button class="mode-chip" data-mode="normal" onclick="setDifficulty('normal')">1.5X</button>
-      <button class="mode-chip" data-mode="hard" onclick="setDifficulty('hard')">2X</button>
-    </div>
-    <div class="mode-note" id="modeNote">기본 속도로 차분하게 시작</div>
-
-    <div class="start-actions">
-      <button class="start-confirm-btn" onclick="confirmStartGame()">이 레벨로 시작</button>
-    </div>
   </div>
 </div>
 
@@ -1595,7 +1507,7 @@ body.haptic-flash::after {
       </div>
     </div>
 
-    <div class="grid grid-4" id="gameGrid">
+    <div class="grid">
       <!-- 빨강 동그라미 -->
       <button class="btn btn-circle" data-fruit="circle" id="btn-circle">
         <svg class="shape-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
@@ -1627,22 +1539,6 @@ body.haptic-flash::after {
           <polygon points="30,10 35,24 50,24 38.5,32.5 43,46 30,37.5 17,46 21.5,32.5 10,24 25,24" fill="#2e7d32" opacity=".15"/>
         </svg>
         <span class="shape-label">별</span>
-      </button>
-      <!-- 보라 다이아 -->
-      <button class="btn btn-diamond" data-fruit="diamond" id="btn-diamond">
-        <svg class="shape-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="30,6 52,30 30,54 8,30" fill="white" opacity=".92"/>
-          <polygon points="30,12 46,30 30,48 14,30" fill="#8e44ad" opacity=".18"/>
-        </svg>
-        <span class="shape-label">다이아</span>
-      </button>
-      <!-- 민트 육각 -->
-      <button class="btn btn-hex" data-fruit="hex" id="btn-hex">
-        <svg class="shape-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="30,5 49,16 49,44 30,55 11,44 11,16" fill="white" opacity=".92"/>
-          <polygon points="30,12 43,20 43,40 30,48 17,40 17,20" fill="#00bfa5" opacity=".16"/>
-        </svg>
-        <span class="shape-label">육각</span>
       </button>
     </div>
 
@@ -1930,7 +1826,6 @@ function showBadgeToast(badges) {
 
 function openBadges() {
   closeMissionPopup();
-  closeStartPopup();
   setBadgeTab(badgeTab || 'all');
   document.getElementById('badgePopup').classList.add('visible');
 }
@@ -2044,7 +1939,6 @@ function skipName() {
 
 function openRanking() {
   closeMissionPopup();
-  closeStartPopup();
   currentRankTab = currentRankTab || 'all';
   setRankTab(currentRankTab);
   renderRanking();
@@ -2341,8 +2235,6 @@ function updateDailyMissions(score, maxCombo, mode) {
 
   saveDailyMissionState(state);
   renderDailyMissions();
-renderLevelOptions();
-applyLevelLayout();
 ensureBgmReady();
 playBgmFor('title');
   return { completedNow, state };
@@ -2386,19 +2278,11 @@ function getDifficultyConfig() {
   return DIFFICULTY[difficulty] || DIFFICULTY.easy;
 }
 
-function getSelectedLevel() {
-  return LEVELS[selectedLevelIdx] || LEVELS[0];
-}
-
-function getUnlockedLevels() {
-  return LEVELS.map((_, idx) => idx <= unlockedLevelIdx);
-}
-
 function updateStageBadge() {
   const badge = document.getElementById('stageBadge');
   if (!badge) return;
-  const level = getSelectedLevel();
-  badge.textContent = `${level.emoji} ${level.name} · ${level.buttons}버튼 · ${getDifficultyConfig().label}`;
+  const stage = (typeof round !== 'undefined' && round > 0) ? getStage(round) : STAGES[0];
+  badge.textContent = `${stage.emoji} ${stage.name} · ${getDifficultyConfig().label}`;
 }
 
 function syncDifficultyUI() {
@@ -2446,72 +2330,16 @@ function titleNext() {
 // 1.8초 단위 슬라이드
 titleTimer = setInterval(titleNext, 1800);
 
-function openStartPopup() {
-  initAudio();
-  playUiSound('tap');
-  renderLevelOptions();
-  syncDifficultyUI();
-  document.getElementById('startPopup').classList.add('visible');
-  document.body.classList.add('popup-open');
-}
-function closeStartPopup() {
-  document.getElementById('startPopup').classList.remove('visible');
-  document.body.classList.remove('popup-open');
-}
-function chooseLevel(idx) {
-  if (idx > unlockedLevelIdx) {
-    const card = document.querySelector(`.level-card[data-level="${idx}"]`);
-    if (card) {
-      card.classList.add('selected-locked');
-      setTimeout(() => card.classList.remove('selected-locked'), 480);
-    }
-    playUiSound('wrong');
-    return;
-  }
-  selectedLevelIdx = idx;
-  localStorage.setItem(LEVEL_KEY, String(selectedLevelIdx));
-  playUiSound('tap');
-  renderLevelOptions();
-  updateStageBadge();
-  applyLevelLayout();
-}
-function renderLevelOptions() {
-  const grid = document.getElementById('levelGrid');
-  if (!grid) return;
-  grid.innerHTML = LEVELS.map((level, idx) => {
-    const locked = idx > unlockedLevelIdx;
-    const active = idx === selectedLevelIdx;
-    const nextTarget = level.unlockScore ? `${level.unlockScore}라운드` : '최종 해금';
-    return `
-      <button class="level-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" data-level="${idx}" onclick="chooseLevel(${idx})">
-        <div class="level-top">
-          <div class="level-name">${level.emoji} ${level.name}</div>
-          <div class="level-lock">${locked ? '🔒' : '✅'}</div>
-        </div>
-        <div class="level-meta">${level.buttons}버튼 · ${idx === LEVELS.length - 1 ? '히든 모드' : `다음 해금 목표 ${nextTarget}`}</div>
-        <div class="level-unlock">${locked ? getLevelLockedText(idx) : level.unlockText}</div>
-      </button>
-    `;
-  }).join('');
-}
-function getLevelLockedText(idx) {
-  if (idx <= 0) return '기본 레벨';
-  const prev = LEVELS[idx - 1];
-  return `${prev.name}에서 ${prev.unlockScore}라운드 달성 필요`;
-}
 function enterGame() {
-  openStartPopup();
-}
-function confirmStartGame() {
   initAudio();
   playUiSound('start');
   pulseVibration([14, 24, 16]);
-  closeStartPopup();
   stopBgm();
   clearInterval(titleTimer);
   const ts = document.getElementById('titleScreen');
   ts.classList.add('hidden');
 
+  // 게임 요소 표시
   const gw = document.getElementById('gameWrapper');
   gw.style.display = 'flex';
   gw.classList.remove('hidden');
@@ -2519,17 +2347,18 @@ function confirmStartGame() {
   gw.style.transition = 'opacity .6s ease';
   requestAnimationFrame(() => { gw.style.opacity = '1'; });
 
+  // overlay display 복원
   document.getElementById('overlay').style.display = '';
+
+  // combo-toast 복원
   document.getElementById('comboToast').style.display = '';
 
-  applyLevelLayout();
   setTimeout(() => { ts.style.display = 'none'; }, 700);
   setTimeout(startGame, 400);
 }
 
 function goHome() {
   closeMissionPopup();
-  closeStartPopup();
   clearAllTimers();
   gameState = STATE.IDLE;
 
@@ -2729,48 +2558,32 @@ document.addEventListener('pointerdown', () => { ensureBgmReady(); initAudio(); 
 document.addEventListener('click', (e) => {
   const popup = document.getElementById('missionPopup');
   if (popup && e.target === popup) closeMissionPopup();
-  const startPopup = document.getElementById('startPopup');
-  if (startPopup && e.target === startPopup) closeStartPopup();
 });
 
-// ── 레벨 정의 ──
-const LEVEL_KEY = 'limitgame_level';
-const UNLOCKED_LEVEL_KEY = 'limitgame_unlocked_level';
-const LEVELS = [
-  { id:'baby',       name:'유아',   emoji:'🍼', scene:0, buttons:3, unlockScore:5,  unlockText:'5라운드 달성 시 유치원 해금' },
-  { id:'kinder',     name:'유치원', emoji:'🎒', scene:1, buttons:3, unlockScore:7,  unlockText:'7라운드 달성 시 초등 해금' },
-  { id:'elementary', name:'초등',   emoji:'✏️', scene:2, buttons:4, unlockScore:10, unlockText:'10라운드 달성 시 중등 해금' },
-  { id:'middle',     name:'중등',   emoji:'🚲', scene:3, buttons:4, unlockScore:13, unlockText:'13라운드 달성 시 고등 해금' },
-  { id:'high',       name:'고등',   emoji:'📚', scene:4, buttons:5, unlockScore:15, unlockText:'15라운드 달성 시 대학 해금' },
-  { id:'college',    name:'대학',   emoji:'🎓', scene:5, buttons:6, unlockScore:20, unlockText:'20라운드 달성 시 대학원 해금' },
-  { id:'grad',       name:'대학원', emoji:'🔬', scene:6, buttons:6, unlockScore:null, unlockText:'히든 모드' },
+// ── 단계 정의 ──
+const STAGES = [
+  { min:1,  max:2,  name:"유아",     emoji:"🍼", scene:0 },
+  { min:3,  max:4,  name:"유치원",   emoji:"🎒", scene:1 },
+  { min:5,  max:6,  name:"초등학생", emoji:"✏️", scene:2 },
+  { min:7,  max:9,  name:"중학생",   emoji:"🚲", scene:3 },
+  { min:10, max:12, name:"고등학생", emoji:"📚", scene:4 },
+  { min:13, max:15, name:"대학생",   emoji:"🎓", scene:5 },
+  { min:16, max:999,name:"대학원생", emoji:"🔬", scene:6 },
 ];
-const LEVEL_BUTTONS = {
-  3: ['circle','triangle','square'],
-  4: ['circle','square','triangle','star'],
-  5: ['circle','square','diamond','triangle','star'],
-  6: ['circle','square','diamond','triangle','star','hex'],
-};
 
 const MSGS = {
-  "유아":   ["응애...", "아직 아기잖아."],
-  "유치원": ["선생님한테 혼날 뻔.", "유치원도 쉽지 않네."],
-  "초등":   ["받아쓰기보다 어렵다.", "집중력이 먼저 하교했다."],
-  "중등":   ["중간고사보다 어렵네.", "여기서 틀리네."],
-  "고등":   ["야자 중에 졸았나.", "이건 진짜 아깝다."],
-  "대학":   ["MT 갔다 온 것 같다.", "집중력이 먼저 꺼졌다."],
-  "대학원": ["논문보다 어렵다...", "지도교수님께 혼날 뻔."],
+  "유아":     ["응애...", "아직 아기잖아."],
+  "유치원":   ["선생님한테 혼날 뻔.", "유치원도 쉽지 않네."],
+  "초등학생": ["받아쓰기보다 어렵다.", "집중력이 먼저 하교했다."],
+  "중학생":   ["중간고사보다 어렵네.", "여기서 틀리네."],
+  "고등학생": ["야자 중에 졸았나.", "이건 진짜 아깝다."],
+  "대학생":   ["MT 갔다 온 것 같다.", "집중력이 먼저 꺼졌다."],
+  "대학원생": ["논문보다 어렵다...", "지도교수님께 혼날 뻔."],
 };
 const DEFAULT_MSGS = ["아깝다.", "한 끗 차이였다.", "다시 하면 될 거 같은데."];
 
-const EMOJI  = { circle:'🔴', square:'🔵', triangle:'🟡', star:'🟢', diamond:'🟣', hex:'🟦' };
-let selectedLevelIdx = parseInt(localStorage.getItem(LEVEL_KEY) || '0', 10);
-let unlockedLevelIdx = parseInt(localStorage.getItem(UNLOCKED_LEVEL_KEY) || '0', 10);
-if (Number.isNaN(selectedLevelIdx)) selectedLevelIdx = 0;
-if (Number.isNaN(unlockedLevelIdx)) unlockedLevelIdx = 0;
-selectedLevelIdx = Math.min(Math.max(0, selectedLevelIdx), LEVELS.length - 1);
-unlockedLevelIdx = Math.min(Math.max(0, unlockedLevelIdx), LEVELS.length - 1);
-if (selectedLevelIdx > unlockedLevelIdx) selectedLevelIdx = unlockedLevelIdx;
+const FRUITS = ['circle','square','triangle','star'];
+const EMOJI  = { circle:'🔴', square:'🔵', triangle:'🟡', star:'🟢' };
 
 // ── 상태 머신 ──
 // IDLE → SHOWING → WAITING → GAMEOVER → IDLE
@@ -2795,8 +2608,6 @@ if (__namePopup) __namePopup.classList.remove('visible');
 syncDifficultyUI();
 syncFeedbackUI();
 renderDailyMissions();
-renderLevelOptions();
-applyLevelLayout();
 
 let activeTimers = [];
 let combo = 0;  // 연속 성공 라운드 수
@@ -2821,7 +2632,7 @@ document.querySelectorAll('.btn').forEach(b =>
   })
 );
 
-document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn').forEach(el => {
+document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn').forEach(el => {
   el.addEventListener('pointerdown', () => { initAudio(); }, { passive:true });
 });
 
@@ -2836,38 +2647,9 @@ function clearAllTimers() {
   activeTimers = [];
 }
 
-function applyLevelLayout() {
-  const level = getSelectedLevel();
-  const activeFruits = LEVEL_BUTTONS[level.buttons] || LEVEL_BUTTONS[4];
-  const grid = document.getElementById('gameGrid');
-  if (grid) {
-    grid.classList.remove('grid-3', 'grid-4', 'grid-5', 'grid-6');
-    grid.classList.add(`grid-${level.buttons}`);
-  }
-  document.querySelectorAll('#gameGrid .btn').forEach(btn => {
-    const fruit = btn.dataset.fruit;
-    const visible = activeFruits.includes(fruit);
-    btn.classList.toggle('hidden-btn', !visible);
-    btn.classList.remove('lit', 'wrong', 'correct', 'tap', 'ripple');
-    btn.style.opacity = '';
-  });
-}
-function tryUnlockNextLevel(finalScore) {
-  const level = getSelectedLevel();
-  if (!level || level.unlockScore == null) return null;
-  if (selectedLevelIdx >= LEVELS.length - 1) return null;
-  if (finalScore < level.unlockScore) return null;
-  const nextIdx = selectedLevelIdx + 1;
-  if (nextIdx <= unlockedLevelIdx) return null;
-  unlockedLevelIdx = nextIdx;
-  localStorage.setItem(UNLOCKED_LEVEL_KEY, String(unlockedLevelIdx));
-  return LEVELS[nextIdx];
-}
-
 // ── 게임 흐름 ──
 function startGame() {
   closeMissionPopup();
-  closeStartPopup();
   clearAllTimers();
   gameState = STATE.IDLE;
   // 모든 팝업 닫기
@@ -2887,8 +2669,7 @@ function startGame() {
 
   sequence = []; playerIndex = 0; round = 0; combo = 0;
   updateRound(0);
-  applyLevelLayout();
-  updateStageUI();
+  updateStageUI(0);
   updateComboBadge(0);
   setStatus('— 시작 —');
   safeTimeout(nextRound, 900);
@@ -2898,9 +2679,8 @@ function startGame() {
 function nextRound() {
   playerIndex = 0; round++;
   updateRound(round);
-  updateStageUI();
-  const activeFruits = LEVEL_BUTTONS[getSelectedLevel().buttons] || LEVEL_BUTTONS[4];
-  sequence.push(activeFruits[Math.floor(Math.random() * activeFruits.length)]);
+  updateStageUI(round);
+  sequence.push(FRUITS[Math.floor(Math.random() * 4)]);
   setStatus('잘 봐.');
   gameState = STATE.SHOWING;   // ← 이 순간부터 클릭 불가
   playSequence(() => {
@@ -2986,10 +2766,9 @@ function gameOver() {
   playUiSound('gameover');
 
   const finalScore = round;
-  const stage = getSelectedLevel();
+  const stage = getStage(Math.max(finalScore, 1));
   const finalStage = stage.name;
   const modeLabel = getDifficultyConfig().label;
-  const unlockedLevel = tryUnlockNextLevel(finalScore);
 
   const newBest = finalScore > best;
   if (newBest) {
@@ -3006,11 +2785,11 @@ function gameOver() {
 
   document.getElementById('resultStageEmoji').textContent = stage.emoji;
   document.getElementById('resultStageName').textContent = finalStage + ' 수준';
-  document.getElementById('resultLine').textContent = `현재 레벨 ${finalStage} · ${stage.buttons}버튼 · ${modeLabel}`;
+  document.getElementById('resultLine').textContent = `여기까지였네 · ${modeLabel}`;
   document.getElementById('resultRound').textContent = finalScore;
   document.getElementById('resultBest').innerHTML = `최고기록 <span>${best}</span> 라운드${newBest ? ' 🎉' : ''}`;
   document.getElementById('resultSeq').textContent = sequence.map(f => EMOJI[f]).join(' ');
-  document.getElementById('resultMsg').textContent = unlockedLevel ? `🎉 ${unlockedLevel.name} 레벨이 열렸어! 다음 도전을 해보자.` : msg;
+  document.getElementById('resultMsg').textContent = msg;
   document.getElementById('resultSummaryMode').textContent = modeLabel;
   document.getElementById('resultSummaryCombo').textContent = combo;
 
@@ -3058,9 +2837,12 @@ function gameOver() {
 }
 
 // ── 헬퍼 ──
-function updateStageUI() {
-  const stage = getSelectedLevel();
-  document.getElementById('stageBadge').textContent = `${stage.emoji} ${stage.name} · ${stage.buttons}버튼 · ${getDifficultyConfig().label}`;
+function getStage(r) {
+  return STAGES.find(s => r >= s.min && r <= s.max) || STAGES[0];
+}
+function updateStageUI(r) {
+  const stage = r === 0 ? STAGES[0] : getStage(r);
+  document.getElementById('stageBadge').textContent = `${stage.emoji} ${stage.name} · ${getDifficultyConfig().label}`;
 
   // 배경 씬 전환
   if (stage.scene !== currentSceneIdx) {
@@ -3078,7 +2860,6 @@ function updateStageUI() {
   if (cl) cl.classList.add('active');
   if (cr) cr.classList.add('active');
 }
-
 function updateRound(n) { document.getElementById('round').textContent = n; }
 function setStatus(m)   { document.getElementById('status').textContent = m; }
 
@@ -3117,5 +2898,69 @@ function showComboToast(n) {
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
 </script>
+
+<script>
+(function() {
+  const allowTag = (el) => {
+    if (!el) return false;
+    const tag = (el.tagName || '').toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable;
+  };
+
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    if (allowTag(e.target)) return;
+    const now = Date.now();
+    if (now - lastTouchEnd <= 350) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+
+  document.addEventListener('gesturestart', function(e) {
+    if (allowTag(e.target)) return;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('gesturechange', function(e) {
+    if (allowTag(e.target)) return;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('gestureend', function(e) {
+    if (allowTag(e.target)) return;
+    e.preventDefault();
+  }, { passive: false });
+
+  let touchStartDistance = 0;
+  document.addEventListener('touchstart', function(e) {
+    if (allowTag(e.target)) return;
+    if (e.touches && e.touches.length > 1) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      touchStartDistance = Math.hypot(dx, dy);
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function(e) {
+    if (allowTag(e.target)) return;
+    if (e.touches && e.touches.length > 1) {
+      e.preventDefault();
+      return;
+    }
+    const interactive = e.target.closest('input, textarea, select, .mission-card, .rank-card, .badge-card, .name-card');
+    if (!interactive) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('dblclick', function(e) {
+    if (allowTag(e.target)) return;
+    e.preventDefault();
+  }, { passive: false });
+})();
+</script>
+
 </body>
 </html>

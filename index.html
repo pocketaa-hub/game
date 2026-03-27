@@ -1129,6 +1129,13 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
   cursor:pointer; width:100%; padding:10px 0;
 }
 .result-next-btn:active { transform: translateY(2px); box-shadow:0 1px 0 #8B6000; }
+.result-next-btn:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+  filter: grayscale(.18);
+  box-shadow: 0 2px 0 #8B6000;
+}
+.result-next-btn.locked::after { content: ' 🔒'; }
 .start-card { width:min(372px,92vw); max-height:min(78vh,620px); padding:14px 14px 14px; }
 .start-card-title { font-size:26px; }
 .start-card-sub { font-size:12px; margin-bottom:8px; }
@@ -1637,7 +1644,7 @@ body.haptic-flash::after {
   position: fixed;
   top: max(12px, env(safe-area-inset-top, 0px) + 12px);
   right: 12px;
-  z-index: 60;
+  z-index: 560;
   min-width: 76px;
   padding: 7px 12px 8px;
   border-radius: 999px;
@@ -1660,7 +1667,7 @@ body.haptic-flash::after {
   position: fixed;
   top: max(58px, env(safe-area-inset-top, 0px) + 58px);
   right: 12px;
-  z-index: 61;
+  z-index: 561;
   display: none;
   max-width: min(70vw, 260px);
   padding: 8px 12px 9px;
@@ -3595,6 +3602,7 @@ function gameOver() {
   if (newBadges.length) addPoints(newBadges.reduce((sum, def) => sum + getBadgeReward(def), 0), '배지 보상');
   if (newMissions.length) addPoints(newMissions.length * DAILY_POINT_REWARD, '일일 미션');
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
+  updateNextStageButton();
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
   const dailyTotalCount = missionUpdate.state.missions.length;
 
@@ -3638,18 +3646,54 @@ function gameOver() {
 
 // ── 헬퍼 ──
 
-function goToNextStage() {
+function getNextStageTarget() {
   const modeIdx = MODE_ORDER.indexOf(difficulty);
   if (selectedLevelIdx < LEVELS.length - 1) {
-    selectedLevelIdx += 1;
-  } else if (modeIdx < MODE_ORDER.length - 1) {
-    difficulty = MODE_ORDER[modeIdx + 1];
-    selectedLevelIdx = 0;
-    unlockedModeIdx = Math.max(unlockedModeIdx, modeIdx + 1);
-    unlockedStageMap[difficulty] = Math.max(0, Number(unlockedStageMap[difficulty] || 0));
-  } else {
-    selectedLevelIdx = 0;
+    const nextLevelIdx = selectedLevelIdx + 1;
+    return {
+      mode: difficulty,
+      levelIdx: nextLevelIdx,
+      locked: nextLevelIdx > getUnlockedStageIdx(difficulty),
+      label: `${LEVELS[nextLevelIdx].name}`
+    };
   }
+
+  if (modeIdx < MODE_ORDER.length - 1) {
+    const nextMode = MODE_ORDER[modeIdx + 1];
+    return {
+      mode: nextMode,
+      levelIdx: 0,
+      locked: modeIdx + 1 > unlockedModeIdx,
+      label: `${getModeConfig(nextMode).label} · ${LEVELS[0].name}`
+    };
+  }
+
+  return null;
+}
+
+function updateNextStageButton() {
+  const btn = document.querySelector('.result-next-btn');
+  if (!btn) return;
+
+  const target = getNextStageTarget();
+  if (!target) {
+    btn.disabled = true;
+    btn.classList.add('locked');
+    btn.title = '마지막 단계야';
+    return;
+  }
+
+  btn.disabled = !!target.locked;
+  btn.classList.toggle('locked', !!target.locked);
+  btn.title = target.locked ? `해금 후 이동 가능: ${target.label}` : `${target.label}로 이동`;
+}
+
+function goToNextStage() {
+  const target = getNextStageTarget();
+  if (!target || target.locked) return;
+
+  difficulty = target.mode;
+  selectedLevelIdx = target.levelIdx;
   saveProgressState();
   saveLastPlay();
   startGame();

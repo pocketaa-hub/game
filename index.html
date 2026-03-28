@@ -895,6 +895,26 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
 .result-card {
   position: relative;
 }
+.mission-card .modal-x-btn {
+  top: 12px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+}
+.mission-card-header {
+  padding-right: 42px;
+}
+.mission-card .daily-panel-stamp {
+  max-width: calc(100% - 56px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
 @media (max-width: 500px) {
   .modal-x-btn {
     top: 8px;
@@ -902,6 +922,16 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
     width: 32px;
     height: 32px;
     font-size: 17px;
+  }
+  .mission-card .modal-x-btn {
+    top: 10px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+  .mission-card-header {
+    padding-right: 38px;
   }
 }
 .mission-close-btn {
@@ -3464,6 +3494,7 @@ function goHome() {
   closeMissionPopup();
   closeStartPopup();
   clearAllTimers();
+  lastFastInputAt = 0;
   gameState = STATE.IDLE;
 
   const overlay = document.getElementById('overlay');
@@ -3777,17 +3808,33 @@ const COMBO_DATA = {
 
 document.getElementById('best').textContent = best;
 
-// 클릭 이벤트 — 단 하나의 진입점
-document.querySelectorAll('.btn').forEach(b =>
-  b.addEventListener('click', () => {
-    initAudio();
-    // WAITING 상태에서만 입력 처리 (완전한 클릭 잠금)
-    if (gameState !== STATE.WAITING) return;
-    handleInput(b.dataset.fruit);
-  })
-);
+// 입력 반응성 보강 — 클릭보다 빠른 pointerdown 기준으로 처리
+let lastFastInputAt = 0;
+function handleFastButtonPress(shape) {
+  initAudio();
+  if (gameState !== STATE.WAITING) return;
+  const now = performance.now();
+  if (now - lastFastInputAt < 35) return;
+  lastFastInputAt = now;
+  handleInput(shape);
+}
 
-document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn').forEach(el => {
+document.querySelectorAll('.btn').forEach(b => {
+  const shape = b.dataset.fruit;
+  b.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    handleFastButtonPress(shape);
+  }, { passive: false });
+  b.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleFastButtonPress(shape);
+  }, { passive: false });
+  b.addEventListener('click', (e) => {
+    e.preventDefault();
+  }, { passive: false });
+});
+
+document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn, .result-next-btn, .rank-open-btn, .badge-open-btn, .mission-open-btn, .modal-x-btn').forEach(el => {
   el.addEventListener('pointerdown', () => { initAudio(); }, { passive:true });
 });
 

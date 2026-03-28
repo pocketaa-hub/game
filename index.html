@@ -2529,10 +2529,10 @@ body.haptic-flash::after {
   text-shadow: 0 2px 4px rgba(0,0,0,.22);
 }
 .speed-play-btn.red { background: linear-gradient(145deg,#ff8c8c,#ff0000); }
-.speed-play-btn.blue { background: linear-gradient(145deg,#ffbe6a,#ff8c00); }
+.speed-play-btn.blue { background: linear-gradient(145deg,#7bc0ff,#1E90FF); }
 .speed-play-btn.yellow { background: linear-gradient(145deg,#ffe98f,#FFD700); }
 .speed-play-btn.green { background: linear-gradient(145deg,#8beb8b,#32CD32); }
-.speed-play-btn.purple { background: linear-gradient(145deg,#7bc0ff,#1E90FF); }
+.speed-play-btn.purple { background: linear-gradient(145deg,#ffbe6a,#ff8c00); }
 .speed-play-btn.teal { background: linear-gradient(145deg,#ff9cc9,#FF69B4); }
 .speed-play-btn.tap { transform: scale(.96); filter: brightness(1.08); }
 .speed-play-btn.wrong { animation: shake .35s ease; }
@@ -2690,6 +2690,15 @@ body.haptic-flash::after {
   color:#8B2500;
   text-align:right;
 }
+.speed-rank-tabs {
+  display:flex; gap:8px; margin: 12px 0 14px;
+}
+.speed-rank-tab {
+  flex:1; border:2px solid #d3b16f; border-radius:14px; background:#f8f0dd; color:#8B2500;
+  padding:8px 0 9px; font-family:'Nanum Pen Script', cursive; font-size:22px; line-height:1; cursor:pointer;
+  box-shadow:0 3px 0 #d4c4a9;
+}
+.speed-rank-tab.active { background: linear-gradient(180deg, #fff3c4 0%, #ffe089 100%); box-shadow: 0 3px 0 #c98b2a; }
 .speed-empty {
   color:#8a5a00;
   padding: 10px 4px;
@@ -2956,7 +2965,7 @@ body.haptic-flash::after {
           <div class="mode-choice-icon">🧠</div>
         </div>
         <div class="mode-choice-desc">Memory mode</div>
-        <div class="mode-choice-meta">Stage / Infinite</div>
+        <div class="mode-choice-meta">Stage / Limit</div>
       </button>
       <button class="mode-choice-btn" onclick="selectTrainingMode('speed')">
         <div class="mode-choice-top">
@@ -2964,7 +2973,7 @@ body.haptic-flash::after {
           <div class="mode-choice-icon">⚡</div>
         </div>
         <div class="mode-choice-desc">Speed mode</div>
-        <div class="mode-choice-meta">Stage / Infinite</div>
+        <div class="mode-choice-meta">Stage / Limit</div>
       </button>
     </div>
   </div>
@@ -2977,7 +2986,7 @@ body.haptic-flash::after {
       <div class="mode-select-title">🧠 Brain Training</div>
       <button class="modal-x-btn" onclick="closeBrainModePopup()" aria-label="Close">✕</button>
     </div>
-    <div class="mode-select-sub">Stage / Infinite</div>
+    <div class="mode-select-sub">Stage / Limit</div>
     <div class="mode-choice-grid">
       <button class="mode-choice-btn" onclick="openBrainStage()">
         <div class="mode-choice-top">
@@ -2987,12 +2996,20 @@ body.haptic-flash::after {
         <div class="mode-choice-desc">Mode + Level</div>
         <div class="mode-choice-meta">Clear route</div>
       </button>
-      <button class="mode-choice-btn" onclick="startBrainInfiniteMode()">
+      <button class="mode-choice-btn" onclick="startBrainLimitMode('normal')">
         <div class="mode-choice-top">
-          <div class="mode-choice-name">Infinite</div>
-          <div class="mode-choice-icon">♾️</div>
+          <div class="mode-choice-name">Limit Normal</div>
+          <div class="mode-choice-icon">🟠</div>
         </div>
-        <div class="mode-choice-desc">No limit time</div>
+        <div class="mode-choice-desc">4 Keys</div>
+        <div class="mode-choice-meta">Rank on</div>
+      </button>
+      <button class="mode-choice-btn" onclick="startBrainLimitMode('hard')">
+        <div class="mode-choice-top">
+          <div class="mode-choice-name">Limit Hard</div>
+          <div class="mode-choice-icon">🔴</div>
+        </div>
+        <div class="mode-choice-desc">6 Keys</div>
         <div class="mode-choice-meta">Rank on</div>
       </button>
     </div>
@@ -3047,7 +3064,7 @@ body.haptic-flash::after {
           <div class="speed-record-dot hard"></div>
         </div>
         <div class="speed-record-card" onclick="startSpeedInfinite('round')">
-          <div class="speed-record-title">Round</div>
+          <div class="speed-record-title">Infinite</div>
           <div class="speed-record-desc">20 → 18 → ... → 8 sec · Best <span id="speedInfiniteBestRound">0</span>R</div>
           <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">No total limit · time resets each round</div>
           <div class="speed-record-dot normal"></div>
@@ -3290,6 +3307,11 @@ body.haptic-flash::after {
     <button class="modal-x-btn" onclick="closeSpeedInfiniteRanking()" aria-label="Close">✕</button>
     <div class="speed-result-title">Infinite Rank</div>
     <div class="speed-result-meta" id="speedRankMeta">Top 10 on this device</div>
+    <div class="speed-rank-tabs">
+      <button class="speed-rank-tab active" id="speedRankTabNormal" onclick="setSpeedRankTab('normal')">Normal</button>
+      <button class="speed-rank-tab" id="speedRankTabHard" onclick="setSpeedRankTab('hard')">Hard</button>
+      <button class="speed-rank-tab" id="speedRankTabRound" onclick="setSpeedRankTab('round')">Infinite</button>
+    </div>
     <div id="speedRankList" class="speed-sheet-list"></div>
   </div>
 </div>
@@ -3387,8 +3409,8 @@ body.haptic-flash::after {
     <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
     <div class="rank-header">🏆 Rank</div>
     <div class="rank-tabs">
-      <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('all')">All</button>
-      <button class="rank-tab" id="rankTabToday" onclick="setRankTab('today')">Today</button>
+      <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('normal')">Normal</button>
+      <button class="rank-tab" id="rankTabToday" onclick="setRankTab('hard')">Hard</button>
       <button class="rank-tab" id="rankTabMine" onclick="setRankTab('mine')">My Run</button>
     </div>
     <div id="rankList"></div>
@@ -3810,7 +3832,7 @@ function skipName() {
 function openRanking() {
   closeMissionPopup();
   closeStartPopup();
-  currentRankTab = currentRankTab || 'all';
+  currentRankTab = currentRankTab || 'normal';
   setRankTab(currentRankTab);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
@@ -3823,7 +3845,7 @@ function closeRanking() {
 function setRankTab(tab) {
   currentRankTab = tab;
   document.querySelectorAll('.rank-tab').forEach(btn => btn.classList.remove('active'));
-  const map = { all:'rankTabAll', today:'rankTabToday', mine:'rankTabMine' };
+  const map = { normal:'rankTabAll', hard:'rankTabToday', mine:'rankTabMine' };
   const active = document.getElementById(map[tab]);
   if (active) active.classList.add('active');
   renderRanking();
@@ -3834,9 +3856,9 @@ function getFilteredRecords() {
   const todayKey = new Date().toLocaleDateString('sv-SE');
   const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
 
-  if (currentRankTab === 'today') return records.filter(r => r.dateKey === todayKey);
   if (currentRankTab === 'mine') return myName ? records.filter(r => r.name === myName) : [];
-  return records;
+  if (currentRankTab === 'hard') return records.filter(r => /Brain Limit · Hard/.test(String(r.stage || '')));
+  return records.filter(r => /Brain Limit · Normal/.test(String(r.stage || '')));
 }
 
 function renderRanking() {
@@ -3844,11 +3866,11 @@ function renderRanking() {
   const list = document.getElementById('rankList');
   const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
   if (records.length === 0) {
-    const emptyMsg = currentRankTab === 'today'
-      ? 'No record today.<br>Set the first one!'
-      : currentRankTab === 'mine'
+    const emptyMsg = currentRankTab === 'mine'
       ? 'No saved record for your name yet.'
-      : 'No record yet.<br>Be the first!';
+      : currentRankTab === 'hard'
+      ? 'No hard record yet.<br>Be the first!'
+      : 'No normal record yet.<br>Be the first!';
     list.innerHTML = `<div class="rank-empty">${emptyMsg}</div>`;
     return;
   }
@@ -4132,12 +4154,11 @@ const PROFILE_AVATAR_OPTIONS = [
   { emoji:'👨', name:'Man' },
   { emoji:'👧', name:'Girl' },
   { emoji:'👦', name:'Boy' },
-  { emoji:'👱‍♀️', name:'Blonde Woman' },
-  { emoji:'👱‍♂️', name:'Blonde Man' },
-  { emoji:'👩🏿', name:'Black Woman' },
-  { emoji:'👨🏿', name:'Black Man' },
-  { emoji:'👩🏻', name:'Light Skin Woman' },
-  { emoji:'👨🏻', name:'Light Skin Man' },
+  { emoji:'🧑', name:'Person' },
+  { emoji:'👱', name:'Blonde' },
+  { emoji:'🧔', name:'Beard' },
+  { emoji:'👩‍🦰', name:'Red Hair Woman' },
+  { emoji:'👨‍🦱', name:'Curly Hair Man' },
   { emoji:'🐶', name:'Dog' },
   { emoji:'🐱', name:'Cat' },
   { emoji:'🦊', name:'Fox' },
@@ -4147,6 +4168,7 @@ const PROFILE_AVATAR_OPTIONS = [
   { emoji:'🌳', name:'Tree' },
   { emoji:'🍀', name:'Clover' },
   { emoji:'⭐', name:'Star' },
+  { emoji:'🌼', name:'Daisy' },
 ];
 
 const WEEKLY_MISSION_DEFS = [
@@ -4995,8 +5017,28 @@ let sequence = [], playerIndex = 0, round = 0;
 let best = parseInt(localStorage.getItem(STORAGE_KEYS.legacyBest) || '0');
 const BRAIN_INFINITE_BEST_KEY = STORAGE_KEYS.brainInfiniteBest;
 let brainInfiniteActive = false;
-let brainInfiniteBest = parseInt(localStorage.getItem(BRAIN_INFINITE_BEST_KEY) || '0', 10);
-if (Number.isNaN(brainInfiniteBest)) brainInfiniteBest = 0;
+let brainLimitMode = 'normal';
+function getBrainLimitBestMap() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BRAIN_INFINITE_BEST_KEY) || '{}');
+    if (raw && typeof raw === 'object') return raw;
+  } catch (e) {}
+  const legacy = parseInt(localStorage.getItem(BRAIN_INFINITE_BEST_KEY) || '0', 10);
+  return { normal: Number.isNaN(legacy) ? 0 : legacy, hard: 0 };
+}
+function getBrainLimitModeKey() { return brainLimitMode === 'hard' ? 'hard' : 'normal'; }
+function getBrainLimitBest(mode = getBrainLimitModeKey()) {
+  const map = getBrainLimitBestMap();
+  return Math.max(0, Number(map[mode] || 0));
+}
+function updateBrainLimitBest(score, mode = getBrainLimitModeKey()) {
+  const map = getBrainLimitBestMap();
+  const prev = Math.max(0, Number(map[mode] || 0));
+  const next = Math.max(prev, Number(score || 0));
+  map[mode] = next;
+  localStorage.setItem(BRAIN_INFINITE_BEST_KEY, JSON.stringify(map));
+  return next;
+}
 let currentSceneIdx = 0;
 
 // 초기 화면 상태 고정
@@ -5135,7 +5177,7 @@ function startGame() {
   });
 
   sequence = []; playerIndex = 0; round = 0; combo = 0;
-  document.getElementById('best').textContent = String(brainInfiniteActive ? brainInfiniteBest : best);
+  document.getElementById('best').textContent = String(brainInfiniteActive ? getBrainLimitBest() : best);
   updateRound(0);
   applyLevelLayout();
   updateStageUI();
@@ -5312,20 +5354,18 @@ function gameOver() {
 
   const finalScore = round;
   const stage = getSelectedLevel();
-  const finalStage = brainInfiniteActive ? 'Infinite' : stage.name;
+  const finalStage = brainInfiniteActive ? `Limit ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'}` : stage.name;
   const modeLabel = getDifficultyConfig().label;
   const unlockedRewards = brainInfiniteActive ? [] : tryUnlockNextLevel(finalScore);
 
   if (!brainInfiniteActive) updateStageBest(difficulty, selectedLevelIdx, finalScore);
   updateProfileStatsAfterGame(finalScore, combo);
 
-  const newBest = brainInfiniteActive ? finalScore > brainInfiniteBest : finalScore > best;
+  const currentBrainBest = brainInfiniteActive ? getBrainLimitBest() : 0;
+  const newBest = brainInfiniteActive ? finalScore > currentBrainBest : finalScore > best;
   if (brainInfiniteActive) {
-    if (newBest) {
-      brainInfiniteBest = finalScore;
-      localStorage.setItem(BRAIN_INFINITE_BEST_KEY, String(brainInfiniteBest));
-    }
-    document.getElementById('best').textContent = String(brainInfiniteBest);
+    const updatedBest = updateBrainLimitBest(finalScore);
+    document.getElementById('best').textContent = String(updatedBest);
   } else {
     if (newBest) {
       best = finalScore;
@@ -5341,10 +5381,10 @@ function gameOver() {
   else if (finalScore >= 10) msg = 'A bit more for top rank.';
 
   document.getElementById('resultStageEmoji').textContent = brainInfiniteActive ? '♾️' : stage.emoji;
-  document.getElementById('resultStageName').textContent = brainInfiniteActive ? 'Brain Infinite' : (finalStage + ' Level');
-  document.getElementById('resultLine').textContent = brainInfiniteActive ? `Mode ${modeLabel} · Infinite · ${getModeConfig().buttons} Keys` : `Now ${modeLabel} · ${finalStage} · ${getModeConfig().buttons} Keys`;
+  document.getElementById('resultStageName').textContent = brainInfiniteActive ? finalStage : (finalStage + ' Level');
+  document.getElementById('resultLine').textContent = brainInfiniteActive ? `Mode ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Limit · ${getModeConfig().buttons} Keys` : `Now ${modeLabel} · ${finalStage} · ${getModeConfig().buttons} Keys`;
   document.getElementById('resultRound').textContent = finalScore;
-  document.getElementById('resultBest').innerHTML = `Best Record <span>${brainInfiniteActive ? brainInfiniteBest : best}</span> Rounds${newBest ? ' 🎉' : ''}`;
+  document.getElementById('resultBest').innerHTML = `Best Record <span>${brainInfiniteActive ? getBrainLimitBest() : best}</span> Rounds${newBest ? ' 🎉' : ''}`;
   document.getElementById('resultSeq').textContent = sequence.map(f => EMOJI[f]).join(' ');
   const unlockMsg = unlockedRewards.length
     ? unlockedRewards.map(entry => entry.type === 'mode'
@@ -5352,7 +5392,7 @@ function gameOver() {
         : `🎉 ${entry.item.name} unlocked!`).join(' ')
     : '';
   document.getElementById('resultMsg').textContent = unlockMsg || msg;
-  document.getElementById('resultSummaryMode').textContent = brainInfiniteActive ? `${modeLabel} · Infinite` : `${modeLabel} · ${getModeConfig().buttons} Keys`;
+  document.getElementById('resultSummaryMode').textContent = brainInfiniteActive ? `${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Limit` : `${modeLabel} · ${getModeConfig().buttons} Keys`;
   document.getElementById('resultSummaryCombo').textContent = combo;
 
   document.getElementById('resultCharLeft').src = `female_${stage.scene}.png`;
@@ -5393,7 +5433,7 @@ function gameOver() {
   }
 
   window._finalScore = finalScore;
-  window._finalStage = brainInfiniteActive ? `Brain Infinite · ${modeLabel}` : finalStage;
+  window._finalStage = brainInfiniteActive ? `Brain Limit · ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'}` : finalStage;
 
   const overlay = document.getElementById('overlay');
   const popup = document.getElementById('namePopup');
@@ -5548,10 +5588,10 @@ function showComboToast(n) {
   const SHAPES = ['circle','square','triangle','star','diamond','hex'];
   const SHAPE_META = {
     circle: { color:'#FF0000' },
-    square: { color:'#FF8C00' },
+    square: { color:'#1E90FF' },
     triangle: { color:'#FFD700' },
     star: { color:'#32CD32' },
-    diamond: { color:'#1E90FF' },
+    diamond: { color:'#FF8C00' },
     hex: { color:'#FF69B4' }
   };
   const LAYOUT_PATTERNS = {
@@ -5666,8 +5706,8 @@ function showComboToast(n) {
     defs.push({ id:'infinite_normal_20', label:'Infinite Normal 20R', unlocked:false });
     defs.push({ id:'infinite_hard_10', label:'Infinite Hard 10R', unlocked:false });
     defs.push({ id:'infinite_hard_20', label:'Infinite Hard 20R', unlocked:false });
-    defs.push({ id:'infinite_round_10', label:'Infinite Round 10R', unlocked:false });
-    defs.push({ id:'infinite_round_20', label:'Infinite Round 20R', unlocked:false });
+    defs.push({ id:'infinite_round_10', label:'Infinite Infinite 10R', unlocked:false });
+    defs.push({ id:'infinite_round_20', label:'Infinite Infinite 20R', unlocked:false });
     const owned = getSpeedBadges();
     return defs.map(d => ({ ...d, unlocked: owned.some(x => x.id === d.id) }));
   }
@@ -5701,7 +5741,7 @@ function showComboToast(n) {
     const map = getSpeedInfiniteRankMap();
     const key = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     const list = Array.isArray(map[key]) ? map[key] : [];
-    list.push({ score: Number(score || 0), ts: Date.now() });
+    list.push({ score: Number(score || 0), ts: Date.now(), avatar: getProfileAvatar?.() || '🙂' });
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
     map[key] = list.slice(0, 10);
     saveSpeedInfiniteRankMap(map);
@@ -5735,6 +5775,7 @@ function showComboToast(n) {
       document.body.classList.remove('popup-open');
     }
   }
+  window.closeModeSelectPopup = closeModeSelectPopup;
   function openModeSelectPopup() {
     initAudio?.();
     playUiSound?.('tap');
@@ -5818,8 +5859,11 @@ function showComboToast(n) {
     closeBrainModePopup();
     openStartPopup();
   };
-  window.startBrainInfiniteMode = function() {
+  window.startBrainLimitMode = function(mode) {
     brainInfiniteActive = true;
+    brainLimitMode = mode === 'hard' ? 'hard' : 'normal';
+    difficulty = brainLimitMode === 'hard' ? 'hell' : 'normal';
+    selectedLevelIdx = 0;
     closeBrainModePopup();
     closeStartPopup();
     initAudio();
@@ -6044,7 +6088,7 @@ function showComboToast(n) {
     if (badge) {
       const left = speedState.type === 'stage'
         ? `${level.emoji || '🏁'} ${getLevelNameEn(level.name)} · ${speedState.selectedKeyCount} Keys`
-        : `${speedState.infiniteMode === 'hard' ? '🔴 Hard' : speedState.infiniteMode === 'round' ? '🟡 Round' : '🟠 Normal'} · Auto Keys`;
+        : `${speedState.infiniteMode === 'hard' ? '🔴 Hard' : speedState.infiniteMode === 'round' ? '🟡 Infinite' : '🟠 Normal'} · Auto Keys`;
       badge.textContent = left;
     }
     if (round) round.textContent = String(speedState.round);
@@ -6202,6 +6246,7 @@ function showComboToast(n) {
         speedState.round += 1;
         setSceneByRound();
         prepareSpeedRound();
+        startSpeedTimer();
       } else {
         updateSpeedStatus('');
       }
@@ -6235,7 +6280,7 @@ function showComboToast(n) {
       newBadges += addSpeedBadge(`stage_${speedState.selectedKeyCount}_${speedState.selectedLevelIdx}`, `${speedState.selectedKeyCount} Keys ${level} Clear`);
       unlockNextSpeedStage();
     }
-    const infiniteLabel = speedState.infiniteMode === 'hard' ? 'Hard' : (speedState.infiniteMode === 'round' ? 'Round' : 'Normal');
+    const infiniteLabel = speedState.infiniteMode === 'hard' ? 'Hard' : (speedState.infiniteMode === 'round' ? 'Infinite' : 'Normal');
     if (speedState.type === 'infinite' && score >= 10) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_10`, `${infiniteLabel} 10R`);
     if (speedState.type === 'infinite' && score >= 20) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_20`, `${infiniteLabel} 20R`);
     if (newBadges > 0 && typeof addPoints === 'function') addPoints(newBadges, 'Speed Badge');
@@ -6273,39 +6318,34 @@ function showComboToast(n) {
     window.startSpeedStageTraining();
   };
   
-  window.openSpeedInfiniteRanking = function() {
-    const listNormal = getSpeedInfiniteRanking('normal');
-    const listHard = getSpeedInfiniteRanking('hard');
-    const listRound = getSpeedInfiniteRanking('round');
+  let currentSpeedRankTab = 'normal';
+  window.setSpeedRankTab = function(tab) {
+    currentSpeedRankTab = tab === 'hard' ? 'hard' : (tab === 'round' ? 'round' : 'normal');
+    document.getElementById('speedRankTabNormal')?.classList.toggle('active', currentSpeedRankTab === 'normal');
+    document.getElementById('speedRankTabHard')?.classList.toggle('active', currentSpeedRankTab === 'hard');
+    document.getElementById('speedRankTabRound')?.classList.toggle('active', currentSpeedRankTab === 'round');
     const root = document.getElementById('speedRankList');
     const meta = document.getElementById('speedRankMeta');
-    if (meta) meta.textContent = 'Top 10 on this device';
+    const title = currentSpeedRankTab === 'hard' ? 'Hard' : (currentSpeedRankTab === 'round' ? 'Infinite' : 'Normal');
+    const list = getSpeedInfiniteRanking(currentSpeedRankTab);
+    if (meta) meta.textContent = `Top 10 on this device · ${title}`;
     if (root) {
       const renderRows = (arr) => {
         if (!arr.length) return '<div class="speed-empty">No Record</div>';
         return arr.map((r,i)=>`
           <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
             <div class="speed-rank-pos">#${i+1}</div>
-            <div class="speed-rank-label">${i===0 ? 'Best' : 'Run'}</div>
+            <div class="speed-rank-label">${r.avatar || '🙂'} ${i===0 ? 'Best' : 'Run'}</div>
             <div class="speed-rank-score">${r.score}R</div>
           </div>
         `).join('');
       };
-      root.innerHTML = `
-        <div class="speed-rank-section">
-          <div class="speed-rank-title">Normal</div>
-          ${renderRows(listNormal)}
-        </div>
-        <div class="speed-rank-section">
-          <div class="speed-rank-title">Hard</div>
-          ${renderRows(listHard)}
-        </div>
-        <div class="speed-rank-section">
-          <div class="speed-rank-title">Round</div>
-          ${renderRows(listRound)}
-        </div>
-      `;
+      root.innerHTML = `<div class="speed-rank-section">${renderRows(list)}</div>`;
     }
+  };
+  window.openSpeedInfiniteRanking = function(mode) {
+    currentSpeedRankTab = mode ? (mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal')) : speedState.infiniteMode;
+    setSpeedRankTab(currentSpeedRankTab);
     document.getElementById('speedRankPopup')?.classList.add('visible');
   };
   window.closeSpeedInfiniteRanking = function() {

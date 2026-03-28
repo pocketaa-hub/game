@@ -725,6 +725,138 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
   margin-bottom: 10px;
 }
 .mission-card-title { font-family:'Nanum Pen Script', cursive; font-size:28px; color:#8B2500; }
+.mission-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 6px 0 12px;
+}
+.mission-tab {
+  appearance: none;
+  border: 2px solid #d3b16f;
+  border-radius: 14px;
+  background: #f8f0dd;
+  color: #8B2500;
+  padding: 8px 0 9px;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #d4c4a9;
+}
+.mission-tab.active {
+  background: linear-gradient(180deg, #fff3c4 0%, #ffd769 100%);
+  border-color: #c88a30;
+  box-shadow: 0 3px 0 #b7770d;
+}
+.mission-panel { display: none; }
+.mission-panel.active { display: block; }
+.mission-card-board .daily-list { display: grid; gap: 10px; }
+.profile-card-compact {
+  width: min(360px, 92vw);
+  max-height: min(84vh, 720px);
+  overflow: hidden;
+}
+.profile-head { margin-bottom: 12px; }
+.profile-hero {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.profile-hero-card,
+.profile-rank-card,
+.profile-stat,
+.profile-wide {
+  border: 2px solid #e0c388;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,252,244,.98), rgba(249,239,215,.96));
+  box-shadow: 0 4px 0 rgba(191,143,54,.35), 0 8px 18px rgba(0,0,0,.08);
+}
+.profile-hero-card {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 108px;
+}
+.profile-hero-label {
+  font-size: 13px;
+  color: #8d6c36;
+  margin-bottom: 4px;
+}
+.profile-hero-value {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 38px;
+  color: #8B2500;
+  line-height: 1;
+}
+.profile-hero-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #7b5a2b;
+}
+.profile-rank-card {
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+  min-height: 108px;
+}
+.profile-rank-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.profile-rank-label {
+  font-size: 12px;
+  color: #8d6c36;
+}
+.profile-rank-value {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 28px;
+  color: #7a2600;
+  line-height: 1;
+}
+.profile-grid.compact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.profile-stat {
+  padding: 12px 12px 11px;
+  min-height: 88px;
+}
+.profile-stat-label {
+  font-size: 12px;
+  color: #8d6c36;
+  margin-bottom: 4px;
+}
+.profile-stat-value {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 31px;
+  color: #8B2500;
+  line-height: 1.04;
+}
+.profile-stat-sub {
+  margin-top: 5px;
+  font-size: 11px;
+  color: #7b5a2b;
+  line-height: 1.25;
+}
+.profile-wide {
+  grid-column: 1 / -1;
+  padding: 12px;
+}
+.profile-wide .profile-rank-row + .profile-rank-row { margin-top: 6px; }
+@media (max-width: 480px) {
+  .mission-card { width: min(362px, 94vw); }
+  .profile-hero { grid-template-columns: 1fr; }
+  .profile-grid.compact { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .profile-stat { min-height: 82px; padding: 11px 10px; }
+  .profile-stat-value { font-size: 28px; }
+  .profile-rank-value { font-size: 24px; }
+}
 .mission-close-btn {
   display:block; width:100%; margin-top: 12px;
   border: 3px solid #b05a14; border-radius: 16px;
@@ -1771,12 +1903,12 @@ body.haptic-flash::after {
 
 <!-- ══ 미션 팝업 ══ -->
 <div class="mission-popup" id="missionPopup">
-  <div class="mission-card">
+  <div class="mission-card mission-card-board">
     <div class="mission-card-header">
       <div class="mission-card-title">📅 미션 보드</div>
       <div class="daily-panel-stamp" id="dailyStampCount">일일 0 / 3 완료</div>
     </div>
-    <div class="mission-tabs">
+    <div class="mission-tabs" role="tablist" aria-label="미션 구분">
       <button class="mission-tab active" id="missionTabDaily" onclick="setMissionTab('daily')">일일</button>
       <button class="mission-tab" id="missionTabWeekly" onclick="setMissionTab('weekly')">주간</button>
       <button class="mission-tab" id="missionTabMonthly" onclick="setMissionTab('monthly')">월간</button>
@@ -1799,13 +1931,14 @@ body.haptic-flash::after {
 
 <!-- ══ 프로필 팝업 ══ -->
 <div class="mission-popup" id="profilePopup">
-  <div class="mission-card profile-card">
-    <div class="mission-card-header">
+  <div class="mission-card profile-card profile-card-compact">
+    <div class="mission-card-header profile-head">
       <div class="mission-card-title">👤 내 프로필</div>
-      <div class="daily-panel-stamp" id="profileTierText">현재 기기 기준 기록</div>
+      <div class="daily-panel-stamp" id="profileTierText">현재 기기 저장 기준</div>
     </div>
-    <div class="profile-grid" id="profileStatGrid"></div>
-    <div class="daily-panel-foot" id="profileFoot">순위는 서버 연동이 없는 현재 버전에서는 이 기기에 저장된 기록 기준으로 계산된다.</div>
+    <div class="profile-hero" id="profileHero"></div>
+    <div class="profile-grid compact" id="profileStatGrid"></div>
+    <div class="daily-panel-foot" id="profileFoot">순위는 서버 없이 이 기기에 저장된 기록 기준으로 계산된다.</div>
     <button class="mission-close-btn" onclick="closeProfilePopup()">닫기</button>
   </div>
 </div>
@@ -2927,24 +3060,42 @@ function renderProfilePopup() {
   const stats = getProfileStats();
   const grid = document.getElementById('profileStatGrid');
   const tier = document.getElementById('profileTierText');
+  const hero = document.getElementById('profileHero');
+  const foot = document.getElementById('profileFoot');
   const totalGames = Number(stats.totalGames || 0);
   const totalCombo = Number(stats.totalCombo || 0);
   const totalPoints = getPoints();
+  const bestScore = Number(stats.bestScore || 0);
   const myBestRank = getMyBestRankInfo('all');
   const weekRank = getMyBestRankInfo('week');
   const todayRank = getMyBestRankInfo('today');
+  const clearDays = Number(getDailyMissionState().clearedDays || 0);
+  const avgCombo = totalGames ? (totalCombo / totalGames).toFixed(1) : '0.0';
   if (tier) tier.textContent = '순위는 현재 기기 저장 기준';
+  if (foot) foot.textContent = '전체 유저 순위가 아니라 이 기기에 저장된 기록을 기준으로 계산한 값이야.';
+  if (hero) {
+    hero.innerHTML = `
+      <div class="profile-hero-card">
+        <div class="profile-hero-label">최고 기록</div>
+        <div class="profile-hero-value">${bestScore}R</div>
+        <div class="profile-hero-sub">누적 ${totalGames}판 플레이 · 평균 콤보 ${avgCombo}</div>
+      </div>
+      <div class="profile-rank-card">
+        <div class="profile-rank-row"><span class="profile-rank-label">내 최고 순위</span><span class="profile-rank-value">${myBestRank}</span></div>
+        <div class="profile-rank-row"><span class="profile-rank-label">이번 주 순위</span><span class="profile-rank-value">${weekRank}</span></div>
+        <div class="profile-rank-row"><span class="profile-rank-label">오늘의 순위</span><span class="profile-rank-value">${todayRank}</span></div>
+      </div>`;
+  }
   if (!grid) return;
   grid.innerHTML = [
-    ['누적 플레이 횟수', `${totalGames}회`, '이 기기 기준 누적'],
-    ['누적 콤보', `${totalCombo}`, '판별 콤보 합계'],
-    ['보유 포인트', `⭐ ${totalPoints}P`, '희소 자원'],
-    ['내 최고 기록', `${Number(stats.bestScore || 0)}R`, '최고 라운드'],
-    ['내 최고 순위', myBestRank, '전체 기록 기준'],
-    ['이번 주 순위', weekRank, '이번 주 저장 기록'],
-    ['오늘의 순위', todayRank, '오늘 저장 기록'],
-    ['미션 완주', `${getDailyMissionState().clearedDays || 0}일`, '일일 미션 완료일']
-  ].map(([label, value, sub]) => `<div class="profile-stat"><div class="profile-stat-label">${label}</div><div class="profile-stat-value">${value}</div><div class="profile-stat-sub">${sub}</div></div>`).join('');
+    ['누적 플레이', `${totalGames}회`, '이 기기 기준 누적'],
+    ['누적 콤보', `${totalCombo}`, '모든 판의 최고 콤보 합계'],
+    ['보유 포인트', `⭐ ${totalPoints}P`, '재도전과 보상에 쓰는 자원'],
+    ['미션 완주', `${clearDays}일`, '일일 미션 전체 완주 횟수'],
+    ['평균 콤보', `${avgCombo}`, '판당 평균 최고 콤보'],
+    ['현재 상태', bestScore >= 20 ? '집중 폭발' : bestScore >= 10 ? '상승세' : '워밍업', bestScore >= 20 ? '고득점 구간 진입' : bestScore >= 10 ? '조금만 더 밀면 상위권' : '기록을 쌓는 중'],
+  ].map(([label, value, sub]) => `<div class="profile-stat"><div class="profile-stat-label">${label}</div><div class="profile-stat-value">${value}</div><div class="profile-stat-sub">${sub}</div></div>`).join('') +
+  `<div class="profile-wide"><div class="profile-rank-row"><span class="profile-rank-label">순위 기준</span><span class="profile-rank-value" style="font-size:22px;">현재 기기 저장</span></div><div class="profile-rank-row"><span class="profile-rank-label">참고</span><span class="profile-rank-value" style="font-size:20px;">멀티 서버 연결 전</span></div></div>`;
 }
 
 function showMissionToast(missions, startDelay = 0) {
@@ -3841,9 +3992,13 @@ function gameOver() {
 
   const newBadges = checkAndAwardBadges(finalScore, combo, newBest);
   const missionUpdate = updateDailyMissions(finalScore, combo, difficulty);
+  const weeklyUpdate = updateWeeklyMissions(finalScore, combo, missionUpdate.justCleared);
+  const monthlyUpdate = updateMonthlyMissions(finalScore, combo, missionUpdate.justCleared);
   const newMissions = missionUpdate.completedNow;
   if (newBadges.length) addPoints(newBadges.reduce((sum, def) => sum + getBadgeReward(def), 0), '배지 보상');
-  if (newMissions.length) addPoints(newMissions.length * DAILY_POINT_REWARD, '일일 미션');
+  if (missionUpdate.justCleared) addPoints(DAILY_POINT_REWARD, '일일 미션 완주');
+  if (weeklyUpdate.justCompletedAll) addPoints(WEEKLY_POINT_REWARD, '주간 미션 완주');
+  if (monthlyUpdate.justCompletedAll) addPoints(MONTHLY_POINT_REWARD, '월간 미션 완주');
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
   updateNextStageButton();
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;

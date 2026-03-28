@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>기억의 한계: 1%의 도전</title>
+<title>Limit Memory: 1% Challenge</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,7 +29,7 @@ body {
   position: relative;
 }
 
-/* ── 배경 ── */
+/* ── x경 ── */
 .bg {
   position: fixed;
   inset: 0;
@@ -140,7 +140,7 @@ audio#bgm { display: none; }
 }
 .sign-sub { font-size: 12px; color: #ffcf80; opacity: .9; letter-spacing: 1px; margin-top: 2px; }
 
-/* 단계 배지 */
+/* 단계 x지 */
 .stage-badge {
   background: rgba(255,248,220,0.93);
   border: 3px solid #c88a30;
@@ -259,7 +259,7 @@ audio#bgm { display: none; }
 .btn-square  { background: linear-gradient(145deg,#64b5f6,#1565c0); border: 3px solid #0d47a1; box-shadow: 0 5px 0 #0a3576, 0 8px 16px rgba(21,101,192,.4); }
 /* 노랑 세모 */
 .btn-triangle{ background: linear-gradient(145deg,#fff176,#f9a825); border: 3px solid #b7770d; box-shadow: 0 5px 0 #8a5a00, 0 8px 16px rgba(249,168,37,.4); }
-/* 초록 별 */
+/* 초록 Star */
 .btn-star    { background: linear-gradient(145deg,#a5d6a7,#2e7d32); border: 3px solid #1b5e20; box-shadow: 0 5px 0 #134016, 0 8px 16px rgba(46,125,50,.4); }
 
 /* lit 효과 */
@@ -377,14 +377,14 @@ audio#bgm { display: none; }
 .restart-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 #3a0e00; }
 .restart-btn:active { transform: translateY(2px);  box-shadow: 0 2px 0 #3a0e00; }
 
-/* 배경 전환 애니메이션 */
+/* x경 전환 애니메이션 */
 @keyframes sway   { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg)} }
 @keyframes float  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 @keyframes walk   { 0%,100%{transform:translateX(0)} 50%{transform:translateX(4px)} }
 @keyframes pulse  { 0%,100%{opacity:.8} 50%{opacity:1} }
 @keyframes sunPulse { 0%,100%{box-shadow:0 0 30px 10px rgba(255,220,50,.5)} 50%{box-shadow:0 0 50px 20px rgba(255,220,50,.7)} }
 
-/* ── 콤보 토스트 ── */
+/* ── Combo 토스트 ── */
 @keyframes comboIn {
   0%   { opacity:0; transform: translate(-50%,-50%) scale(.4) rotate(-8deg); }
   55%  { opacity:1; transform: translate(-50%,-50%) scale(1.12) rotate(2deg); }
@@ -445,7 +445,7 @@ audio#bgm { display: none; }
   animation: starPop .5s cubic-bezier(.34,1.56,.64,1) .1s both;
 }
 
-/* 콤보 카운터 배지 */
+/* Combo 카운터 x지 */
 .combo-badge {
   position: fixed;
   top: 12px; right: 12px;
@@ -470,18 +470,18 @@ audio#bgm { display: none; }
 #titleScreen {
   position: fixed; inset: 0; z-index: 500;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-start;
+  align-items: center; justify-content: center;
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: manipulation;
   width: 100%;
   height: 100%;
   transition: opacity .7s ease;
-  padding: 16px 0 28px;
+  padding: 24px 0 28px;
 }
 #titleScreen.hidden { opacity: 0; pointer-events: none; }
 
-/* 슬라이드 배경 */
+/* 슬라이드 x경 */
 .title-bg-slide {
   position: absolute; inset: 0;
   z-index: 1;
@@ -500,7 +500,7 @@ audio#bgm { display: none; }
   z-index: 0;
   pointer-events: none;
 }
-/* 배경 위 약한 그라데이션 */
+/* x경 # 약한 그라데이션 */
 #titleScreen::after {
   content: '';
   position: absolute; inset: 0;
@@ -514,14 +514,17 @@ audio#bgm { display: none; }
   pointer-events: none;
 }
 
-/* 타이틀 콘텐츠 전체 (z-index 2로 오버레이 위에) */
+/* 타이틀 콘텐츠 전체 (z-index 2로 오버레이 #에) */
 .title-content {
   position: relative; z-index: 3;
   display: flex; flex-direction: column;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  margin-top: clamp(10px, 3vh, 28px);
-  padding-bottom: 18px;
+  min-height: 100%;
+  margin-top: 0;
+  padding: 18px 0 20px;
+  gap: 10px;
 }
 
 /* 타이틀 텍스트 패널 */
@@ -554,7 +557,7 @@ audio#bgm { display: none; }
   justify-content: center;
   width: 320px;
   height: 240px;
-  margin: 0;
+  margin: 6px 0 0;
 }
 .title-char {
   pointer-events: none;
@@ -566,9 +569,9 @@ audio#bgm { display: none; }
   position: absolute; bottom: 0;
 }
 .title-char.active { opacity: 1; }
-/* 왼쪽 여자: 왼쪽에 배치, 오른쪽 향하도록 */
+/* 왼쪽 Woman: 왼쪽에 x치, 오른쪽 향하도록 */
 .title-char-f { left: 0; }
-/* 오른쪽 남자 */
+/* 오른쪽 Man */
 .title-char-m { right: 0; transform: scaleX(-1); }
 
 /* 시작버튼 — 캐릭터 가운데 고정 */
@@ -597,7 +600,7 @@ audio#bgm { display: none; }
 
 /* 인디케이터 */
 .title-dots {
-  display: flex; gap: 8px; margin-top: 14px;
+  display: flex; gap: 8px; margin-top: 8px;
 }
 .title-dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -612,7 +615,7 @@ audio#bgm { display: none; }
 }
 
 
-/* 속도 선택 */
+/* Speed 선택 */
 .title-mode-picker {
   display: flex;
   flex-direction: column;
@@ -914,6 +917,72 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
   padding: 12px;
 }
 .profile-wide .profile-rank-row + .profile-rank-row { margin-top: 6px; }
+
+.profile-avatar-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 136px;
+}
+.profile-avatar-emoji {
+  font-size: 52px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.12));
+}
+.profile-avatar-name {
+  font-size: 13px;
+  color: #8a5a00;
+}
+.profile-avatar-picker {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  padding: 12px;
+  border: 2px solid #e0c78f;
+  border-radius: 16px;
+  background: rgba(255,248,232,.9);
+}
+.profile-avatar-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.profile-avatar-picker-title {
+  font-size: 18px;
+  color: #8B2500;
+  font-weight: 700;
+}
+.profile-avatar-picker-note {
+  font-size: 11px;
+  color: #9b6a20;
+}
+.profile-avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+.profile-avatar-option {
+  appearance: none;
+  border: 2px solid #d7b678;
+  border-radius: 14px;
+  background: #fffbee;
+  min-height: 52px;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #d4c4a9;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+}
+.profile-avatar-option:hover { transform: translateY(-1px); }
+.profile-avatar-option:active { transform: translateY(2px); box-shadow: 0 1px 0 #d4c4a9; }
+.profile-avatar-option.active {
+  background: linear-gradient(180deg, #fff1b7 0%, #ffd55c 100%);
+  border-color: #b7770d;
+  box-shadow: 0 4px 0 #8a5a00, 0 8px 14px rgba(0,0,0,.14);
+}
 @media (max-width: 480px) {
   .mission-card { width: min(362px, 94vw); }
   .profile-hero { grid-template-columns: 1fr; }
@@ -923,6 +992,7 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
   .profile-rank-value { font-size: 22px; }
   .profile-hero-value { font-size: 30px; }
   .profile-card-compact { max-height: min(80vh, 640px); }
+  .profile-avatar-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 .modal-x-btn {
@@ -1428,9 +1498,6 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
   .result-secondary-grid .rank-open-btn,
   .result-secondary-grid .badge-open-btn { font-size:12px; padding:6px 4px; }
 }
-.start-card { width:min(372px,92vw); max-height:min(78vh,620px); padding:14px 14px 14px; }
-.start-card-title { font-size:26px; }
-.start-card-sub { font-size:12px; margin-bottom:8px; }
 .start-steps { display:flex; gap:6px; margin: 6px 0 10px; }
 .start-step-chip { flex:1; text-align:center; border-radius:999px; padding:6px 0; font-size:12px; font-weight:700; border:2px solid #d7b675; background:#fff7e6; color:#8B2500; }
 .start-step-chip.active { background:#8B2500; color:#ffe566; border-color:#8B2500; }
@@ -1458,17 +1525,6 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
 .level-name { font-size:19px; }
 .level-meta { font-size:11px; }
 .level-unlock { font-size:10px; margin-top:4px; }
-@media (max-width:430px){
-  .start-popup { padding:12px; }
-  .start-card { width:min(360px,92vw); max-height:min(76vh,560px); padding:12px; }
-  .mode-card-name { font-size:21px; }
-  .mode-card-meta { font-size:12px; }
-  .mode-card-unlock { font-size:10px; }
-  .level-grid { grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; }
-  .level-card { min-height:82px; padding:8px 6px; }
-  .level-name { font-size:16px; }
-  .level-meta,.level-unlock { font-size:9px; }
-}
 
 /* 결과 화면 랭킹 버튼 */
 .rank-open-btn {
@@ -1482,8 +1538,8 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
 }
 .rank-open-btn:hover { background: rgba(200,138,48,.1); }
 
-/* ══ 배지 시스템 ══ */
-/* 배지 알림 토스트 */
+/* ══ x지 시스템 ══ */
+/* x지 알림 토스트 */
 @keyframes badgeIn {
   0%   { opacity:0; transform:translate(-50%,-50%) scale(.3) rotate(-10deg); }
   60%  { opacity:1; transform:translate(-50%,-50%) scale(1.15) rotate(2deg); }
@@ -1517,7 +1573,7 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
   display: block;
 }
 
-/* 배지 팝업 */
+/* x지 팝업 */
 .badge-popup {
   position: fixed; inset: 0; z-index: 315;
   background: rgba(0,0,0,.82);
@@ -1608,7 +1664,7 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
 }
 .badge-close-btn:active { transform: scale(.97); }
 
-/* 결과 화면 배지 버튼 */
+/* 결과 화면 x지 버튼 */
 .badge-open-btn {
   display: block; width: 100%; margin-top: 8px;
   background: transparent; color: #9b6a20;
@@ -1619,7 +1675,7 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
 }
 .badge-open-btn:hover { background: rgba(200,138,48,.1); }
 
-/* 새 배지 표시 (버튼에 dot) */
+/* 새 x지 표시 (버튼에 dot) */
 .badge-new-dot {
   display: inline-block; width: 8px; height: 8px;
   background: #ef5350; border-radius: 50;
@@ -2239,6 +2295,13 @@ body.haptic-flash::after {
   transform: translateY(2px);
   box-shadow: 0 2px 0 #6e1f00;
 }
+.speed-primary-btn.disabled,
+.speed-primary-btn:disabled {
+  opacity: .45;
+  cursor: default;
+  pointer-events: none;
+  box-shadow: 0 3px 0 #6e1f00;
+}
 .speed-record-card {
   position: relative;
   border: 4px solid #d1a65a;
@@ -2719,7 +2782,7 @@ body.haptic-flash::after {
 
 <!-- ══ 타이틀 화면 ══ -->
 <div id="titleScreen">
-  <!-- 슬라이드 배경 (7개) -->
+  <!-- 슬라이드 x경 (7개) -->
   <div class="title-bg-slide active" id="tbg-0" style="background-image:url('bg_0.jpg')"></div>
   <div class="title-bg-slide" id="tbg-1" style="background-image:url('bg_1.jpg')"></div>
   <div class="title-bg-slide" id="tbg-2" style="background-image:url('bg_2.jpg')"></div>
@@ -2732,13 +2795,13 @@ body.haptic-flash::after {
   <div class="title-content">
     <!-- 타이틀 텍스트 -->
     <div class="title-panel">
-      <div class="title-main">기억의 한계: 1%의 도전</div>
-      <div class="title-sub">집중력이 먼저 꺼지는 기억력 테스트</div>
+      <div class="title-main">Limit Memory: 1% Challenge</div>
+      <div class="title-sub">Memory test</div>
     </div>
 
     <!-- 캐릭터 + 시작버튼 묶음 -->
     <div class="title-char-group">
-      <!-- 여자 캐릭터들 (왼쪽) -->
+      <!-- Woman 캐릭터들 (왼쪽) -->
       <img class="title-char title-char-f active" id="tchar-f-0" src="female_0.png" alt="">
       <img class="title-char title-char-f" id="tchar-f-1" src="female_1.png" alt="">
       <img class="title-char title-char-f" id="tchar-f-2" src="female_2.png" alt="">
@@ -2746,7 +2809,7 @@ body.haptic-flash::after {
       <img class="title-char title-char-f" id="tchar-f-4" src="female_4.png" alt="">
       <img class="title-char title-char-f" id="tchar-f-5" src="female_5.png" alt="">
       <img class="title-char title-char-f" id="tchar-f-6" src="female_6.png" alt="">
-      <!-- 남자 캐릭터들 (오른쪽) -->
+      <!-- Man 캐릭터들 (오른쪽) -->
       <img class="title-char title-char-m active" id="tchar-m-0" src="male_0.png" alt="">
       <img class="title-char title-char-m" id="tchar-m-1" src="male_1.png" alt="">
       <img class="title-char title-char-m" id="tchar-m-2" src="male_2.png" alt="">
@@ -2755,19 +2818,19 @@ body.haptic-flash::after {
       <img class="title-char title-char-m" id="tchar-m-5" src="male_5.png" alt="">
       <img class="title-char title-char-m" id="tchar-m-6" src="male_6.png" alt="">
       <!-- 시작 버튼 — 캐릭터 가운데 고정 -->
-      <button class="start-btn" onclick="enterGame()">시 작</button>
+      <button class="start-btn" onclick="enterGame()">Start</button>
     </div>
 
     <div class="title-mode-picker title-mode-picker-compact">
-      <div class="title-mode-label">시작 버튼을 누르면 Brain / Speed를 먼저 고를 수 있어</div>
+      
       <div class="title-feedback-row">
-        <button class="feedback-chip" id="soundChip" onclick="toggleSound()">🔊 소리 ON</button>
+        <button class="feedback-chip" id="soundChip" onclick="toggleSound()">🔊 Sound ON</button>
         <button class="feedback-chip" id="bgmChip" onclick="toggleBgm()">🎵 BGM ON</button>
       </div>
-      <div class="feedback-note">효과음만 남기고 진동/시각 반응은 제외했다</div>
+      
       <div class="mission-open-wrap multi-tools-row">
-        <button class="mission-open-btn" onclick="openMissionPopup()">📅 미션 보기 <span class="mission-open-meta" id="dailyStampCountMini">일일 0 / 3 · 주간 0 / 3</span></button>
-        <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 프로필 보기</button>
+        <button class="mission-open-btn" onclick="openMissionPopup()">📅 Mission <span class="mission-open-meta" id="dailyStampCountMini">Daily 0 / 3 · Weekly 0 / 3</span></button>
+        <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 Profile</button>
       </div>
     </div>
 
@@ -2789,44 +2852,44 @@ body.haptic-flash::after {
 <!-- ══ 미션 팝업 ══ -->
 <div class="mission-popup" id="missionPopup">
   <div class="mission-card mission-card-board">
-    <button class="modal-x-btn" onclick="closeMissionPopup()" aria-label="닫기">✕</button>
+    <button class="modal-x-btn" onclick="closeMissionPopup()" aria-label="Close">✕</button>
     <div class="mission-card-header">
-      <div class="mission-card-title">📅 미션 보드</div>
-      <div class="daily-panel-stamp" id="dailyStampCount">일일 0 / 3 완료</div>
+      <div class="mission-card-title">📅 Mission</div>
+      <div class="daily-panel-stamp" id="dailyStampCount">Daily 0 / 3</div>
     </div>
-    <div class="mission-tabs" role="tablist" aria-label="미션 구분">
-      <button class="mission-tab active" id="missionTabDaily" onclick="setMissionTab('daily')">일일</button>
-      <button class="mission-tab" id="missionTabWeekly" onclick="setMissionTab('weekly')">주간</button>
-      <button class="mission-tab" id="missionTabMonthly" onclick="setMissionTab('monthly')">월간</button>
+    <div class="mission-tabs" role="tablist" aria-label="Mission tabs">
+      <button class="mission-tab active" id="missionTabDaily" onclick="setMissionTab('daily')">Daily</button>
+      <button class="mission-tab" id="missionTabWeekly" onclick="setMissionTab('weekly')">Weekly</button>
+      <button class="mission-tab" id="missionTabMonthly" onclick="setMissionTab('monthly')">Monthly</button>
     </div>
     <div class="mission-panel active" id="missionPanelDaily">
       <div class="daily-list" id="dailyMissionList"></div>
-      <div class="daily-panel-foot" id="dailyMissionFoot">오늘 미션 3개를 전부 끝내면 ⭐ 1P를 준다.</div>
+      <div class="daily-panel-foot" id="dailyMissionFoot">Clear all 3 daily missions for ⭐ 1P.</div>
     </div>
     <div class="mission-panel" id="missionPanelWeekly">
       <div class="daily-list" id="weeklyMissionList"></div>
-      <div class="daily-panel-foot" id="weeklyMissionFoot">주간 미션 3개를 전부 끝내면 ⭐ 3P를 준다.</div>
+      <div class="daily-panel-foot" id="weeklyMissionFoot">Clear all 3 weekly missions for ⭐ 3P.</div>
     </div>
     <div class="mission-panel" id="missionPanelMonthly">
       <div class="daily-list" id="monthlyMissionList"></div>
-      <div class="daily-panel-foot" id="monthlyMissionFoot">월간 미션 3개를 전부 끝내면 ⭐ 5P를 준다.</div>
+      <div class="daily-panel-foot" id="monthlyMissionFoot">Clear all 3 monthly missions for ⭐ 5P.</div>
     </div>
-    <button class="mission-close-btn" onclick="closeMissionPopup()">닫기</button>
+    <button class="mission-close-btn" onclick="closeMissionPopup()">Close</button>
   </div>
 </div>
 
 <!-- ══ 프로필 팝업 ══ -->
 <div class="mission-popup" id="profilePopup">
   <div class="mission-card profile-card profile-card-compact">
-    <button class="modal-x-btn" onclick="closeProfilePopup()" aria-label="닫기">✕</button>
+    <button class="modal-x-btn" onclick="closeProfilePopup()" aria-label="Close">✕</button>
     <div class="mission-card-header profile-head">
-      <div class="mission-card-title">👤 내 프로필</div>
+      <div class="mission-card-title">👤 My Profile</div>
       <div class="daily-panel-stamp" id="profileTierText"></div>
     </div>
     <div class="profile-hero" id="profileHero"></div>
     <div class="profile-grid compact" id="profileStatGrid"></div>
     <div class="daily-panel-foot" id="profileFoot"></div>
-    <button class="mission-close-btn" onclick="closeProfilePopup()">닫기</button>
+    <button class="mission-close-btn" onclick="closeProfilePopup()">Close</button>
   </div>
 </div>
 
@@ -2834,45 +2897,45 @@ body.haptic-flash::after {
 <div class="start-popup" id="startPopup">
   <div class="start-card">
     <div class="start-card-header">
-      <div class="start-card-title">🎮 도전 레벨 선택</div>
-      <button class="start-close-btn" onclick="closeStartPopup()" aria-label="닫기">✕</button>
+      <div class="start-card-title">🎮 Level</div>
+      <button class="start-close-btn" onclick="closeStartPopup()" aria-label="Close">✕</button>
     </div>
-    <div class="start-card-sub" id="startCardSub">먼저 모드를 고르고, 다음 화면에서 세부 단계를 골라.</div>
+    <div class="start-card-sub" id="startCardSub">Pick mode, then level.</div>
     <div class="start-steps">
-      <div class="start-step-chip active" id="stepChipMode">1. 모드</div>
-      <div class="start-step-chip" id="stepChipStage">2. 단계</div>
+      <div class="start-step-chip active" id="stepChipMode">1. Mode</div>
+      <div class="start-step-chip" id="stepChipStage">2. Level</div>
     </div>
 
     <div class="start-view active" id="startViewMode">
       <div class="resume-chip" id="resumeChip" style="display:none;">
         <div>
-          <div class="resume-title">최근 플레이 이어하기</div>
-          <div class="resume-value" id="resumeValue">EASY · 유아</div>
+          <div class="resume-title">Resume</div>
+          <div class="resume-value" id="resumeValue">EASY · Baby</div>
         </div>
-        <button class="start-ghost-btn" id="resumeBtn" onclick="resumeLastPlay()">이어하기</button>
+        <button class="start-ghost-btn" id="resumeBtn" onclick="resumeLastPlay()">Resume</button>
       </div>
-      <div class="start-section-label">모드</div>
+      <div class="start-section-label">Mode</div>
       <div class="mode-level-grid" id="modeGrid"></div>
       <div class="start-sub-actions">
-        <button class="start-ghost-btn" onclick="closeStartPopup()">닫기</button>
-        <button class="start-continue-btn" onclick="goToStageStep()">다음</button>
+        <button class="start-ghost-btn" onclick="closeStartPopup()">Close</button>
+        <button class="start-continue-btn" onclick="goToStageStep()">Next</button>
       </div>
     </div>
 
     <div class="start-view" id="startViewStage">
       <div class="resume-chip" id="stageInfoChip">
         <div>
-          <div class="resume-title">선택한 모드</div>
-          <div class="resume-value" id="selectedModeSummary">EASY · 3키</div>
+          <div class="resume-title">Mode</div>
+          <div class="resume-value" id="selectedModeSummary">EASY · 3 Keys</div>
         </div>
-        <button class="start-ghost-btn" onclick="goToModeStep()">모드 변경</button>
+        <button class="start-ghost-btn" onclick="goToModeStep()">Mode</button>
       </div>
-      <div class="start-section-label">세부 단계</div>
+      <div class="start-section-label">Level</div>
       <div class="level-grid" id="levelGrid"></div>
-      <div class="mode-note" id="modeNote">유아 1.0배 ~ 대학원 1.6배</div>
+      <div class="mode-note" id="modeNote">Baby 1.0x ~ Grad 1.6x</div>
       <div class="start-sub-actions">
-        <button class="start-back-btn" onclick="goToModeStep()">이전</button>
-        <button class="start-confirm-btn" onclick="confirmStartGame()">이 단계로 시작</button>
+        <button class="start-back-btn" onclick="goToModeStep()">Back</button>
+        <button class="start-confirm-btn" onclick="confirmStartGame()">Start</button>
       </div>
     </div>
   </div>
@@ -2882,26 +2945,55 @@ body.haptic-flash::after {
 <div class="mode-select-popup" id="modeSelectPopup">
   <div class="mode-select-card">
     <div class="mode-select-header">
-      <div class="mode-select-title">🧠 트레이닝 선택</div>
-      <button class="modal-x-btn" onclick="closeModeSelectPopup()" aria-label="닫기">✕</button>
+      <div class="mode-select-title">🧠 Training</div>
+      <button class="modal-x-btn" onclick="closeModeSelectPopup()" aria-label="Close">✕</button>
     </div>
-    <div class="mode-select-sub">첫 화면은 같이 쓰고, 안으로 들어가면 Brain과 Speed는 서로 따로 움직이도록 분리했다.</div>
+    <div class="mode-select-sub"></div>
     <div class="mode-choice-grid">
       <button class="mode-choice-btn" onclick="selectTrainingMode('brain')">
         <div class="mode-choice-top">
           <div class="mode-choice-name">Brain Training</div>
           <div class="mode-choice-icon">🧠</div>
         </div>
-        <div class="mode-choice-desc">기존 기억력 게임. 현재 정리된 흐름은 그대로 유지하고, 시작 팝업부터 기존 구조를 사용한다.</div>
-        <div class="mode-choice-meta">기존 레벨 / 단계 선택</div>
+        <div class="mode-choice-desc">Memory mode</div>
+        <div class="mode-choice-meta">Stage / Infinite</div>
       </button>
       <button class="mode-choice-btn" onclick="selectTrainingMode('speed')">
         <div class="mode-choice-top">
           <div class="mode-choice-name">Speed Training</div>
           <div class="mode-choice-icon">⚡</div>
         </div>
-        <div class="mode-choice-desc">스테이지과 무한을 분리한 속도 모드. 상단 시퀀스와 하단 시간바를 따로 가진다.</div>
-        <div class="mode-choice-meta">스테이지 / 무한</div>
+        <div class="mode-choice-desc">Speed mode</div>
+        <div class="mode-choice-meta">Stage / Infinite</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div class="mode-select-popup" id="brainModePopup">
+  <div class="mode-select-card">
+    <div class="mode-select-header">
+      <div class="mode-select-title">🧠 Brain Training</div>
+      <button class="modal-x-btn" onclick="closeBrainModePopup()" aria-label="Close">✕</button>
+    </div>
+    <div class="mode-select-sub">Stage / Infinite</div>
+    <div class="mode-choice-grid">
+      <button class="mode-choice-btn" onclick="openBrainStage()">
+        <div class="mode-choice-top">
+          <div class="mode-choice-name">Stage</div>
+          <div class="mode-choice-icon">🎯</div>
+        </div>
+        <div class="mode-choice-desc">Mode + Level</div>
+        <div class="mode-choice-meta">Clear route</div>
+      </button>
+      <button class="mode-choice-btn" onclick="startBrainInfiniteMode()">
+        <div class="mode-choice-top">
+          <div class="mode-choice-name">Infinite</div>
+          <div class="mode-choice-icon">♾️</div>
+        </div>
+        <div class="mode-choice-desc">No limit time</div>
+        <div class="mode-choice-meta">Rank on</div>
       </button>
     </div>
   </div>
@@ -2912,51 +3004,57 @@ body.haptic-flash::after {
   <div class="mode-select-card">
     <div class="mode-select-header">
       <div class="mode-select-title">⚡ Speed Training</div>
-      <button class="modal-x-btn" onclick="closeSpeedStartPopup()" aria-label="닫기">✕</button>
+      <button class="modal-x-btn" onclick="closeSpeedStartPopup()" aria-label="Close">✕</button>
     </div>
-    <div class="mode-select-sub">스테이지 / 무한 선택</div>
+    <div class="mode-select-sub">Stage / Infinite</div>
 
     <div class="speed-mode-tabs">
-      <button class="speed-mode-tab" id="speedModeTabStage" onclick="setSpeedPopupMode('stage')">스테이지</button>
-      <button class="speed-mode-tab inactive" id="speedModeTabInfinite" onclick="setSpeedPopupMode('infinite')">무한</button>
+      <button class="speed-mode-tab" id="speedModeTabStage" onclick="setSpeedPopupMode('stage')">Stage</button>
+      <button class="speed-mode-tab inactive" id="speedModeTabInfinite" onclick="setSpeedPopupMode('infinite')">Infinite</button>
     </div>
 
     <div class="speed-panel-body" id="speedStagePanel">
       <div class="speed-step-tabs">
-        <button class="speed-step-tab" id="speedStepTabKey" onclick="setSpeedPopupStep('key')">1. 키 선택</button>
-        <button class="speed-step-tab inactive" id="speedStepTabLevel" onclick="setSpeedPopupStep('level')">2. 단계 선택</button>
+        <button class="speed-step-tab" id="speedStepTabKey" onclick="setSpeedPopupStep('key')">1. Keys</button>
+        <button class="speed-step-tab inactive" id="speedStepTabLevel" onclick="setSpeedPopupStep('level')">2. Level</button>
       </div>
 
       <div class="speed-panel-section">
-        <div class="speed-panel-label">스테이지</div>
+        <div class="speed-panel-label">Stage</div>
         <div class="speed-key-grid" id="speedKeyGrid"></div>
         <div class="speed-level-grid" id="speedLevelGrid" style="margin-top:10px;"></div>
-        <div class="speed-stage-note" id="speedStageNote">3키 · 유아 단계 · 제한시간 60초</div>
+        <div class="speed-stage-note" id="speedStageNote">3 Keys · Baby · 60 sec</div>
         <div class="speed-start-actions">
-          <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">닫기</button>
-          <button class="speed-primary-btn" id="speedStartConfirmBtn" onclick="startSpeedStageTraining()">시작</button>
+          <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">Close</button>
+          <button class="speed-primary-btn disabled" id="speedStartConfirmBtn" onclick="startSpeedStageTraining()" disabled>Start</button>
         </div>
       </div>
     </div>
 
     <div class="speed-panel-body hidden" id="speedInfinitePanel">
       <div class="speed-panel-section">
-        <div class="speed-panel-label">무한</div>
+        <div class="speed-panel-label">Infinite</div>
         <div class="speed-record-card" onclick="startSpeedInfinite('normal')">
           <div class="speed-record-title">Normal</div>
-          <div class="speed-record-desc">60초 안에 최대 라운드.  최고 <span id="speedInfiniteBestNormal">0</span>R</div>
+          <div class="speed-record-desc">60 sec run · Best <span id="speedInfiniteBestNormal">0</span>R</div>
           <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;"></div>
           <div class="speed-record-dot normal"></div>
         </div>
         <div class="speed-record-card" onclick="startSpeedInfinite('hard')">
           <div class="speed-record-title">Hard</div>
-          <div class="speed-record-desc">45초 안에 더 빠른 템포로 기록 경쟁. 최고 <span id="speedInfiniteBestHard">0</span>R</div>
+          <div class="speed-record-desc">45 sec run · Best <span id="speedInfiniteBestHard">0</span>R</div>
           <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;"></div>
           <div class="speed-record-dot hard"></div>
         </div>
+        <div class="speed-record-card" onclick="startSpeedInfinite('round')">
+          <div class="speed-record-title">Round</div>
+          <div class="speed-record-desc">20 → 18 → ... → 8 sec · Best <span id="speedInfiniteBestRound">0</span>R</div>
+          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">No total limit · time resets each round</div>
+          <div class="speed-record-dot normal"></div>
+        </div>
         <div class="speed-start-actions">
-          <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">닫기</button>
-          <button class="speed-primary-btn" onclick="setSpeedPopupMode('stage')">스테이지로 돌아가기</button>
+          <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">Close</button>
+          <button class="speed-primary-btn" onclick="setSpeedPopupMode('stage')">Back</button>
         </div>
       </div>
     </div>
@@ -2967,19 +3065,19 @@ body.haptic-flash::after {
 </div>
 
 
-<!-- 콤보 토스트 -->
+<!-- Combo 토스트 -->
 <div class="combo-toast" id="comboToast" style="display:none">
   <span class="combo-stars" id="comboStars">⭐⭐⭐</span>
-  <div class="combo-main"  id="comboMain">5 콤보!</div>
-  <div class="combo-sub"   id="comboSub">집중력 살아있네</div>
+  <div class="combo-main"  id="comboMain">5 Combo!</div>
+  <div class="combo-sub"   id="comboSub">Nice focus</div>
 </div>
 
-<!-- 콤보 카운터 배지 -->
-<div class="combo-badge" id="comboBadge" style="opacity:0;pointer-events:none">🔥 0 콤보</div>
+<!-- Combo 카운터 x지 -->
+<div class="combo-badge" id="comboBadge" style="opacity:0;pointer-events:none">🔥 0 Combo</div>
 <div class="point-badge" id="pointBadge">⭐ 0P</div>
 <div class="point-toast" id="pointToast">⭐ +1P</div>
 
-<!-- 배경 레이어 -->
+<!-- x경 레이어 -->
 <div class="bg" id="bg">
 <div class="bg-scene active" id="scene-0" style="background-image:url('bg_0.jpg')"></div>
 <div class="bg-scene" id="scene-1" style="background-image:url('bg_1.jpg')"></div>
@@ -2993,7 +3091,7 @@ body.haptic-flash::after {
 <!-- 게임 UI -->
 <div class="game-wrapper" id="gameWrapper" style="display:none;opacity:0">
 
-  <!-- 왼쪽 캐릭터 (여자) -->
+  <!-- 왼쪽 캐릭터 (Woman) -->
   <div class="char-panel" id="charLeft">
     <div class="char-stage active" id="cl-0"><img src="female_0.png" alt=""></div>
     <div class="char-stage" id="cl-1"><img src="female_1.png" alt=""></div>
@@ -3007,26 +3105,26 @@ body.haptic-flash::after {
   <!-- 메인 컨테이너 -->
   <div class="container">
     <div class="signboard">
-      <div class="sign-title">기억의 한계: 1%의 도전</div>
-      <div class="sign-sub">집중력이 먼저 꺼지는 기억력 테스트</div>
+      <div class="sign-title">Limit Memory: 1% Challenge</div>
+      <div class="sign-sub">Memory test</div>
     </div>
 
-    <div class="stage-badge" id="stageBadge">🍼 유아 · 1X</div>
+    <div class="stage-badge" id="stageBadge">🍼 Baby · 1X</div>
     <div class="speed-toolbar" id="speedToolbar">
-      <div class="speed-toolbar-label">배속</div>
-      <button class="speed-chip active" id="speedChip1" onclick="setPlaySpeed(1)">1배속</button>
-      <button class="speed-chip" id="speedChip15" onclick="setPlaySpeed(1.5)">1.5배속</button>
-      <button class="speed-chip" id="speedChip2" onclick="setPlaySpeed(2)">2배속</button>
-      <div class="speed-chip-note" id="speedChipNote">패턴 재생 속도 조절</div>
+      <div class="speed-toolbar-label">Speed</div>
+      <button class="speed-chip active" id="speedChip1" onclick="setPlaySpeed(1)">1x</button>
+      <button class="speed-chip" id="speedChip15" onclick="setPlaySpeed(1.5)">1.5x</button>
+      <button class="speed-chip" id="speedChip2" onclick="setPlaySpeed(2)">2x</button>
+      <div class="speed-chip-note" id="speedChipNote">Pattern speed</div>
     </div>
 
     <div class="stats-board">
       <div class="stat">
-        <div class="stat-label">라운드</div>
+        <div class="stat-label">Round</div>
         <div class="stat-value" id="round">0</div>
       </div>
       <div class="stat">
-        <div class="stat-label">최고기록</div>
+        <div class="stat-label">Best</div>
         <div class="stat-value" id="best">0</div>
       </div>
     </div>
@@ -3038,7 +3136,7 @@ body.haptic-flash::after {
           <circle cx="30" cy="30" r="24" fill="white" opacity=".92"/>
           <circle cx="30" cy="30" r="20" fill="#ff1744" opacity=".15"/>
         </svg>
-        <span class="shape-label">동그라미</span>
+        <span class="shape-label">Circle</span>
       </button>
       <!-- 파랑 네모 -->
       <button class="btn btn-square" data-fruit="square" id="btn-square">
@@ -3046,7 +3144,7 @@ body.haptic-flash::after {
           <rect x="8" y="8" width="44" height="44" rx="6" fill="white" opacity=".92"/>
           <rect x="12" y="12" width="36" height="36" rx="4" fill="#1565c0" opacity=".15"/>
         </svg>
-        <span class="shape-label">네모</span>
+        <span class="shape-label">Square</span>
       </button>
       <!-- 노랑 세모 -->
       <button class="btn btn-triangle" data-fruit="triangle" id="btn-triangle">
@@ -3054,15 +3152,15 @@ body.haptic-flash::after {
           <polygon points="30,6 56,52 4,52" fill="white" opacity=".92"/>
           <polygon points="30,12 50,48 10,48" fill="#f9a825" opacity=".15"/>
         </svg>
-        <span class="shape-label">세모</span>
+        <span class="shape-label">Triangle</span>
       </button>
-      <!-- 초록 별 -->
+      <!-- 초록 Star -->
       <button class="btn btn-star" data-fruit="star" id="btn-star">
         <svg class="shape-icon" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
           <polygon points="30,4 36.5,21.5 55,21.5 40.5,32.5 46,50 30,39 14,50 19.5,32.5 5,21.5 23.5,21.5" fill="white" opacity=".92"/>
           <polygon points="30,10 35,24 50,24 38.5,32.5 43,46 30,37.5 17,46 21.5,32.5 10,24 25,24" fill="#2e7d32" opacity=".15"/>
         </svg>
-        <span class="shape-label">별</span>
+        <span class="shape-label">Star</span>
       </button>
       <!-- 보라 다이아 -->
       <button class="btn btn-diamond" data-fruit="diamond" id="btn-diamond">
@@ -3070,7 +3168,7 @@ body.haptic-flash::after {
           <polygon points="30,6 52,30 30,54 8,30" fill="white" opacity=".92"/>
           <polygon points="30,12 46,30 30,48 14,30" fill="#8e44ad" opacity=".18"/>
         </svg>
-        <span class="shape-label">다이아</span>
+        <span class="shape-label">Diamond</span>
       </button>
       <!-- 민트 육각 -->
       <button class="btn btn-hex" data-fruit="hex" id="btn-hex">
@@ -3078,14 +3176,14 @@ body.haptic-flash::after {
           <polygon points="30,5 49,16 49,44 30,55 11,44 11,16" fill="white" opacity=".92"/>
           <polygon points="30,12 43,20 43,40 30,48 17,40 17,20" fill="#00bfa5" opacity=".16"/>
         </svg>
-        <span class="shape-label">육각</span>
+        <span class="shape-label">Hex</span>
       </button>
     </div>
 
-    <div class="status-bubble" id="status">—  중 —</div>
+    <div class="status-bubble" id="status">— Ready —</div>
   </div>
 
-  <!-- 오른쪽 캐릭터 (남자) -->
+  <!-- 오른쪽 캐릭터 (Man) -->
   <div class="char-panel" id="charRight">
     <div class="char-stage active" id="cr-0"><img src="male_0.png" alt=""></div>
     <div class="char-stage" id="cr-1"><img src="male_1.png" alt=""></div>
@@ -3100,29 +3198,29 @@ body.haptic-flash::after {
 
 <div class="speed-screen" id="speedScreen">
   <div class="speed-screen-inner">
-    <button class="modal-x-btn" onclick="speedGoHome()" aria-label="닫기">✕</button>
+    <button class="modal-x-btn" onclick="speedGoHome()" aria-label="Close">✕</button>
     <div class="speed-top-card">
       <div class="signboard">
         <div class="sign-title">Speed Training</div>
         <div class="sign-sub" id="speedScreenSub"></div>
       </div>
-      <div class="speed-stage-badge" id="speedStageBadge">🍼 유아 · 3키</div>
+      <div class="speed-stage-badge" id="speedStageBadge">🍼 Baby · 3 Keys</div>
       <div class="speed-sequence-wrap" id="speedSequenceWrap">
         <div class="speed-sequence-row" id="speedSequenceRow"></div>
       </div>
       <div class="speed-info-row">
         <div class="speed-stat-card">
-          <div class="speed-stat-label">라운드</div>
+          <div class="speed-stat-label">Round</div>
           <div class="speed-stat-value" id="speedRound">0</div>
         </div>
         <div class="speed-stat-card">
-          <div class="speed-stat-label">최고 기록</div>
+          <div class="speed-stat-label">Best</div>
           <div class="speed-stat-value" id="speedBest">0</div>
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;justify-content:center;">
         <div class="speed-status" id="speedStatus"></div>
-        <button class="speed-ghost-btn" style="padding:6px 14px;font-size:18px;border-radius:999px;" onclick="openSpeedPausePopup()">멈춤</button>
+        <button class="speed-ghost-btn" style="padding:6px 14px;font-size:18px;border-radius:999px;" onclick="openSpeedPausePopup()">Pause</button>
       </div>
     </div>
 
@@ -3130,27 +3228,27 @@ body.haptic-flash::after {
       <div class="speed-grid" id="speedGrid">
         <button class="speed-play-btn red" data-shape="circle">
           <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="white" opacity=".92"/></svg></div>
-          <div class="speed-btn-name">동그라미</div>
+          <div class="speed-btn-name">Circle</div>
         </button>
         <button class="speed-play-btn blue" data-shape="square">
           <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" rx="6" fill="white" opacity=".92"/></svg></div>
-          <div class="speed-btn-name">네모</div>
+          <div class="speed-btn-name">Square</div>
         </button>
         <button class="speed-play-btn yellow" data-shape="triangle">
           <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,10 50,46 10,46" fill="white" opacity=".92"/></svg></div>
-          <div class="speed-btn-name">세모</div>
+          <div class="speed-btn-name">Triangle</div>
         </button>
         <button class="speed-play-btn green" data-shape="star">
           <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,7 35,23 52,23 38,33 43,49 30,39 17,49 22,33 8,23 25,23" fill="white" opacity=".92"/></svg></div>
-          <div class="speed-btn-name">별</div>
+          <div class="speed-btn-name">Star</div>
         </button>
         <button class="speed-play-btn purple" data-shape="diamond">
           <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,8 50,30 30,52 10,30" fill="white" opacity=".92"/></svg></div>
-          <div class="speed-btn-name">다이아</div>
+          <div class="speed-btn-name">Diamond</div>
         </button>
         <button class="speed-play-btn teal" data-shape="hex">
           <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,8 47,18 47,42 30,52 13,42 13,18" fill="white" opacity=".92"/></svg></div>
-          <div class="speed-btn-name">육각</div>
+          <div class="speed-btn-name">Hex</div>
         </button>
       </div>
     </div>
@@ -3159,7 +3257,7 @@ body.haptic-flash::after {
   <div class="speed-bottom-timer">
     <div class="speed-timer-card">
       <div class="speed-timer-top">
-        <div id="speedTimerLabel">남은 시간</div>
+        <div id="speedTimerLabel">Time</div>
         <div class="speed-timer-readout" id="speedTimeReadout">60</div>
       </div>
       <div class="speed-timer-track">
@@ -3171,17 +3269,17 @@ body.haptic-flash::after {
 
 <div class="speed-result-popup" id="speedResultPopup">
   <div class="speed-result-card">
-    <button class="modal-x-btn" onclick="speedGoHome()" aria-label="닫기">✕</button>
+    <button class="modal-x-btn" onclick="speedGoHome()" aria-label="Close">✕</button>
     <div class="speed-result-title" id="speedResultTitle">Speed Training</div>
     <div class="speed-result-score" id="speedResultScore">0</div>
-    <div class="speed-result-meta" id="speedResultMeta">최고 기록 0R</div>
-    <div class="speed-result-badges" id="speedResultBadgeInfo">새 배지 0개</div>
+    <div class="speed-result-meta" id="speedResultMeta">Best 0R</div>
+    <div class="speed-result-badges" id="speedResultBadgeInfo">New Badge 0</div>
     <div class="speed-result-actions">
-      <button class="speed-ghost-btn" onclick="speedGoHome()">처음으로</button>
-      <button class="speed-primary-btn" onclick="restartSpeedCurrent()">다시 시작</button>
-      <button class="speed-ghost-btn" id="speedNextStageBtn" onclick="goNextSpeedStage()" style="display:none;">다음 단계</button>
-      <button class="speed-ghost-btn" onclick="openSpeedInfiniteRanking()">무한 순위</button>
-      <button class="speed-ghost-btn" onclick="openSpeedBadgePopup()">스피드 배지</button>
+      <button class="speed-ghost-btn" onclick="speedGoHome()">Home</button>
+      <button class="speed-primary-btn" id="speedNextStageBtn" onclick="goNextSpeedStage()" style="display:none;">Next</button>
+      <button class="speed-ghost-btn" onclick="restartSpeedCurrent()">Retry</button>
+      <button class="speed-ghost-btn" onclick="openSpeedInfiniteRanking()">Rank</button>
+      <button class="speed-ghost-btn" onclick="openSpeedBadgePopup()">Badge</button>
     </div>
   </div>
 </div>
@@ -3189,29 +3287,29 @@ body.haptic-flash::after {
 
 <div class="speed-result-popup" id="speedRankPopup" onclick="if(event.target===this) closeSpeedInfiniteRanking()">
   <div class="speed-result-card speed-sheet-card">
-    <button class="modal-x-btn" onclick="closeSpeedInfiniteRanking()" aria-label="닫기">✕</button>
-    <div class="speed-result-title">무한 순위</div>
-    <div class="speed-result-meta" id="speedRankMeta">이 기기 기준 Top 10</div>
+    <button class="modal-x-btn" onclick="closeSpeedInfiniteRanking()" aria-label="Close">✕</button>
+    <div class="speed-result-title">Infinite Rank</div>
+    <div class="speed-result-meta" id="speedRankMeta">Top 10 on this device</div>
     <div id="speedRankList" class="speed-sheet-list"></div>
   </div>
 </div>
 
 <div class="speed-result-popup" id="speedBadgePopup" onclick="if(event.target===this) closeSpeedBadgePopup()">
   <div class="speed-result-card speed-sheet-card speed-badge-card">
-    <button class="modal-x-btn" onclick="closeSpeedBadgePopup()" aria-label="닫기">✕</button>
-    <div class="speed-result-title">스피드 배지</div>
-    <div class="speed-result-meta" id="speedBadgeMeta">전체 배지</div>
+    <button class="modal-x-btn" onclick="closeSpeedBadgePopup()" aria-label="Close">✕</button>
+    <div class="speed-result-title">Speed Badge</div>
+    <div class="speed-result-meta" id="speedBadgeMeta">All Badge</div>
     <div id="speedBadgeList" class="speed-sheet-list"></div>
   </div>
 </div>
 
 <div class="speed-result-popup" id="speedPausePopup" onclick="if(event.target===this) resumeSpeedGame()">
   <div class="speed-result-card speed-pause-card">
-    <div class="speed-result-title">일시정지</div>
-    <div class="speed-result-meta">계속하거나 포기할 수 있어요.</div>
+    <div class="speed-result-title">Pause</div>
+    <div class="speed-result-meta">Resume or quit.</div>
     <div class="speed-result-actions">
-      <button class="speed-ghost-btn" onclick="resumeSpeedGame()">계속</button>
-      <button class="speed-primary-btn" onclick="quitSpeedGame()">포기</button>
+      <button class="speed-ghost-btn" onclick="resumeSpeedGame()">Resume</button>
+      <button class="speed-primary-btn" onclick="quitSpeedGame()">Quit</button>
     </div>
   </div>
 </div>
@@ -3224,29 +3322,29 @@ body.haptic-flash::after {
   <div class="result-chars">
     <div class="result-char-left"><img id="resultCharLeft" src="female_0.png" alt=""></div>
     <div class="result-card">
-      <button class="modal-x-btn" onclick="returnHome()" aria-label="닫기">✕</button>
+      <button class="modal-x-btn" onclick="returnHome()" aria-label="Close">✕</button>
     <div class="result-stage-emoji" id="resultStageEmoji">🍼</div>
-    <div class="result-stage-name"  id="resultStageName">유아</div>
-    <div class="result-line" id="resultLine">여기까지였네</div>
+    <div class="result-stage-name"  id="resultStageName">Baby</div>
+    <div class="result-line" id="resultLine">Good run</div>
     <div class="result-round" id="resultRound">0</div>
-    <div class="result-unit">라운드</div>
-    <div class="result-best"  id="resultBest">최고기록 <span>0</span> 라운드</div>
+    <div class="result-unit">Round</div>
+    <div class="result-best"  id="resultBest">Best <span>0</span> Round</div>
     <div class="result-seq"   id="resultSeq"></div>
-    <div class="result-msg"   id="resultMsg">아깝다.</div>
+    <div class="result-msg"   id="resultMsg">Close one.</div>
     <div class="result-summary">
-      <div class="result-summary-item"><div class="result-summary-label">속도</div><div class="result-summary-value" id="resultSummaryMode">1X</div></div>
-      <div class="result-summary-item"><div class="result-summary-label">최고 콤보</div><div class="result-summary-value" id="resultSummaryCombo">0</div></div>
-      <div class="result-summary-item"><div class="result-summary-label">새 배지</div><div class="result-summary-value" id="resultSummaryBadges">0</div></div>
+      <div class="result-summary-item"><div class="result-summary-label">Speed</div><div class="result-summary-value" id="resultSummaryMode">1X</div></div>
+      <div class="result-summary-item"><div class="result-summary-label">Max Combo</div><div class="result-summary-value" id="resultSummaryCombo">0</div></div>
+      <div class="result-summary-item"><div class="result-summary-label">Badge</div><div class="result-summary-value" id="resultSummaryBadges">0</div></div>
     </div>
     <div class="result-daily" id="resultDaily"></div>
     <div class="result-action-row">
-      <button class="restart-btn" onclick="startGame()">다시 시작</button>
-      <button class="result-next-btn" onclick="goToNextStage()">다음 단계</button>
+      <button class="restart-btn" onclick="startGame()">Retry</button>
+      <button class="result-next-btn" onclick="goToNextStage()">Next</button>
     </div>
     <div class="result-secondary-grid">
-      <button class="rank-open-btn home-btn" onclick="goHome()">🏠 처음으로</button>
-      <button class="rank-open-btn" onclick="openRanking()">🏆 명예의 전당</button>
-      <button class="badge-open-btn" onclick="openBadges()" id="badgeOpenBtn">🏅 나의 배지</button>
+      <button class="rank-open-btn home-btn" onclick="goHome()">🏠 Home</button>
+      <button class="rank-open-btn" onclick="openRanking()">🏆 Rank</button>
+      <button class="badge-open-btn" onclick="openBadges()" id="badgeOpenBtn">🏅 Badge</button>
     </div>
     </div><!-- /result-card -->
     <div class="result-char-right"><img id="resultCharRight" src="male_0.png" alt=""></div>
@@ -3258,11 +3356,11 @@ body.haptic-flash::after {
 <div class="second-chance-popup" id="secondChancePopup">
   <div class="second-chance-card">
     <div class="second-chance-emoji">😮</div>
-    <div class="second-chance-title" id="secondChanceTitle">다시 도전할까?</div>
-    <div class="second-chance-desc" id="secondChanceDesc">같은 라운드를 처음부터 다시 보여줄게.<br>이번 재도전에는 ⭐ 1P가 필요해.</div>
+    <div class="second-chance-title" id="secondChanceTitle">Try again?</div>
+    <div class="second-chance-desc" id="secondChanceDesc">Same round again.<br>This retry needs ⭐ 1P.</div>
     <div class="second-chance-btns">
-      <button class="second-chance-continue" id="secondChanceConfirmBtn" onclick="useSecondChance()">⭐ 1P 사용</button>
-      <button class="second-chance-cancel" onclick="declineSecondChance()">그만할래</button>
+      <button class="second-chance-continue" id="secondChanceConfirmBtn" onclick="useSecondChance()">Use ⭐ 1P</button>
+      <button class="second-chance-cancel" onclick="declineSecondChance()">No</button>
     </div>
   </div>
 </div>
@@ -3270,15 +3368,15 @@ body.haptic-flash::after {
 <!-- ══ 이름 입력 팝업 ══ -->
 <div class="name-popup" id="namePopup">
   <div class="name-card">
-    <div class="name-title">기록을 남길게요</div>
+    <div class="name-title">Save score</div>
     <div class="name-score" id="nameScore">0</div>
-    <div class="name-score-label">라운드 도달</div>
+    <div class="name-score-label">Round</div>
     <input class="name-input" id="nameInput" type="text"
-      placeholder="이름을 입력해줘" maxlength="10"
+      placeholder="Name" maxlength="10"
       onkeydown="if(event.key==='Enter') confirmName()">
     <div class="name-btns">
-      <button class="name-confirm-btn" onclick="confirmName()">등록</button>
-      <button class="name-skip-btn" onclick="skipName()">건너뛰기</button>
+      <button class="name-confirm-btn" onclick="confirmName()">Save</button>
+      <button class="name-skip-btn" onclick="skipName()">Skip</button>
     </div>
   </div>
 </div>
@@ -3286,47 +3384,47 @@ body.haptic-flash::after {
 <!-- ══ 랭킹 팝업 ══ -->
 <div class="rank-popup" id="rankPopup">
   <div class="rank-card">
-    <button class="modal-x-btn" onclick="closeRanking()" aria-label="닫기">✕</button>
-    <div class="rank-header">🏆 명예의 전당</div>
+    <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
+    <div class="rank-header">🏆 Rank</div>
     <div class="rank-tabs">
-      <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('all')">전체</button>
-      <button class="rank-tab" id="rankTabToday" onclick="setRankTab('today')">오늘</button>
-      <button class="rank-tab" id="rankTabMine" onclick="setRankTab('mine')">내 기록</button>
+      <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('all')">All</button>
+      <button class="rank-tab" id="rankTabToday" onclick="setRankTab('today')">Today</button>
+      <button class="rank-tab" id="rankTabMine" onclick="setRankTab('mine')">My Run</button>
     </div>
     <div id="rankList"></div>
-    <button class="rank-close-btn" onclick="closeRanking()">닫기</button>
+    <button class="rank-close-btn" onclick="closeRanking()">Close</button>
   </div>
 </div>
 
-<!-- ══ 배지 토스트 ══ -->
+<!-- ══ x지 토스트 ══ -->
 <div class="badge-toast" id="badgeToast">
   <span class="badge-toast-icon" id="badgeToastIcon">🏅</span>
-  <span class="badge-toast-label">배지 획득!</span>
-  <span class="badge-toast-name" id="badgeToastName">이름</span>
+  <span class="badge-toast-label">Badge!</span>
+  <span class="badge-toast-name" id="badgeToastName">Name</span>
 </div>
 
 <!-- ══ 미션 토스트 ══ -->
 <audio id="bgm" src="Layered Thoughts.mp3" loop preload="auto"></audio>
 <div class="mission-toast" id="missionToast">
   <span class="mission-toast-icon" id="missionToastIcon">📅</span>
-  <span class="mission-toast-label">오늘 미션 완료!</span>
-  <span class="mission-toast-name" id="missionToastName">이름</span>
+  <span class="mission-toast-label">Daily Done!</span>
+  <span class="mission-toast-name" id="missionToastName">Name</span>
 </div>
 
-<!-- ══ 배지 팝업 ══ -->
+<!-- ══ x지 팝업 ══ -->
 <div class="badge-popup" id="badgePopup">
   <div class="badge-card">
-    <button class="modal-x-btn" onclick="closeBadges()" aria-label="닫기">✕</button>
-    <div class="badge-card-header">🏅 나의 배지</div>
+    <button class="modal-x-btn" onclick="closeBadges()" aria-label="Close">✕</button>
+    <div class="badge-card-header">🏅 My Badge</div>
     <div class="badge-card-summary" id="badgeSummary"></div>
     <div class="badge-tabs">
-      <button class="badge-tab active" id="badgeTabAll" onclick="setBadgeTab('all')">전체</button>
-      <button class="badge-tab" id="badgeTabGeneral" onclick="setBadgeTab('general')">일반</button>
-      <button class="badge-tab" id="badgeTabSpeed" onclick="setBadgeTab('speed')">속도</button>
-      <button class="badge-tab" id="badgeTabDaily" onclick="setBadgeTab('daily')">꾸준함</button>
+      <button class="badge-tab active" id="badgeTabAll" onclick="setBadgeTab('all')">All</button>
+      <button class="badge-tab" id="badgeTabGeneral" onclick="setBadgeTab('general')">Basic</button>
+      <button class="badge-tab" id="badgeTabSpeed" onclick="setBadgeTab('speed')">Speed</button>
+      <button class="badge-tab" id="badgeTabDaily" onclick="setBadgeTab('daily')">Daily</button>
     </div>
     <div class="badge-grid" id="badgeGrid"></div>
-    <button class="badge-close-btn" onclick="closeBadges()">닫기</button>
+    <button class="badge-close-btn" onclick="closeBadges()">Close</button>
   </div>
 </div>
 
@@ -3334,7 +3432,38 @@ body.haptic-flash::after {
 <script>
 
 
-const STAGE_BEST_KEY = 'limitgame_stage_best_v1';
+
+const STORAGE_KEYS = Object.freeze({
+  stageBest: 'limitgame_stage_best_v1',
+  badges: 'limitgame_badges',
+  gameStats: 'limitgame_game_stats',
+  ranking: 'limitgame_ranking',
+  playerName: 'limitgame_last_player',
+  dailyMission: 'limitgame_daily_missions_v1',
+  weeklyMission: 'limitgame_weekly_missions_v1',
+  monthlyMission: 'limitgame_monthly_missions_v1',
+  profileStats: 'limitgame_profile_stats_v1',
+  profileAvatar: 'limitgame_profile_avatar_v1',
+  mode: 'limitgame_mode_v2',
+  level: 'limitgame_stage_v2',
+  unlockedStage: 'limitgame_unlocked_stages_v2',
+  unlockedMode: 'limitgame_unlocked_mode_v2',
+  lastPlay: 'limitgame_last_play_v2',
+  playSpeed: 'limitgame_play_speed_v1',
+  soundOn: 'limitgame_sound_on',
+  vibrationOn: 'limitgame_vibration_on',
+  bgmOn: 'limitgame_bgm_on',
+  points: 'limitgame_points_v1',
+  brainInfiniteBest: 'limitgame_brain_infinite_best',
+  legacyBest: 'limitgame_best',
+  speedStageBest: 'limitgame_speed_stage_best_v1',
+  speedStageUnlock: 'limitgame_speed_stage_unlock_v1',
+  speedBadges: 'limitgame_speed_badges_v1',
+  speedInfiniteRank: 'limitgame_speed_infinite_rank_v1',
+  speedInfiniteBest: 'limitgame_speed_infinite_best_v1'
+});
+
+const STAGE_BEST_KEY = STORAGE_KEYS.stageBest;
 function getStageBestMap() {
   try {
     const obj = JSON.parse(localStorage.getItem(STAGE_BEST_KEY) || '{}');
@@ -3371,82 +3500,82 @@ function getBadgeReward(def) {
   return BADGE_POINT_REWARD;
 }
 
-// ══ 배지 시스템 ══
-const BADGE_KEY = 'limitgame_badges';
-const GAME_STATS_KEY = 'limitgame_game_stats';
+// ══ x지 시스템 ══
+const BADGE_KEY = STORAGE_KEYS.badges;
+const GAME_STATS_KEY = STORAGE_KEYS.gameStats;
 
 const BADGE_DEFS = [
   // 일반
-  { id:'first_play',            icon:'🌱', name:'첫걸음',          desc:'첫 게임 완료',                        category:'general', check:(ctx)=> ctx.stats.totalGames >= 1 },
-  { id:'round1_end',            icon:'😅', name:'숨 고르기',        desc:'1라운드에서 게임 종료',               category:'general', check:(ctx)=> ctx.score === 1 },
-  { id:'combo10',               icon:'⚡', name:'콤보 마스터',      desc:'10콤보 달성',                        category:'general', check:(ctx)=> ctx.maxCombo >= 10 },
-  { id:'combo15',               icon:'🔥', name:'콤보 폭주',        desc:'15콤보 달성',                        category:'general', check:(ctx)=> ctx.maxCombo >= 15 },
-  { id:'combo20',               icon:'💥', name:'콤보 초신성',      desc:'20콤보 달성',                        category:'general', check:(ctx)=> ctx.maxCombo >= 20 },
-  { id:'bounce_back',           icon:'📈', name:'반등의 신호',      desc:'직전 2 이하 후 이번 8 이상',           category:'general', check:(ctx)=> ctx.stats.bounceBack },
-  { id:'games25',               icon:'🎟️', name:'열혈 참가자',      desc:'총 25판 플레이',                      category:'general', check:(ctx)=> ctx.stats.totalGames >= 25 },
-  { id:'games50',               icon:'🎮', name:'단골 도전자',      desc:'총 50판 플레이',                      category:'general', check:(ctx)=> ctx.stats.totalGames >= 50 },
-  { id:'games100',              icon:'🕹️', name:'게임 친구',        desc:'총 100판 플레이',                     category:'general', check:(ctx)=> ctx.stats.totalGames >= 100 },
-  { id:'games250',              icon:'🏆', name:'한계 탐험가',      desc:'총 250판 플레이',                     category:'general', check:(ctx)=> ctx.stats.totalGames >= 250 },
-  { id:'rounds100',             icon:'🏃', name:'마라토너',         desc:'누적 라운드 100 달성',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 100 },
-  { id:'rounds250',             icon:'🥾', name:'꾸준한 발걸음',    desc:'누적 라운드 250 달성',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 250 },
-  { id:'rounds500',             icon:'🧭', name:'기억의 순례자',    desc:'누적 라운드 500 달성',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 500 },
-  { id:'rounds1000',            icon:'👑', name:'기억의 군주',      desc:'누적 라운드 1000 달성',                category:'general', check:(ctx)=> ctx.stats.totalRounds >= 1000 },
-  { id:'low10',                 icon:'🧱', name:'연습벌레',         desc:'5라운드 이하 종료 10번 경험',          category:'general', check:(ctx)=> ctx.stats.lowRoundFinishes >= 10 },
-  { id:'steady3',               icon:'🧘', name:'꾸준한 손',        desc:'최근 3판 연속 5라운드 이상',           category:'general', check:(ctx)=> ctx.stats.last3Over5 },
+  { id:'first_play',            icon:'🌱', name:'First Step',          desc:'Finish first game',                        category:'general', check:(ctx)=> ctx.stats.totalGames >= 1 },
+  { id:'round1_end',            icon:'😅', name:'Catch Breath',        desc:'End at Round 1',               category:'general', check:(ctx)=> ctx.score === 1 },
+  { id:'combo10',               icon:'⚡', name:'Combo Master',      desc:'Reach 10 Combo',                        category:'general', check:(ctx)=> ctx.maxCombo >= 10 },
+  { id:'combo15',               icon:'🔥', name:'Combo Rush',        desc:'Reach 15 Combo',                        category:'general', check:(ctx)=> ctx.maxCombo >= 15 },
+  { id:'combo20',               icon:'💥', name:'Combo Nova',      desc:'Reach 20 Combo',                        category:'general', check:(ctx)=> ctx.maxCombo >= 20 },
+  { id:'bounce_back',           icon:'📈', name:'Bounce Back',      desc:'After 2 or less, score 8+ next game',           category:'general', check:(ctx)=> ctx.stats.bounceBack },
+  { id:'games25',               icon:'🎟️', name:'Active Player',      desc:'Play 25 games',                      category:'general', check:(ctx)=> ctx.stats.totalGames >= 25 },
+  { id:'games50',               icon:'🎮', name:'Regular',      desc:'Play 50 games',                      category:'general', check:(ctx)=> ctx.stats.totalGames >= 50 },
+  { id:'games100',              icon:'🕹️', name:'Game Friend',        desc:'Play 100 games',                     category:'general', check:(ctx)=> ctx.stats.totalGames >= 100 },
+  { id:'games250',              icon:'🏆', name:'Limit Explorer',      desc:'Play 250 games',                     category:'general', check:(ctx)=> ctx.stats.totalGames >= 250 },
+  { id:'rounds100',             icon:'🏃', name:'Marathoner',         desc:'Reach 100 total rounds',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 100 },
+  { id:'rounds250',             icon:'🥾', name:'Steady Steps',    desc:'Reach 250 total rounds',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 250 },
+  { id:'rounds500',             icon:'🧭', name:'Memory Walker',    desc:'Reach 500 total rounds',                 category:'general', check:(ctx)=> ctx.stats.totalRounds >= 500 },
+  { id:'rounds1000',            icon:'👑', name:'Memory King',      desc:'Reach 1000 total rounds',                category:'general', check:(ctx)=> ctx.stats.totalRounds >= 1000 },
+  { id:'low10',                 icon:'🧱', name:'Practice Bug',         desc:'End at 5 or less 10 times',          category:'general', check:(ctx)=> ctx.stats.lowRoundFinishes >= 10 },
+  { id:'steady3',               icon:'🧘', name:'Steady Hand',        desc:'Last 3 games reach 5+ rounds',           category:'general', check:(ctx)=> ctx.stats.last3Over5 },
 
-  // 속도별 단계
-  { id:'easy_5',                icon:'🥉', name:'1X 워밍업',        desc:'1X에서 5라운드 도달',                 category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 5 },
-  { id:'easy_10',               icon:'🥈', name:'1X 집중 시동',     desc:'1X에서 10라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 10 },
-  { id:'easy_15',               icon:'🥇', name:'1X 안정 질주',     desc:'1X에서 15라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 15 },
-  { id:'easy_20',               icon:'💎', name:'1X 기억 장인',     desc:'1X에서 20라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 20 },
-  { id:'easy_25',               icon:'🏰', name:'1X 고요한 제왕',   desc:'1X에서 25라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 25 },
-  { id:'easy_30',               icon:'🧠', name:'1X 완벽 기억왕',   desc:'1X에서 30라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 30 },
+  // SpeedStar 단계
+  { id:'easy_5',                icon:'🥉', name:'1X Warm Up',        desc:'Reach 5 rounds in 1X',                 category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 5 },
+  { id:'easy_10',               icon:'🥈', name:'1X Focus Start',     desc:'Reach 10 rounds in 1X',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 10 },
+  { id:'easy_15',               icon:'🥇', name:'1X Steady Run',     desc:'Reach 15 rounds in 1X',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 15 },
+  { id:'easy_20',               icon:'💎', name:'1X Memory Craft',     desc:'Reach 20 rounds in 1X',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 20 },
+  { id:'easy_25',               icon:'🏰', name:'1X Calm King',   desc:'Reach 25 rounds in 1X',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 25 },
+  { id:'easy_30',               icon:'🧠', name:'1X Perfect Memory',   desc:'Reach 30 rounds in 1X',                category:'speed', check:(ctx)=> ctx.mode === 'easy' && ctx.score >= 30 },
 
-  { id:'normal_5',              icon:'🚗', name:'1.5X 출발',        desc:'1.5X에서 5라운드 도달',               category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 5 },
-  { id:'normal_10',             icon:'🚀', name:'1.5X 추격자',      desc:'1.5X에서 10라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 10 },
-  { id:'normal_15',             icon:'🛰️', name:'1.5X 돌파자',      desc:'1.5X에서 15라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 15 },
-  { id:'normal_20',             icon:'🌠', name:'1.5X 가속 군단',   desc:'1.5X에서 20라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 20 },
-  { id:'normal_25',             icon:'🛡️', name:'1.5X 집중 기사',   desc:'1.5X에서 25라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 25 },
-  { id:'normal_30',             icon:'🏹', name:'1.5X 예리한 눈',   desc:'1.5X에서 30라운드 도달',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 30 },
+  { id:'normal_5',              icon:'🚗', name:'1.5X Start Run',        desc:'Reach 5 rounds in 1.5X',               category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 5 },
+  { id:'normal_10',             icon:'🚀', name:'1.5X Chaser',      desc:'Reach 10 rounds in 1.5X',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 10 },
+  { id:'normal_15',             icon:'🛰️', name:'1.5X Breaker',      desc:'Reach 15 rounds in 1.5X',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 15 },
+  { id:'normal_20',             icon:'🌠', name:'1.5X Speed Squad',   desc:'Reach 20 rounds in 1.5X',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 20 },
+  { id:'normal_25',             icon:'🛡️', name:'1.5X Focus Knight',   desc:'Reach 25 rounds in 1.5X',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 25 },
+  { id:'normal_30',             icon:'🏹', name:'1.5X Sharp Eye',   desc:'Reach 30 rounds in 1.5X',              category:'speed', check:(ctx)=> ctx.mode === 'normal' && ctx.score >= 30 },
 
-  { id:'hard_5',                icon:'🌪️', name:'2X 맛보기',        desc:'2X에서 5라운드 도달',                 category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 5 },
-  { id:'hard_10',               icon:'🎯', name:'2X 입문자',        desc:'2X에서 10라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 10 },
-  { id:'hard_15',               icon:'🛸', name:'2X 돌격대',        desc:'2X에서 15라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 15 },
-  { id:'hard_20',               icon:'☄️', name:'2X 폭풍 핵심',     desc:'2X에서 20라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 20 },
-  { id:'hard_25',               icon:'👾', name:'2X 초고속 괴수',   desc:'2X에서 25라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 25 },
-  { id:'hard_30',               icon:'🪐', name:'2X 정복자',        desc:'2X에서 30라운드 도달',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 30 },
+  { id:'hard_5',                icon:'🌪️', name:'2X Try Out',        desc:'Reach 5 rounds in 2X',                 category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 5 },
+  { id:'hard_10',               icon:'🎯', name:'2X Starter',        desc:'Reach 10 rounds in 2X',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 10 },
+  { id:'hard_15',               icon:'🛸', name:'2X Raider',        desc:'Reach 15 rounds in 2X',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 15 },
+  { id:'hard_20',               icon:'☄️', name:'2X Storm Core',     desc:'Reach 20 rounds in 2X',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 20 },
+  { id:'hard_25',               icon:'👾', name:'2X Speed Beast',   desc:'Reach 25 rounds in 2X',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 25 },
+  { id:'hard_30',               icon:'🪐', name:'2X Conqueror',        desc:'Reach 30 rounds in 2X',                category:'speed', check:(ctx)=> ctx.mode === 'hard' && ctx.score >= 30 },
 
-  { id:'speed2_plays5',         icon:'🌪️', name:'고속 단골',        desc:'2X 모드로 5판 플레이',                 category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.hard || 0) >= 5 },
-  { id:'speed15_plays10',       icon:'🧲', name:'1.5X 체질',        desc:'1.5X 모드로 10판 플레이',              category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.normal || 0) >= 10 },
-  { id:'speed1_plays20',        icon:'🪶', name:'기본기의 힘',      desc:'1X 모드로 20판 플레이',                category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.easy || 0) >= 20 },
+  { id:'speed2_plays5',         icon:'🌪️', name:'Fast Regular',        desc:'Play 5 games in 2X Mode',                 category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.hard || 0) >= 5 },
+  { id:'speed15_plays10',       icon:'🧲', name:'1.5X Built For It',        desc:'Play 10 games in 1.5X Mode',              category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.normal || 0) >= 10 },
+  { id:'speed1_plays20',        icon:'🪶', name:'Base Power',      desc:'Play 20 games in 1X Mode',                category:'speed', check:(ctx)=> Number(ctx.stats.modeGames?.easy || 0) >= 20 },
 
   // 꾸준함 / 일일 미션
-  { id:'daily_play3',           icon:'☀️', name:'오늘도 한 판',     desc:'오늘 3판 플레이',                     category:'daily', check:(ctx)=> ctx.stats.todayGames >= 3 },
-  { id:'daily_play10',          icon:'📅', name:'하루 10판',        desc:'하루 10판 플레이',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 10 },
-  { id:'daily_play30',          icon:'🗓️', name:'하루 30판',        desc:'하루 30판 플레이',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 30 },
-  { id:'daily_play50',          icon:'📛', name:'하루 50판',        desc:'하루 50판 플레이',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 50 },
-  { id:'daily_play100',         icon:'🏟️', name:'하루 100판',       desc:'하루 100판 플레이',                   category:'daily', check:(ctx)=> ctx.stats.todayGames >= 100 },
-  { id:'mission_day1',          icon:'✅', name:'미션 첫 완주',      desc:'일일 미션 1일 연속 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 1 },
-  { id:'mission_day3',          icon:'🥉', name:'3일 루틴',         desc:'일일 미션 3일 연속 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 3 },
-  { id:'mission_day7',          icon:'🥈', name:'1주 루틴',         desc:'일일 미션 7일 연속 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 7 },
-  { id:'mission_day30',         icon:'🥇', name:'1개월 루틴',       desc:'일일 미션 30일 연속 완료',             category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 30 },
-  { id:'mission_clear7',        icon:'🎖️', name:'7일 성실상',       desc:'일일 미션 누적 7일 완료',              category:'daily', check:(ctx)=> Number(ctx.daily?.clearedDays || 0) >= 7 },
-  { id:'mission_clear30',       icon:'🏅', name:'30일 성실상',      desc:'일일 미션 누적 30일 완료',             category:'daily', check:(ctx)=> Number(ctx.daily?.clearedDays || 0) >= 30 },
-  { id:'stamp25',               icon:'📮', name:'스탬프 수집가',    desc:'누적 스탬프 25개',                    category:'daily', check:(ctx)=> Number(ctx.daily?.totalStamps || 0) >= 25 },
-  { id:'stamp100',              icon:'📚', name:'스탬프 박물관',    desc:'누적 스탬프 100개',                   category:'daily', check:(ctx)=> Number(ctx.daily?.totalStamps || 0) >= 100 },
-  { id:'perfect_day',           icon:'🌟', name:'완벽한 하루',      desc:'오늘의 미션 3개 전부 완료',           category:'daily', check:(ctx)=> !!ctx.daily?.dayCleared },
-  { id:'daily_longest7',        icon:'🧿', name:'루틴 지킴이',      desc:'최장 연속 완료 7일 달성',              category:'daily', check:(ctx)=> Number(ctx.daily?.longestStreak || 0) >= 7 },
-  { id:'daily_longest30',       icon:'🪙', name:'루틴 전설',        desc:'최장 연속 완료 30일 달성',             category:'daily', check:(ctx)=> Number(ctx.daily?.longestStreak || 0) >= 30 },
+  { id:'daily_play3',           icon:'☀️', name:'One More Today',     desc:'Play 3 games today',                     category:'daily', check:(ctx)=> ctx.stats.todayGames >= 3 },
+  { id:'daily_play10',          icon:'📅', name:'10 A Day',        desc:'Play 10 games today',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 10 },
+  { id:'daily_play30',          icon:'🗓️', name:'30 A Day',        desc:'Play 30 games today',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 30 },
+  { id:'daily_play50',          icon:'📛', name:'50 A Day',        desc:'Play 50 games today',                    category:'daily', check:(ctx)=> ctx.stats.todayGames >= 50 },
+  { id:'daily_play100',         icon:'🏟️', name:'100 A Day',       desc:'Play 100 games today',                   category:'daily', check:(ctx)=> ctx.stats.todayGames >= 100 },
+  { id:'mission_day1',          icon:'✅', name:'First Mission',      desc:'Clear Daily Mission 1 day in a row',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 1 },
+  { id:'mission_day3',          icon:'🥉', name:'3 Day Run',         desc:'Clear Daily Mission 3 days in a row',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 3 },
+  { id:'mission_day7',          icon:'🥈', name:'1 Week Run',         desc:'Clear Daily Mission 7 days in a row',              category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 7 },
+  { id:'mission_day30',         icon:'🥇', name:'30 Day Run',       desc:'Clear Daily Mission 30 days in a row',             category:'daily', check:(ctx)=> Number(ctx.daily?.currentStreak || 0) >= 30 },
+  { id:'mission_clear7',        icon:'🎖️', name:'7 Day Medal',       desc:'Clear Daily Mission on 7 days',              category:'daily', check:(ctx)=> Number(ctx.daily?.clearedDays || 0) >= 7 },
+  { id:'mission_clear30',       icon:'🏅', name:'30 Day Medal',      desc:'Clear Daily Mission on 30 days',             category:'daily', check:(ctx)=> Number(ctx.daily?.clearedDays || 0) >= 30 },
+  { id:'stamp25',               icon:'📮', name:'Stamp Collector',    desc:'Collect 25 stamps',                    category:'daily', check:(ctx)=> Number(ctx.daily?.totalStamps || 0) >= 25 },
+  { id:'stamp100',              icon:'📚', name:'Stamp Museum',    desc:'Collect 100 stamps',                   category:'daily', check:(ctx)=> Number(ctx.daily?.totalStamps || 0) >= 100 },
+  { id:'perfect_day',           icon:'🌟', name:'Perfect Day',      desc:'Clear all 3 missions today',           category:'daily', check:(ctx)=> !!ctx.daily?.dayCleared },
+  { id:'daily_longest7',        icon:'🧿', name:'Routine Keeper',      desc:'Reach 7 day streak',              category:'daily', check:(ctx)=> Number(ctx.daily?.longestStreak || 0) >= 7 },
+  { id:'daily_longest30',       icon:'🪙', name:'Routine Legend',        desc:'Reach 30 day streak',             category:'daily', check:(ctx)=> Number(ctx.daily?.longestStreak || 0) >= 30 },
 
-  // 모드 완주 / 마스터
-  { id:'easy_all_clear',   icon:'⭐', name:'EASY 올클리어',  desc:'EASY 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('easy') },
-  { id:'normal_all_clear', icon:'🌟', name:'NORMAL 올클리어',desc:'NORMAL 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('normal') },
-  { id:'hard_all_clear',   icon:'✨', name:'HARD 올클리어',  desc:'HARD 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('hard') },
-  { id:'hell_all_clear',   icon:'👑', name:'HELL 올클리어',  desc:'HELL 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('hell') },
-  { id:'easy_all_20',      icon:'🏅', name:'EASY 20 챌린지', desc:'EASY 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('easy') },
-  { id:'normal_all_20',    icon:'🏆', name:'NORMAL 20 챌린지',desc:'NORMAL 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('normal') },
-  { id:'hard_all_20',      icon:'💠', name:'HARD 20 챌린지', desc:'HARD 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('hard') },
-  { id:'hell_all_20',      icon:'🔥', name:'HELL 20 챌린지', desc:'HELL 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('hell') },
+  // 모드 Clear / 마스터
+  { id:'easy_all_clear',   icon:'⭐', name:'EASY All Clear',  desc:'Unlock all EASY levels', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('easy') },
+  { id:'normal_all_clear', icon:'🌟', name:'NORMAL All Clear',desc:'Unlock all NORMAL levels', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('normal') },
+  { id:'hard_all_clear',   icon:'✨', name:'HARD All Clear',  desc:'Unlock all HARD levels', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('hard') },
+  { id:'hell_all_clear',   icon:'👑', name:'HELL All Clear',  desc:'Unlock all HELL levels', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('hell') },
+  { id:'easy_all_20',      icon:'🏅', name:'EASY 20 Challenge', desc:'Reach 20 rounds in every EASY level', category:'speed', reward:1, check:(ctx)=> hasModeAll20('easy') },
+  { id:'normal_all_20',    icon:'🏆', name:'NORMAL 20 Challenge',desc:'Reach 20 rounds in every NORMAL level', category:'speed', reward:1, check:(ctx)=> hasModeAll20('normal') },
+  { id:'hard_all_20',      icon:'💠', name:'HARD 20 Challenge', desc:'Reach 20 rounds in every HARD level', category:'speed', reward:1, check:(ctx)=> hasModeAll20('hard') },
+  { id:'hell_all_20',      icon:'🔥', name:'HELL 20 Challenge', desc:'Reach 20 rounds in every HELL level', category:'speed', reward:1, check:(ctx)=> hasModeAll20('hell') },
 ];
 
 function getBadges() {
@@ -3483,7 +3612,6 @@ function updateGameStats(score, mode, maxCombo = 0) {
   stats.modeGames.easy = Number(stats.modeGames.easy || 0);
   stats.modeGames.normal = Number(stats.modeGames.normal || 0);
   stats.modeGames.hard = Number(stats.modeGames.hard || 0);
-  stats.modeGames.hell = Number(stats.modeGames.hell || 0);
   stats.modeGames.hell = Number(stats.modeGames.hell || 0);
 
   if (stats.todayKey !== todayKey) {
@@ -3599,8 +3727,8 @@ function renderBadges() {
   if (summary) {
     const earnedCount = source.filter(def => earnedMap.has(def.id)).length;
     summary.textContent = badgeTab === 'all'
-      ? `${earned.length} / ${BADGE_DEFS.length} 획득`
-      : `${earnedCount} / ${source.length} 획득`;
+      ? `${earned.length} / ${BADGE_DEFS.length} Earned`
+      : `${earnedCount} / ${source.length} Earned`;
   }
   grid.innerHTML = ordered.map(def => {
     const earnedData = earnedMap.get(def.id);
@@ -3610,15 +3738,15 @@ function renderBadges() {
         <div class="badge-point-tag">⭐ ${getBadgeReward(def)}P</div>
         <div class="badge-item-icon">${def.icon}</div>
         <div class="badge-item-name">${def.name}</div>
-        <div class="badge-item-desc">${isEarned ? (earnedData.date || '획득 완료') : def.desc}</div>
+        <div class="badge-item-desc">${isEarned ? (earnedData.date || 'Earned Done') : def.desc}</div>
       </div>`;
   }).join('');
 }
 
 
 // ══ 랭킹 시스템 ══
-const RANK_KEY = 'limitgame_ranking';
-const PLAYER_NAME_KEY = 'limitgame_last_player';
+const RANK_KEY = STORAGE_KEYS.ranking;
+const PLAYER_NAME_KEY = STORAGE_KEYS.playerName;
 let currentRankTab = 'all';
 
 function getRanking() {
@@ -3632,7 +3760,7 @@ function saveRanking(records) {
 
 function addRankRecord(name, score, stageName) {
   const records = getRanking();
-  const cleanName = (name || '익명').trim().slice(0, 10) || '익명';
+  const cleanName = (name || 'Guest').trim().slice(0, 10) || 'Guest';
   const now = new Date();
   records.push({
     name: cleanName,
@@ -3662,7 +3790,7 @@ function openNamePopup(score, stageName) {
 }
 
 function confirmName() {
-  const name = document.getElementById('nameInput').value.trim() || '익명';
+  const name = document.getElementById('nameInput').value.trim() || 'Guest';
   addRankRecord(name, window._finalScore, window._finalStage);
   document.getElementById('namePopup').classList.remove('visible');
   const overlay = document.getElementById('overlay');
@@ -3717,10 +3845,10 @@ function renderRanking() {
   const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
   if (records.length === 0) {
     const emptyMsg = currentRankTab === 'today'
-      ? '오늘 기록은 아직 없어.<br>첫 기록을 남겨봐!'
+      ? 'No record today.<br>Set the first one!'
       : currentRankTab === 'mine'
-      ? '아직 네 이름으로 저장된 기록이 없어.'
-      : '아직 기록이 없어.<br>첫 도전자가 되어봐!';
+      ? 'No saved record for your name yet.'
+      : 'No record yet.<br>Be the first!';
     list.innerHTML = `<div class="rank-empty">${emptyMsg}</div>`;
     return;
   }
@@ -3729,7 +3857,7 @@ function renderRanking() {
     <div class="rank-row ${myName && r.name === myName ? 'rank-me' : ''}">
       <div class="rank-pos">${i < 3 ? medals[i] : (i+1)}</div>
       <div class="rank-name">${r.name}</div>
-      <div class="rank-stage">${r.stage} · ${r.modeLabel || '편안'}</div>
+      <div class="rank-stage">${r.stage} · ${r.modeLabel || 'Easy'}</div>
       <div class="rank-score">${r.score}</div>
       <div class="rank-date">${r.date}</div>
     </div>
@@ -3739,25 +3867,25 @@ function renderRanking() {
 
 
 // ══ 일일 미션 시스템 ══
-const DAILY_MISSION_KEY = 'limitgame_daily_missions_v1';
+const DAILY_MISSION_KEY = STORAGE_KEYS.dailyMission;
 const DAILY_MISSION_DEFS = [
-  { id:'play3', icon:'🎮', name:'세 판만 더', desc:'오늘 3판 플레이', target:3,
+  { id:'play3', icon:'🎮', name:'3 More Games', desc:'Play 3 games today', target:3,
     progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 3 },
-  { id:'rounds12', icon:'📚', name:'기억 예열', desc:'오늘 누적 12라운드', target:12,
+  { id:'rounds12', icon:'📚', name:'Memory Warm Up', desc:'Reach 12 total rounds today', target:12,
     progress:(p)=> Number(p.totalRounds || 0), check:(p)=> Number(p.totalRounds || 0) >= 12 },
-  { id:'combo5', icon:'⚡', name:'집중 스파크', desc:'오늘 5콤보 달성', target:5,
+  { id:'combo5', icon:'⚡', name:'Focus Spark', desc:'Reach 5 Combo today', target:5,
     progress:(p)=> Number(p.maxCombo || 0), check:(p)=> Number(p.maxCombo || 0) >= 5 },
-  { id:'score5', icon:'🪜', name:'워밍업 성공', desc:'한 판 5라운드 도달', target:5,
+  { id:'score5', icon:'🪜', name:'Warm Up Clear', desc:'Reach 5 rounds in one game', target:5,
     progress:(p)=> Number(p.best || 0), check:(p)=> Number(p.best || 0) >= 5 },
-  { id:'score8', icon:'🏹', name:'집중선 돌파', desc:'한 판 8라운드 도달', target:8,
+  { id:'score8', icon:'🏹', name:'Focus Break', desc:'Reach 8 rounds in one game', target:8,
     progress:(p)=> Number(p.best || 0), check:(p)=> Number(p.best || 0) >= 8 },
-  { id:'score12', icon:'👑', name:'오늘의 에이스', desc:'한 판 12라운드 도달', target:12,
+  { id:'score12', icon:'👑', name:'Ace Today', desc:'Reach 12 rounds in one game', target:12,
     progress:(p)=> Number(p.best || 0), check:(p)=> Number(p.best || 0) >= 12 },
-  { id:'modeNormal2', icon:'🚀', name:'1.5X 적응', desc:'1.5X 모드 2판 플레이', target:2,
+  { id:'modeNormal2', icon:'🚀', name:'1.5X Ready', desc:'Play 2 games in 1.5X Mode', target:2,
     progress:(p)=> Number(p.modeGames?.normal || 0), check:(p)=> Number(p.modeGames?.normal || 0) >= 2 },
-  { id:'modeHard1', icon:'🌪️', name:'2X 맛보기', desc:'2X 모드 1판 플레이', target:1,
+  { id:'modeHard1', icon:'🌪️', name:'2X Try Out', desc:'Play 1 game in 2X Mode', target:1,
     progress:(p)=> Number(p.modeGames?.hard || 0), check:(p)=> Number(p.modeGames?.hard || 0) >= 1 },
-  { id:'modeHard2', icon:'🎯', name:'고속 적응', desc:'2X 모드 2판 플레이', target:2,
+  { id:'modeHard2', icon:'🎯', name:'Fast Ready', desc:'Play 2 games in 2X Mode', target:2,
     progress:(p)=> Number(p.modeGames?.hard || 0), check:(p)=> Number(p.modeGames?.hard || 0) >= 2 },
 ];
 
@@ -3920,8 +4048,8 @@ function renderDailyMissions() {
   const foot = document.getElementById('dailyMissionFoot');
   if (!stamp || !mini || !list || !foot) return;
 
-  stamp.textContent = `일일 ${completed} / ${state.missions.length} 완료 · 누적 완주 ${state.clearedDays}일`;
-  mini.textContent = `일일 ${completed} / ${state.missions.length} · 주간 ${getWeeklyMissionState().missions.filter(m => m.completed).length}/3`;
+  stamp.textContent = `Daily ${completed} / ${state.missions.length} done · Total ${state.clearedDays} days`;
+  mini.textContent = `Daily ${completed} / ${state.missions.length} · Weekly ${getWeeklyMissionState().missions.filter(m => m.completed).length}/3`;
   list.innerHTML = state.missions.map(m => {
     const def = getDailyMissionDef(m.id);
     if (!def) return '';
@@ -3932,13 +4060,13 @@ function renderDailyMissions() {
           <div class="daily-item-name">${def.name}</div>
           <div class="daily-item-desc">${def.desc}</div>
         </div>
-        <div class="daily-item-progress">${m.completed ? '완료' : missionProgressText(def, state.progress)}</div>
+        <div class="daily-item-progress">${m.completed ? 'Done' : missionProgressText(def, state.progress)}</div>
       </div>`;
   }).join('');
 
   foot.textContent = state.dayCleared
-    ? `오늘 미션 3개를 전부 끝냈어. 오늘 보상 ⭐ ${DAILY_POINT_REWARD}P 지급 완료 · 누적 완료 ${state.clearedDays}일`
-    : `오늘 미션 3개를 전부 끝내면 ⭐ ${DAILY_POINT_REWARD}P · 누적 완료 ${state.clearedDays}일`;
+    ? `All 3 daily missions cleared. ⭐ ${DAILY_POINT_REWARD}P done · Total ${state.clearedDays} days`
+    : `Clear all 3 daily missions for ⭐ ${DAILY_POINT_REWARD}P · Total ${state.clearedDays} days`;
 }
 
 function updateDailyMissions(score, maxCombo, mode) {
@@ -3994,19 +4122,42 @@ playBgmFor('title');
 
 
 let currentMissionTab = 'daily';
-const WEEKLY_MISSION_KEY = 'limitgame_weekly_missions_v1';
-const MONTHLY_MISSION_KEY = 'limitgame_monthly_missions_v1';
-const PROFILE_STATS_KEY = 'limitgame_profile_stats_v1';
+const WEEKLY_MISSION_KEY = STORAGE_KEYS.weeklyMission;
+const MONTHLY_MISSION_KEY = STORAGE_KEYS.monthlyMission;
+const PROFILE_STATS_KEY = STORAGE_KEYS.profileStats;
+const PROFILE_AVATAR_KEY = STORAGE_KEYS.profileAvatar;
+const PROFILE_AVATAR_OPTIONS = [
+  { emoji:'🙂', name:'Basic' },
+  { emoji:'👩', name:'Woman' },
+  { emoji:'👨', name:'Man' },
+  { emoji:'👧', name:'Girl' },
+  { emoji:'👦', name:'Boy' },
+  { emoji:'👱‍♀️', name:'Blonde Woman' },
+  { emoji:'👱‍♂️', name:'Blonde Man' },
+  { emoji:'👩🏿', name:'Black Woman' },
+  { emoji:'👨🏿', name:'Black Man' },
+  { emoji:'👩🏻', name:'Light Skin Woman' },
+  { emoji:'👨🏻', name:'Light Skin Man' },
+  { emoji:'🐶', name:'Dog' },
+  { emoji:'🐱', name:'Cat' },
+  { emoji:'🦊', name:'Fox' },
+  { emoji:'🐼', name:'Panda' },
+  { emoji:'🌷', name:'Flower' },
+  { emoji:'🌻', name:'Sunflower' },
+  { emoji:'🌳', name:'Tree' },
+  { emoji:'🍀', name:'Clover' },
+  { emoji:'⭐', name:'Star' },
+];
 
 const WEEKLY_MISSION_DEFS = [
-  { id:'weekly_daily5', icon:'🗓️', name:'주간 루틴', desc:'일일 미션 5회 완료', target:5, progress:(p)=> Number(p.dailyClears || 0), check:(p)=> Number(p.dailyClears || 0) >= 5 },
-  { id:'weekly_play20', icon:'🎮', name:'주간 몰입', desc:'이번 주 20판 플레이', target:20, progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 20 },
-  { id:'weekly_combo60', icon:'🔥', name:'주간 콤보 러시', desc:'이번 주 누적 콤보 60', target:60, progress:(p)=> Number(p.comboSum || 0), check:(p)=> Number(p.comboSum || 0) >= 60 },
+  { id:'weekly_daily5', icon:'🗓️', name:'Weekly Run', desc:'Clear Daily Mission 5 times', target:5, progress:(p)=> Number(p.dailyClears || 0), check:(p)=> Number(p.dailyClears || 0) >= 5 },
+  { id:'weekly_play20', icon:'🎮', name:'Weekly Focus', desc:'Play 20 games this week', target:20, progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 20 },
+  { id:'weekly_combo60', icon:'🔥', name:'Weekly Combo Rush', desc:'Reach 60 total Combo this week', target:60, progress:(p)=> Number(p.comboSum || 0), check:(p)=> Number(p.comboSum || 0) >= 60 },
 ];
 const MONTHLY_MISSION_DEFS = [
-  { id:'monthly_daily20', icon:'📆', name:'월간 루틴', desc:'일일 미션 20회 완료', target:20, progress:(p)=> Number(p.dailyClears || 0), check:(p)=> Number(p.dailyClears || 0) >= 20 },
-  { id:'monthly_play80', icon:'🕹️', name:'월간 출석왕', desc:'이번 달 80판 플레이', target:80, progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 80 },
-  { id:'monthly_combo200', icon:'⚡', name:'월간 집중 폭발', desc:'이번 달 누적 콤보 200', target:200, progress:(p)=> Number(p.comboSum || 0), check:(p)=> Number(p.comboSum || 0) >= 200 },
+  { id:'monthly_daily20', icon:'📆', name:'Monthly Run', desc:'Clear Daily Mission 20 times', target:20, progress:(p)=> Number(p.dailyClears || 0), check:(p)=> Number(p.dailyClears || 0) >= 20 },
+  { id:'monthly_play80', icon:'🕹️', name:'Monthly Attendance', desc:'Play 80 games this month', target:80, progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 80 },
+  { id:'monthly_combo200', icon:'⚡', name:'Monthly Focus Burst', desc:'Reach 200 total Combo this month', target:200, progress:(p)=> Number(p.comboSum || 0), check:(p)=> Number(p.comboSum || 0) >= 200 },
 ];
 
 function getWeekKey(date = new Date()) {
@@ -4070,20 +4221,20 @@ function renderMissionSection(listEl, footEl, state, defs, reward, title) {
           <div class="daily-item-name">${def?.name || ''}</div>
           <div class="daily-item-desc">${def?.desc || ''}</div>
         </div>
-        <div class="daily-item-progress">${m.completed ? '완료' : progress}</div>
+        <div class="daily-item-progress">${m.completed ? 'Done' : progress}</div>
       </div>`;
   }).join('');
   footEl.textContent = completed >= defs.length
-    ? `${title} 미션을 전부 끝냈어. 보상 ⭐ ${reward}P ${state.rewardClaimed ? '지급 완료' : '지급 대기'}`
-    : `${title} 미션 3개를 전부 끝내면 ⭐ ${reward}P를 준다.`;
+    ? `All ${title} missions cleared. ⭐ ${reward}P ${state.rewardClaimed ? 'Done' : 'Ready'}`
+    : `Clear all 3 ${title.toLowerCase()} missions for ⭐ ${reward}P.`;
 }
 function renderWeeklyMissions() {
   const state = getWeeklyMissionState();
-  renderMissionSection(document.getElementById('weeklyMissionList'), document.getElementById('weeklyMissionFoot'), state, WEEKLY_MISSION_DEFS, WEEKLY_POINT_REWARD, '주간');
+  renderMissionSection(document.getElementById('weeklyMissionList'), document.getElementById('weeklyMissionFoot'), state, WEEKLY_MISSION_DEFS, WEEKLY_POINT_REWARD, 'Weekly');
 }
 function renderMonthlyMissions() {
   const state = getMonthlyMissionState();
-  renderMissionSection(document.getElementById('monthlyMissionList'), document.getElementById('monthlyMissionFoot'), state, MONTHLY_MISSION_DEFS, MONTHLY_POINT_REWARD, '월간');
+  renderMissionSection(document.getElementById('monthlyMissionList'), document.getElementById('monthlyMissionFoot'), state, MONTHLY_MISSION_DEFS, MONTHLY_POINT_REWARD, 'Monthly');
 }
 function setMissionTab(tab) {
   currentMissionTab = tab;
@@ -4129,6 +4280,20 @@ function getProfileStats() {
   try { return JSON.parse(localStorage.getItem(PROFILE_STATS_KEY) || '{}'); } catch(e) { return {}; }
 }
 function saveProfileStats(stats) { localStorage.setItem(PROFILE_STATS_KEY, JSON.stringify(stats)); }
+function getProfileAvatar() {
+  const saved = localStorage.getItem(PROFILE_AVATAR_KEY) || '🙂';
+  return PROFILE_AVATAR_OPTIONS.find(item => item.emoji === saved)?.emoji || '🙂';
+}
+function getProfileAvatarMeta() {
+  const emoji = getProfileAvatar();
+  return PROFILE_AVATAR_OPTIONS.find(item => item.emoji === emoji) || PROFILE_AVATAR_OPTIONS[0];
+}
+function setProfileAvatar(emoji) {
+  const found = PROFILE_AVATAR_OPTIONS.find(item => item.emoji === emoji);
+  if (!found) return;
+  localStorage.setItem(PROFILE_AVATAR_KEY, found.emoji);
+  renderProfilePopup();
+}
 function updateProfileStatsAfterGame(score, maxCombo) {
   const prev = getProfileStats();
   const stats = Object.assign({ totalGames:0, totalCombo:0, bestScore:0 }, prev || {});
@@ -4146,13 +4311,13 @@ function getMyBestRankInfo(period = 'all') {
   if (period === 'today') records = records.filter(r => r.dateKey === todayKey);
   if (period === 'week') records = records.filter(r => getWeekKey(new Date(r.ts || Date.now())) === weekKey);
   if (!records.length) return '—';
-  if (!myName) return '기록 필요';
+  if (!myName) return 'Need Record';
   const mine = records.filter(r => r.name === myName);
-  if (!mine.length) return '기록 필요';
+  if (!mine.length) return 'Need Record';
   const bestMine = [...mine].sort((a,b) => (b.score - a.score) || (a.ts - b.ts))[0];
   const sorted = [...records].sort((a,b) => (b.score - a.score) || (a.ts - b.ts));
   const idx = sorted.findIndex(r => r.name === bestMine.name && r.score === bestMine.score && r.ts === bestMine.ts);
-  return idx >= 0 ? `${idx+1}위` : '—';
+  return idx >= 0 ? `${idx+1}#` : '—';
 }
 function openProfilePopup() {
   closeMissionPopup(); closeStartPopup(); closeRanking(); closeBadges();
@@ -4181,35 +4346,50 @@ function renderProfilePopup() {
   const todayRank = getMyBestRankInfo('today');
   const clearDays = Number(getDailyMissionState().clearedDays || 0);
   const avgCombo = totalGames ? (totalCombo / totalGames).toFixed(1) : '0.0';
+  const avatarMeta = getProfileAvatarMeta();
 
   if (tier) tier.textContent = '';
   if (foot) foot.textContent = '';
 
   if (hero) {
     hero.innerHTML = `
+      <div class="profile-hero-card profile-avatar-card">
+        <div class="profile-hero-label">Avatar</div>
+        <div class="profile-avatar-emoji">${avatarMeta.emoji}</div>
+        <div class="profile-avatar-name">${avatarMeta.name}</div>
+      </div>
       <div class="profile-hero-card">
-        <div class="profile-hero-label">최고 기록</div>
+        <div class="profile-hero-label">Best</div>
         <div class="profile-hero-value">${bestScore}R</div>
-        <div class="profile-hero-sub">누적 ${totalGames}판 · 평균 콤보 ${avgCombo}</div>
+        <div class="profile-hero-sub">Total ${totalGames} games · Avg combo ${avgCombo}</div>
       </div>
       <div class="profile-rank-card">
-        <div class="profile-rank-row"><span class="profile-rank-label">내 최고 순위</span><span class="profile-rank-value">${myBestRank}</span></div>
-        <div class="profile-rank-row"><span class="profile-rank-label">이번 주 순위</span><span class="profile-rank-value">${weekRank}</span></div>
-        <div class="profile-rank-row"><span class="profile-rank-label">오늘의 순위</span><span class="profile-rank-value">${todayRank}</span></div>
+        <div class="profile-rank-row"><span class="profile-rank-label">Best Rank</span><span class="profile-rank-value">${myBestRank}</span></div>
+        <div class="profile-rank-row"><span class="profile-rank-label">This Week</span><span class="profile-rank-value">${weekRank}</span></div>
+        <div class="profile-rank-row"><span class="profile-rank-label">Today</span><span class="profile-rank-value">${todayRank}</span></div>
       </div>`;
   }
 
   if (!grid) return;
   grid.innerHTML = [
-    ['누적 플레이', `${totalGames}회`, '이 기기 기준 누적'],
-    ['누적 콤보', `${totalCombo}`, '모든 판의 최고 콤보 합계'],
-    ['보유 포인트', `⭐ ${totalPoints}P`, '재도전과 보상에 쓰는 자원'],
-    ['미션 완주', `${clearDays}일`, '일일 미션 전체 완주 횟수'],
-    ['평균 콤보', `${avgCombo}`, '판당 평균 최고 콤보'],
-    ['현재 상태', bestScore >= 20 ? '집중 폭발' : bestScore >= 10 ? '상승세' : '워밍업', bestScore >= 20 ? '고득점 구간' : bestScore >= 10 ? '조금만 더' : '기록 쌓는 중'],
+    ['Games', `${totalGames}`, 'This device total'],
+    ['Total Combo', `${totalCombo}`, 'Total max combo'],
+    ['Points', `⭐ ${totalPoints}P`, 'Use for retry and rewards'],
+    ['Mission Days', `${clearDays} days`, 'Daily mission clear days'],
+    ['Avg Combo', `${avgCombo}`, 'Average max combo'],
+    ['Status', bestScore >= 20 ? 'On Fire' : bestScore >= 10 ? 'Rising' : 'Warm Up', bestScore >= 20 ? 'High zone' : bestScore >= 10 ? 'Almost there' : 'Building'],
   ].map(([label, value, sub]) =>
     `<div class="profile-stat"><div class="profile-stat-label">${label}</div><div class="profile-stat-value">${value}</div><div class="profile-stat-sub">${sub}</div></div>`
-  ).join('');
+  ).join('') + `
+    <div class="profile-avatar-picker">
+      <div class="profile-avatar-picker-head">
+        <div class="profile-avatar-picker-title">Pick Emoji</div>
+        <div class="profile-avatar-picker-note">Saved now</div>
+      </div>
+      <div class="profile-avatar-grid">
+        ${PROFILE_AVATAR_OPTIONS.map(item => `<button type="button" class="profile-avatar-option ${item.emoji === avatarMeta.emoji ? 'active' : ''}" onclick="setProfileAvatar('${item.emoji}')" aria-label="${item.name}" title="${item.name}">${item.emoji}</button>`).join('')}
+      </div>
+    </div>`;
 }
 
 function showMissionToast(missions, startDelay = 0) {
@@ -4238,12 +4418,12 @@ function showMissionToast(missions, startDelay = 0) {
 }
 
 // ══ 난이도 시스템 ══
-const MODE_KEY = 'limitgame_mode_v2';
-const LEVEL_KEY = 'limitgame_stage_v2';
-const UNLOCKED_STAGE_KEY = 'limitgame_unlocked_stages_v2';
-const UNLOCKED_MODE_KEY = 'limitgame_unlocked_mode_v2';
-const LAST_PLAY_KEY = 'limitgame_last_play_v2';
-const PLAY_SPEED_KEY = 'limitgame_play_speed_v1';
+const MODE_KEY = STORAGE_KEYS.mode;
+const LEVEL_KEY = STORAGE_KEYS.level;
+const UNLOCKED_STAGE_KEY = STORAGE_KEYS.unlockedStage;
+const UNLOCKED_MODE_KEY = STORAGE_KEYS.unlockedMode;
+const LAST_PLAY_KEY = STORAGE_KEYS.lastPlay;
+const PLAY_SPEED_KEY = STORAGE_KEYS.playSpeed;
 const PLAY_SPEED_OPTIONS = [1, 1.5, 2];
 let playSpeed = (() => {
   const raw = Number(localStorage.getItem(PLAY_SPEED_KEY) || '1');
@@ -4251,19 +4431,19 @@ let playSpeed = (() => {
 })();
 const MODE_ORDER = ['easy','normal','hard','hell'];
 const MODE_DEFS = {
-  easy:   { key:'easy',   label:'EASY',   note:'3키 · 입문용', buttons:3, nextUnlockScore:20, nextMode:'normal' },
-  normal: { key:'normal', label:'NORMAL', note:'4키 · 기본형', buttons:4, nextUnlockScore:20, nextMode:'hard' },
-  hard:   { key:'hard',   label:'HARD',   note:'5키 · 고속형', buttons:5, nextUnlockScore:20, nextMode:'hell' },
-  hell:   { key:'hell',   label:'HELL',   note:'6키 · 극한형', buttons:6, nextUnlockScore:null, nextMode:null },
+  easy:   { key:'easy',   label:'EASY',   note:'3 Keys · Easy start', buttons:3, nextUnlockScore:20, nextMode:'normal' },
+  normal: { key:'normal', label:'NORMAL', note:'4 Keys · Standard', buttons:4, nextUnlockScore:20, nextMode:'hard' },
+  hard:   { key:'hard',   label:'HARD',   note:'5 Keys · Fast', buttons:5, nextUnlockScore:20, nextMode:'hell' },
+  hell:   { key:'hell',   label:'HELL',   note:'6 Keys · Extreme', buttons:6, nextUnlockScore:null, nextMode:null },
 };
 const LEVELS = [
-  { id:'baby',       name:'유아',   emoji:'🍼', scene:0, speedMul:1.0, unlockScore:5,  unlockText:'5라운드 달성 시 유치원 해금' },
-  { id:'kinder',     name:'유치원', emoji:'🎒', scene:1, speedMul:1.1, unlockScore:7,  unlockText:'7라운드 달성 시 초등 해금' },
-  { id:'elementary', name:'초등',   emoji:'✏️', scene:2, speedMul:1.2, unlockScore:10, unlockText:'10라운드 달성 시 중등 해금' },
-  { id:'middle',     name:'중등',   emoji:'🚲', scene:3, speedMul:1.3, unlockScore:13, unlockText:'13라운드 달성 시 고등 해금' },
-  { id:'high',       name:'고등',   emoji:'📚', scene:4, speedMul:1.4, unlockScore:15, unlockText:'15라운드 달성 시 대학 해금' },
-  { id:'college',    name:'대학',   emoji:'🎓', scene:5, speedMul:1.5, unlockScore:20, unlockText:'20라운드 달성 시 대학원 해금' },
-  { id:'grad',       name:'대학원', emoji:'🔬', scene:6, speedMul:1.6, unlockScore:null, unlockText:'이 모드의 최종 단계' },
+  { id:'baby',       name:'Baby',    emoji:'🍼', scene:0, speedMul:1.0, unlockScore:5,  unlockText:'Unlock Kinder at 5R' },
+  { id:'kinder',     name:'Kinder',  emoji:'🎒', scene:1, speedMul:1.1, unlockScore:7,  unlockText:'Unlock School at 7R' },
+  { id:'elementary', name:'School',  emoji:'✏️', scene:2, speedMul:1.2, unlockScore:10, unlockText:'Unlock Middle at 10R' },
+  { id:'middle',     name:'Middle',  emoji:'🚲', scene:3, speedMul:1.3, unlockScore:13, unlockText:'Unlock High at 13R' },
+  { id:'high',       name:'High',    emoji:'📚', scene:4, speedMul:1.4, unlockScore:15, unlockText:'Unlock College at 15R' },
+  { id:'college',    name:'College', emoji:'🎓', scene:5, speedMul:1.5, unlockScore:20, unlockText:'Unlock Grad at 20R' },
+  { id:'grad',       name:'Grad',    emoji:'🔬', scene:6, speedMul:1.6, unlockScore:null, unlockText:'Final level' },
 ];
 const LEVEL_BUTTONS = {
   3: ['circle','triangle','square'],
@@ -4309,7 +4489,7 @@ function getDifficultyConfig() {
   const effectiveMul = baseMul * playSpeed;
   return {
     label: getModeConfig().label,
-    note: `${getModeConfig().note} · ${stage.name} ${baseMul.toFixed(1)}배 · 재생 ${playSpeed.toFixed(playSpeed % 1 ? 1 : 0)}배`,
+    note: `${getModeConfig().note} · ${stage.name} ${baseMul.toFixed(1)}x · Play ${playSpeed.toFixed(playSpeed % 1 ? 1 : 0)}x`,
     speed: effectiveMul,
     baseSpeed: baseMul,
     playSpeed,
@@ -4330,7 +4510,7 @@ function syncPlaySpeedUI() {
     if (el) el.classList.toggle('active', Number(value) === Number(playSpeed));
   });
   const note = document.getElementById('speedChipNote');
-  if (note) note.textContent = `패턴 재생 ${formatPlaySpeedLabel(playSpeed)}배속`;
+  if (note) note.textContent = `Play ${formatPlaySpeedLabel(playSpeed)}x`;
 }
 function setPlaySpeed(value) {
   const parsed = Number(value);
@@ -4343,8 +4523,8 @@ function setPlaySpeed(value) {
   if (gameState === STATE.SHOWING) {
     clearAllTimers();
     const cfg = getDifficultyConfig();
-    setStatus(`배속 변경 · ${formatPlaySpeedLabel(playSpeed)}배 적용`);
-    safeTimeout(() => showSequence(()=> { gameState = STATE.INPUT; setStatus('따라해봐.'); }), 0);
+    setStatus(`Speed ${formatPlaySpeedLabel(playSpeed)}x`);
+    safeTimeout(() => showSequence(()=> { gameState = STATE.INPUT; setStatus('Your turn.'); }), 0);
   }
 }
 
@@ -4353,13 +4533,13 @@ function updateStageBadge() {
   if (!badge) return;
   const stage = getSelectedLevel();
   const mode = getModeConfig();
-  badge.textContent = `${stage.emoji} ${mode.label} · ${stage.name} · ${mode.buttons}키`;
+  badge.textContent = `${stage.emoji} ${mode.label} · ${stage.name} · ${mode.buttons} Keys`;
 }
 function syncDifficultyUI() {
   const summary = document.getElementById('selectedModeSummary');
-  if (summary) summary.textContent = `${getModeConfig().label} · ${getModeConfig().buttons}키`;
+  if (summary) summary.textContent = `${getModeConfig().label} · ${getModeConfig().buttons} Keys`;
   const note = document.getElementById('modeNote');
-  if (note) note.textContent = `${getModeConfig().label} · ${getModeConfig().buttons}키 · ${getSelectedLevel().name} ${getSelectedLevel().speedMul.toFixed(1)}배 · 재생 ${formatPlaySpeedLabel(playSpeed)}배`; syncPlaySpeedUI();
+  if (note) note.textContent = `${getModeConfig().label} · ${getModeConfig().buttons} Keys · ${getSelectedLevel().name} ${getSelectedLevel().speedMul.toFixed(1)}x · Play ${formatPlaySpeedLabel(playSpeed)}x`; syncPlaySpeedUI();
   updateStageBadge();
 }
 function setDifficulty(mode) {
@@ -4403,20 +4583,20 @@ function renderModeOptions() {
     const locked = idx > unlockedModeIdx;
     const active = mode === difficulty;
     const unlockText = locked
-      ? `${getModeConfig(MODE_ORDER[idx-1]).label} 대학원 20R 필요`
-      : (def.nextMode ? `대학원 20R 달성 시 ${getModeConfig(def.nextMode).label}` : '최종 모드');
+      ? `Need ${getModeConfig(MODE_ORDER[idx-1]).label} Grad 20R`
+      : (def.nextMode ? `Clear Grad 20R for ${getModeConfig(def.nextMode).label}` : 'Final mode');
     return `<button class="mode-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" onclick="setDifficulty('${mode}')">
       <div class="mode-card-top"><div class="mode-card-name">${def.label}</div><div>${locked ? '🔒' : '✅'}</div></div>
-      <div class="mode-card-meta">${def.buttons}키 · ${def.note}</div>
+      <div class="mode-card-meta">${def.buttons} Keys · ${def.note}</div>
       <div class="mode-card-unlock">${unlockText}</div>
     </button>`;
   }).join('');
   renderResumeChip();
 }
 function getStageLockedText(idx) {
-  if (idx <= 0) return '기본 단계';
+  if (idx <= 0) return 'Base level';
   const prev = LEVELS[idx - 1];
-  return `${prev.name} ${prev.unlockScore}R 필요`;
+  return `Need ${prev.name} ${prev.unlockScore}R`;
 }
 function renderLevelOptions() {
   const grid = document.getElementById('levelGrid');
@@ -4425,10 +4605,10 @@ function renderLevelOptions() {
   grid.innerHTML = LEVELS.map((level, idx) => {
     const locked = idx > unlockedIdx;
     const active = idx === selectedLevelIdx;
-    const unlockText = locked ? getStageLockedText(idx) : (level.unlockText || '최종 단계');
+    const unlockText = locked ? getStageLockedText(idx) : (level.unlockText || 'Final level');
     return `<button class="level-card ${locked ? 'locked' : ''} ${active ? 'active' : ''}" data-level="${idx}" onclick="chooseLevel(${idx})">
       <div class="level-top"><div class="level-name">${level.emoji} ${level.name}</div><div class="level-lock">${locked ? '🔒' : '✅'}</div></div>
-      <div class="level-meta">${getModeConfig().buttons}키 · ${level.speedMul.toFixed(1)}배</div>
+      <div class="level-meta">${getModeConfig().buttons} Keys · ${level.speedMul.toFixed(1)}x</div>
       <div class="level-unlock">${unlockText}</div>
     </button>`;
   }).join('');
@@ -4480,6 +4660,7 @@ function closeStartPopup() {
 }
 function enterGame() { openModeSelectPopup(); }
 function confirmStartGame() {
+  brainInfiniteActive = false;
   initAudio();
   playUiSound('start');
   pulseVibration([14, 24, 16]);
@@ -4512,7 +4693,7 @@ function titleNext() {
   const prev = titleIdx;
   titleIdx = (titleIdx + 1) % TITLE_COUNT;
 
-  // 배경 전환
+  // x경 전환
   document.getElementById('tbg-' + prev).classList.remove('active');
   document.getElementById('tbg-' + titleIdx).classList.add('active');
 
@@ -4527,7 +4708,7 @@ function titleNext() {
   document.getElementById('tdot-' + titleIdx).classList.add('active');
 }
 
-// 1.8초 단위 슬라이드
+// 1.8초 단# 슬라이드
 titleTimer = setInterval(titleNext, 1800);
 
 function goHome() {
@@ -4563,8 +4744,8 @@ function goHome() {
 }
 
 // ══ 소리 / 진동 시스템 ══
-const SOUND_KEY = 'limitgame_sound_on';
-const VIBE_KEY = 'limitgame_vibration_on';
+const SOUND_KEY = STORAGE_KEYS.soundOn;
+const VIBE_KEY = STORAGE_KEYS.vibrationOn;
 let soundOn = localStorage.getItem(SOUND_KEY) !== '0';
 let vibrationOn = false;
 let audioCtx = null;
@@ -4653,7 +4834,7 @@ function playUiSound(kind) {
 function syncFeedbackUI() {
   const soundChip = document.getElementById('soundChip');
   if (soundChip) {
-    soundChip.textContent = soundOn ? '🔊 소리 ON' : '🔇 소리 OFF';
+    soundChip.textContent = soundOn ? '🔊 Sound ON' : '🔇 Sound OFF';
     soundChip.classList.toggle('active', soundOn);
     soundChip.classList.toggle('muted', !soundOn);
   }
@@ -4671,7 +4852,7 @@ function toggleVibration() { return; }
 
 
 // ══ BGM 시스템 ══
-const BGM_KEY = 'limitgame_bgm_on';
+const BGM_KEY = STORAGE_KEYS.bgmOn;
 let bgmOn = localStorage.getItem(BGM_KEY) === '1';
 let bgmState = 'title';
 const bgm = document.getElementById('bgm');
@@ -4682,7 +4863,7 @@ function updateBgmChip() {
   if (!chip) return;
   let label = '🎵 BGM ON';
   if (!bgmOn) label = '🎵 BGM OFF';
-  else if (bgmState === 'game') label = '🎵 BGM 대기';
+  else if (bgmState === 'game') label = '🎵 BGM Ready';
   chip.textContent = label;
   chip.classList.toggle('active', bgmOn && bgmState !== 'game');
   chip.classList.toggle('muted', !bgmOn || bgmState === 'game');
@@ -4741,18 +4922,18 @@ document.addEventListener('click', (e) => {
 
 // ── 메시지 정의 ──
 const MSGS = {
-  "유아":   ["응애...", "아직 아기잖아."],
-  "유치원": ["선생님한테 혼날 뻔.", "유치원도 쉽지 않네."],
-  "초등":   ["받아쓰기보다 어렵다.", "집중력이 먼저 하교했다."],
-  "중등":   ["중간고사보다 어렵네.", "여기서 틀리네."],
-  "고등":   ["야자 중에 졸았나.", "이건 진짜 아깝다."],
-  "대학":   ["MT 갔다 온 것 같다.", "집중력이 먼저 꺼졌다."],
-  "대학원": ["논문보다 어렵다...", "지도교수님께 혼날 뻔."],
+  "Baby":   ["Too early...", "Still just a baby."],
+  "Kids": ["Almost got caught.", "Kids is not easy either."],
+  "School":   ["Harder than a quiz.", "Focus left first."],
+  "Middle":   ["Harder than midterms.", "Missed it here."],
+  "High":   ["Fell asleep there?", "That was really close."],
+  "College":   ["Feels like after a trip.", "Focus ran out first."],
+  "College": ["Harder than a paper...", "Almost got scolded."],
 };
-const DEFAULT_MSGS = ["아깝다.", "한 끗 차이였다.", "다시 하면 될 거 같은데."];
+const DEFAULT_MSGS = ["Close one.", "So close.", "You can do it next try."];
 const EMOJI  = { circle:'🔴', square:'🔵', triangle:'🟡', star:'🟢', diamond:'🟣', hex:'🟦' };
 
-const POINT_KEY = 'limitgame_points_v1';
+const POINT_KEY = STORAGE_KEYS.points;
 const BADGE_POINT_REWARD = 1;
 const DAILY_POINT_REWARD = 1;
 const WEEKLY_POINT_REWARD = 3;
@@ -4811,7 +4992,11 @@ const STATE = { IDLE:'idle', SHOWING:'showing', WAITING:'waiting', GAMEOVER:'gam
 let gameState = STATE.IDLE;
 
 let sequence = [], playerIndex = 0, round = 0;
-let best = parseInt(localStorage.getItem('limitgame_best') || '0');
+let best = parseInt(localStorage.getItem(STORAGE_KEYS.legacyBest) || '0');
+const BRAIN_INFINITE_BEST_KEY = STORAGE_KEYS.brainInfiniteBest;
+let brainInfiniteActive = false;
+let brainInfiniteBest = parseInt(localStorage.getItem(BRAIN_INFINITE_BEST_KEY) || '0', 10);
+if (Number.isNaN(brainInfiniteBest)) brainInfiniteBest = 0;
 let currentSceneIdx = 0;
 
 // 초기 화면 상태 고정
@@ -4834,16 +5019,16 @@ applyLevelLayout();
 updatePointUI();
 
 let activeTimers = [];
-let combo = 0;  // 연속 성공 라운드 수
+let combo = 0;  // 연속 성공 Rounds 수
 let retryCount = 0;
 let pendingRetry = false;
 
-// 콤보 메시지 정의
+// Combo 메시지 정의
 const COMBO_DATA = {
-  5:  { main:'5 콤보!',   sub:'집중력 살아있네',    stars:'⭐⭐⭐',    },
-  10: { main:'10 콤보!',  sub:'이거 진짜 되는데?',  stars:'🌟🌟🌟🌟',  },
-  15: { main:'15 콤보!',  sub:'여기서 멈추면 아깝다', stars:'💫💫💫💫💫', },
-  20: { main:'20 콤보!!', sub:'대학원생 각이다',      stars:'🔥🔥🔥🔥🔥', },
+  5:  { main:'5 Combo!',   sub:'Nice focus',    stars:'⭐⭐⭐',    },
+  10: { main:'10 Combo!',  sub:'This is working.',  stars:'🌟🌟🌟🌟',  },
+  15: { main:'15 Combo!',  sub:'Too good to stop.', stars:'💫💫💫💫💫', },
+  20: { main:'20 Combo!!', sub:'College legend vibe.',      stars:'🔥🔥🔥🔥🔥', },
 };
 
 document.getElementById('best').textContent = best;
@@ -4933,6 +5118,8 @@ function startGame() {
   pendingRetry = false;
   hideSecondChancePopup();
   // 모든 팝업 닫기
+  const rankBtnHome = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
+  if (rankBtnHome) rankBtnHome.style.display = brainInfiniteActive ? '' : 'none';
   const ov = document.getElementById('overlay');
   ov.style.display = '';
   ov.classList.remove('visible');
@@ -4948,11 +5135,12 @@ function startGame() {
   });
 
   sequence = []; playerIndex = 0; round = 0; combo = 0;
+  document.getElementById('best').textContent = String(brainInfiniteActive ? brainInfiniteBest : best);
   updateRound(0);
   applyLevelLayout();
   updateStageUI();
   updateComboBadge(0);
-  setStatus('— 시작 —');
+  setStatus('— Start —');
   safeTimeout(nextRound, 900);
   stopBgm();
 }
@@ -4963,11 +5151,11 @@ function nextRound() {
   updateStageUI();
   const activeFruits = LEVEL_BUTTONS[getModeConfig().buttons] || LEVEL_BUTTONS[4];
   sequence.push(activeFruits[Math.floor(Math.random() * activeFruits.length)]);
-  setStatus('잘 봐.');
+  setStatus('Watch.');
   gameState = STATE.SHOWING;   // ← 이 순간부터 클릭 불가
   playSequence(() => {
     gameState = STATE.WAITING; // ← 시퀀스 끝나면 클릭 허용
-    setStatus('따라해봐.');
+    setStatus('Your turn.');
   });
 }
 
@@ -5026,12 +5214,12 @@ function handleInput(shape) {
 
   playerIndex++;
   if (playerIndex === sequence.length) {
-    // 라운드 클리어
+    // Rounds Clear
     gameState = STATE.SHOWING;
     combo++;
     updateComboBadge(combo);
 
-    // 콤보 마일스톤 체크 (5, 10, 15, 20)
+    // Combo 마일스톤 체크 (5, 10, 15, 20)
     if (COMBO_DATA[combo]) {
       playUiSound('combo');
       pulseVibration([12, 24, 18]);
@@ -5044,7 +5232,7 @@ function handleInput(shape) {
       b.classList.add('correct');
       safeTimeout(() => b.classList.remove('correct'), 380);
     });
-    setStatus('맞아.');
+    setStatus('Good.');
     safeTimeout(nextRound, getDifficultyConfig().nextRoundDelay);
   }
 }
@@ -5061,18 +5249,18 @@ function showSecondChancePopup() {
   const title = document.getElementById('secondChanceTitle');
   const desc = document.getElementById('secondChanceDesc');
   const btn = document.getElementById('secondChanceConfirmBtn');
-  if (title) title.textContent = retryCost === 1 ? '여기서 끝낼 거야?' : '지금 포기하면 기록이 끊겨.';
+  if (title) title.textContent = retryCost === 1 ? 'Stop here?' : 'Give up and the streak ends.';
   if (desc) {
     if (retryCost == null) {
-      desc.innerHTML = '이번 판에서는 더 이상 재도전할 수 없어.';
+      desc.innerHTML = 'No more retry in this round.';
     } else if (canAfford(retryCost)) {
-      desc.innerHTML = `이번 판을 여기서 접기엔 아까워.<br>${retryCost === 1 ? '첫 번째 재도전' : '마지막 재도전'}에 ⭐ ${retryCost}P를 쓰면 같은 라운드를 다시 보여줄게.`;
+      desc.innerHTML = `Use ⭐ ${retryCost}P for ${retryCost === 1 ? 'first retry' : 'last retry'}<br>and replay this round.`;
     } else {
-      desc.innerHTML = `포인트가 부족해.<br>필요 포인트 ⭐ ${retryCost}P · 현재 ⭐ ${points}P`;
+      desc.innerHTML = `Not enough points.<br>Need ⭐ ${retryCost}P · Now ⭐ ${points}P`;
     }
   }
   if (btn) {
-    btn.textContent = retryCost != null ? (retryCost === 1 ? '⭐ 1P 쓰고 한 번 더' : '⭐ 2P 쓰고 마지막 기회') : '재도전 종료';
+    btn.textContent = retryCost != null ? (retryCost === 1 ? '⭐ 1P Retry' : '⭐ 2P Last Retry') : 'Close Retry';
     btn.disabled = retryCost == null || !canAfford(retryCost);
     btn.style.opacity = btn.disabled ? '.5' : '1';
   }
@@ -5087,11 +5275,11 @@ function replayCurrentRound() {
   clearAllTimers();
   playerIndex = 0;
   gameState = STATE.SHOWING;
-  setStatus('한 번 더. 잘 봐.');
+  setStatus('One more. Watch.');
   safeTimeout(() => {
     playSequence(() => {
       gameState = STATE.WAITING;
-      setStatus('따라해봐.');
+      setStatus('Your turn.');
     });
   }, 280);
 }
@@ -5099,7 +5287,7 @@ function useSecondChance() {
   if (!pendingRetry) { hideSecondChancePopup(); return; }
   const retryCost = getRetryCost();
   if (retryCost == null) { hideSecondChancePopup(); gameOver(); return; }
-  if (!spendPoints(retryCost, '재도전')) {
+  if (!spendPoints(retryCost, 'Retry')) {
     showSecondChancePopup();
     return;
   }
@@ -5112,7 +5300,7 @@ function declineSecondChance() {
   hideSecondChancePopup();
   pendingRetry = false;
   secondChanceUsed = true;
-  setStatus('여기서 마무리할게.');
+  setStatus('End here.');
   safeTimeout(() => gameOver(), 60);
 }
 
@@ -5124,39 +5312,47 @@ function gameOver() {
 
   const finalScore = round;
   const stage = getSelectedLevel();
-  const finalStage = stage.name;
+  const finalStage = brainInfiniteActive ? 'Infinite' : stage.name;
   const modeLabel = getDifficultyConfig().label;
-  const unlockedRewards = tryUnlockNextLevel(finalScore);
+  const unlockedRewards = brainInfiniteActive ? [] : tryUnlockNextLevel(finalScore);
 
-  updateStageBest(difficulty, selectedLevelIdx, finalScore);
+  if (!brainInfiniteActive) updateStageBest(difficulty, selectedLevelIdx, finalScore);
   updateProfileStatsAfterGame(finalScore, combo);
 
-  const newBest = finalScore > best;
-  if (newBest) {
-    best = finalScore;
-    localStorage.setItem('limitgame_best', best);
-    document.getElementById('best').textContent = best;
+  const newBest = brainInfiniteActive ? finalScore > brainInfiniteBest : finalScore > best;
+  if (brainInfiniteActive) {
+    if (newBest) {
+      brainInfiniteBest = finalScore;
+      localStorage.setItem(BRAIN_INFINITE_BEST_KEY, String(brainInfiniteBest));
+    }
+    document.getElementById('best').textContent = String(brainInfiniteBest);
+  } else {
+    if (newBest) {
+      best = finalScore;
+      localStorage.setItem(STORAGE_KEYS.legacyBest, best);
+      document.getElementById('best').textContent = best;
+    }
   }
 
-  const msgs = MSGS[finalStage] || DEFAULT_MSGS;
+  const msgs = MSGS[stage.name] || DEFAULT_MSGS;
   let msg = msgs[Math.floor(Math.random() * msgs.length)];
-  if (newBest && finalScore > 0) msg = '신기록이야. 지금 흐름 좋다.';
-  else if (finalScore >= 15) msg = '여기까지 오면 진짜 잘한 거다.';
-  else if (finalScore >= 10) msg = '조금만 더 가면 상위권이다.';
+  if (newBest && finalScore > 0) msg = 'New record. Great pace.';
+  else if (finalScore >= 15) msg = 'That was really good.';
+  else if (finalScore >= 10) msg = 'A bit more for top rank.';
 
-  document.getElementById('resultStageEmoji').textContent = stage.emoji;
-  document.getElementById('resultStageName').textContent = finalStage + ' 수준';
-  document.getElementById('resultLine').textContent = `현재 레벨 ${modeLabel} · ${finalStage} · ${getModeConfig().buttons}키`;
+  document.getElementById('resultStageEmoji').textContent = brainInfiniteActive ? '♾️' : stage.emoji;
+  document.getElementById('resultStageName').textContent = brainInfiniteActive ? 'Brain Infinite' : (finalStage + ' Level');
+  document.getElementById('resultLine').textContent = brainInfiniteActive ? `Mode ${modeLabel} · Infinite · ${getModeConfig().buttons} Keys` : `Now ${modeLabel} · ${finalStage} · ${getModeConfig().buttons} Keys`;
   document.getElementById('resultRound').textContent = finalScore;
-  document.getElementById('resultBest').innerHTML = `최고기록 <span>${best}</span> 라운드${newBest ? ' 🎉' : ''}`;
+  document.getElementById('resultBest').innerHTML = `Best Record <span>${brainInfiniteActive ? brainInfiniteBest : best}</span> Rounds${newBest ? ' 🎉' : ''}`;
   document.getElementById('resultSeq').textContent = sequence.map(f => EMOJI[f]).join(' ');
   const unlockMsg = unlockedRewards.length
     ? unlockedRewards.map(entry => entry.type === 'mode'
-        ? `🎉 ${entry.item.label} 모드가 열렸어!`
-        : `🎉 ${entry.item.name} 단계가 열렸어!`).join(' ')
+        ? `🎉 ${entry.item.label} unlocked!`
+        : `🎉 ${entry.item.name} unlocked!`).join(' ')
     : '';
   document.getElementById('resultMsg').textContent = unlockMsg || msg;
-  document.getElementById('resultSummaryMode').textContent = `${modeLabel} · ${getModeConfig().buttons}키`;
+  document.getElementById('resultSummaryMode').textContent = brainInfiniteActive ? `${modeLabel} · Infinite` : `${modeLabel} · ${getModeConfig().buttons} Keys`;
   document.getElementById('resultSummaryCombo').textContent = combo;
 
   document.getElementById('resultCharLeft').src = `female_${stage.scene}.png`;
@@ -5167,17 +5363,21 @@ function gameOver() {
   const weeklyUpdate = updateWeeklyMissions(finalScore, combo, missionUpdate.justCleared);
   const monthlyUpdate = updateMonthlyMissions(finalScore, combo, missionUpdate.justCleared);
   const newMissions = missionUpdate.completedNow;
-  if (newBadges.length) addPoints(newBadges.reduce((sum, def) => sum + getBadgeReward(def), 0), '배지 보상');
-  if (missionUpdate.justCleared) addPoints(DAILY_POINT_REWARD, '일일 미션 완주');
-  if (weeklyUpdate.justCompletedAll) addPoints(WEEKLY_POINT_REWARD, '주간 미션 완주');
-  if (monthlyUpdate.justCompletedAll) addPoints(MONTHLY_POINT_REWARD, '월간 미션 완주');
+  if (newBadges.length) addPoints(newBadges.reduce((sum, def) => sum + getBadgeReward(def), 0), 'Badge Reward');
+  if (missionUpdate.justCleared) addPoints(DAILY_POINT_REWARD, 'Daily Mission Clear');
+  if (weeklyUpdate.justCompletedAll) addPoints(WEEKLY_POINT_REWARD, 'Weekly Mission Clear');
+  if (monthlyUpdate.justCompletedAll) addPoints(MONTHLY_POINT_REWARD, 'Monthly Mission Clear');
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
   updateNextStageButton();
+  const rankBtn = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
+  if (rankBtn) rankBtn.style.display = brainInfiniteActive ? '' : 'none';
+  const nextBtn = document.querySelector('.result-action-row .result-next-btn');
+  if (nextBtn && brainInfiniteActive) nextBtn.style.display = 'none';
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
   const dailyTotalCount = missionUpdate.state.missions.length;
 
   gameState = STATE.GAMEOVER;
-  setStatus('—  중 —');
+  setStatus('— End —');
 
   if (newBadges.length) showBadgeToast(newBadges);
   const missionDelay = newBadges.length ? Math.max(0, newBadges.length - 1) * 2280 + 1980 : 0;
@@ -5186,27 +5386,32 @@ function gameOver() {
   const resultDaily = document.getElementById('resultDaily');
   if (resultDaily) {
     if (newMissions.length) {
-      resultDaily.innerHTML = `<strong>오늘 미션 ${newMissions.length}개 달성!</strong> · ${dailyDoneCount}/${dailyTotalCount} 완료${missionUpdate.justCleared ? ` · 일일 보상 ⭐ ${DAILY_POINT_REWARD}P 지급` : ''}${weeklyUpdate.justCompletedAll ? ` · 주간 보상 ⭐ ${WEEKLY_POINT_REWARD}P` : ''}${monthlyUpdate.justCompletedAll ? ` · 월간 보상 ⭐ ${MONTHLY_POINT_REWARD}P` : ''}`;
+      resultDaily.innerHTML = `<strong>Daily ${newMissions.length} cleared!</strong> · ${dailyDoneCount}/${dailyTotalCount} done${missionUpdate.justCleared ? ` · Daily reward ⭐ ${DAILY_POINT_REWARD}P` : ''}${weeklyUpdate.justCompletedAll ? ` · Weekly reward ⭐ ${WEEKLY_POINT_REWARD}P` : ''}${monthlyUpdate.justCompletedAll ? ` · Monthly reward ⭐ ${MONTHLY_POINT_REWARD}P` : ''}`;
     } else {
-      resultDaily.innerHTML = `오늘 미션 진행도 ${dailyDoneCount}/${dailyTotalCount}${missionUpdate.justCleared ? ` · 일일 보상 ⭐ ${DAILY_POINT_REWARD}P 지급` : ''}${weeklyUpdate.justCompletedAll ? ` · 주간 보상 ⭐ ${WEEKLY_POINT_REWARD}P` : ''}${monthlyUpdate.justCompletedAll ? ` · 월간 보상 ⭐ ${MONTHLY_POINT_REWARD}P` : ''}`;
+      resultDaily.innerHTML = `Daily progress ${dailyDoneCount}/${dailyTotalCount}${missionUpdate.justCleared ? ` · Daily reward ⭐ ${DAILY_POINT_REWARD}P` : ''}${weeklyUpdate.justCompletedAll ? ` · Weekly reward ⭐ ${WEEKLY_POINT_REWARD}P` : ''}${monthlyUpdate.justCompletedAll ? ` · Monthly reward ⭐ ${MONTHLY_POINT_REWARD}P` : ''}`;
     }
   }
 
   window._finalScore = finalScore;
-  window._finalStage = finalStage;
+  window._finalStage = brainInfiniteActive ? `Brain Infinite · ${modeLabel}` : finalStage;
 
   const overlay = document.getElementById('overlay');
   const popup = document.getElementById('namePopup');
   playBgmFor('result');
   if (overlay) {
     overlay.classList.remove('visible');
-    overlay.style.display = 'none';
+    overlay.style.display = brainInfiniteActive ? 'none' : '';
   }
   if (popup) popup.classList.remove('visible');
 
   window.setTimeout(() => {
     try {
-      openNamePopup(window._finalScore, window._finalStage);
+      if (brainInfiniteActive) {
+        openNamePopup(window._finalScore, window._finalStage);
+      } else {
+        const overlay = document.getElementById('overlay');
+        if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
+      }
     } catch (e) {
       const overlay = document.getElementById('overlay');
       if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
@@ -5249,13 +5454,13 @@ function updateNextStageButton() {
   if (!target) {
     btn.disabled = true;
     btn.classList.add('locked');
-    btn.title = '마지막 단계야';
+    btn.title = 'Last level';
     return;
   }
 
   btn.disabled = !!target.locked;
   btn.classList.toggle('locked', !!target.locked);
-  btn.title = target.locked ? `해금 후 이동 가능: ${target.label}` : `${target.label}로 이동`;
+  btn.title = target.locked ? `Move after unlock: ${target.label}` : `${target.label}Go to`;
 }
 
 function goToNextStage() {
@@ -5271,9 +5476,9 @@ function goToNextStage() {
 
 function updateStageUI() {
   const stage = getSelectedLevel();
-  document.getElementById('stageBadge').textContent = `${stage.emoji} ${getDifficultyConfig().label} · ${stage.name} · ${getModeConfig().buttons}키`; syncPlaySpeedUI();
+  document.getElementById('stageBadge').textContent = `${stage.emoji} ${getDifficultyConfig().label} · ${stage.name} · ${getModeConfig().buttons} Keys`; syncPlaySpeedUI();
 
-  // 배경 씬 전환
+  // x경 씬 전환
   if (stage.scene !== currentSceneIdx) {
     document.getElementById('scene-' + currentSceneIdx).classList.remove('active');
     document.getElementById('scene-' + stage.scene).classList.add('active');
@@ -5293,11 +5498,11 @@ function updateStageUI() {
 function updateRound(n) { document.getElementById('round').textContent = n; }
 function setStatus(m)   { document.getElementById('status').textContent = m; }
 
-// ── 콤보 헬퍼 ──
+// ── Combo 헬퍼 ──
 function updateComboBadge(n) {
   const badge = document.getElementById('comboBadge');
   if (n < 2) { badge.classList.remove('visible'); return; }
-  badge.textContent = '🔥 ' + n + ' 콤보';
+  badge.textContent = '🔥 ' + n + ' Combo';
   badge.classList.add('visible');
   badge.classList.remove('pulse-anim');
   void badge.offsetWidth; // reflow
@@ -5333,13 +5538,13 @@ function showComboToast(n) {
 
 <script>
 (function() {
-  const SPEED_STAGE_BEST_KEY = 'limitgame_speed_stage_best_v1';
-  const SPEED_STAGE_UNLOCK_KEY = 'limitgame_speed_stage_unlock_v1';
-  const SPEED_BADGE_KEY = 'limitgame_speed_badges_v1';
-  const SPEED_INFINITE_RANK_KEY = 'limitgame_speed_infinite_rank_v1';
-  const SPEED_INFINITE_BEST_KEY = 'limitgame_speed_infinite_best_v1';
+  const SPEED_STAGE_BEST_KEY = STORAGE_KEYS.speedStageBest;
+  const SPEED_STAGE_UNLOCK_KEY = STORAGE_KEYS.speedStageUnlock;
+  const SPEED_BADGE_KEY = STORAGE_KEYS.speedBadges;
+  const SPEED_INFINITE_RANK_KEY = STORAGE_KEYS.speedInfiniteRank;
+  const SPEED_INFINITE_BEST_KEY = STORAGE_KEYS.speedInfiniteBest;
   const SPEED_STAGE_DURATIONS = [45, 42, 39, 36, 33, 30, 27];
-  const SPEED_INFINITE_DURATIONS = { normal: 60, hard: 45 };
+  const SPEED_INFINITE_DURATIONS = { normal: 60, hard: 45, round: 20 };
   const SHAPES = ['circle','square','triangle','star','diamond','hex'];
   const SHAPE_META = {
     circle: { color:'#FF0000' },
@@ -5380,14 +5585,26 @@ function showComboToast(n) {
 
   function getStageLevels() {
     return Array.isArray(window.LEVELS) ? window.LEVELS : [
-      { name:'유아', emoji:'🍼', scene:0 },
-      { name:'유치원', emoji:'🎒', scene:1 },
-      { name:'초등', emoji:'✏️', scene:2 },
-      { name:'중등', emoji:'🚲', scene:3 },
-      { name:'고등', emoji:'📚', scene:4 },
-      { name:'대학', emoji:'🎓', scene:5 },
-      { name:'대학원', emoji:'🔬', scene:6 }
+      { name:'Baby', emoji:'🍼', scene:0 },
+      { name:'Kids', emoji:'🎒', scene:1 },
+      { name:'School', emoji:'✏️', scene:2 },
+      { name:'Middle', emoji:'🚲', scene:3 },
+      { name:'High', emoji:'📚', scene:4 },
+      { name:'College', emoji:'🎓', scene:5 },
+      { name:'Grad', emoji:'🔬', scene:6 }
     ];
+  }
+  function getLevelNameEn(name) {
+    const map = {
+      'Baby':'Baby',
+      'Kids':'Kinder',
+      'School':'School',
+      'Middle':'Middle',
+      'High':'High',
+      'College':'College',
+      'Grad':'Grad'
+    };
+    return map[name] || name || '';
   }
   function getSpeedStageBestMap() {
     try {
@@ -5442,13 +5659,15 @@ function showComboToast(n) {
     const levels = getStageLevels();
     [3,4,5,6].forEach(key => {
       levels.forEach((lv, idx) => {
-        defs.push({ id:`stage_${key}_${idx}`, label:`${key}키 ${lv.name} 클리어`, unlocked:false });
+        defs.push({ id:`stage_${key}_${idx}`, label:`${key} Keys ${lv.name} Clear`, unlocked:false });
       });
     });
-    defs.push({ id:'infinite_normal_10', label:'무한 Normal 10R', unlocked:false });
-    defs.push({ id:'infinite_normal_20', label:'무한 Normal 20R', unlocked:false });
-    defs.push({ id:'infinite_hard_10', label:'무한 Hard 10R', unlocked:false });
-    defs.push({ id:'infinite_hard_20', label:'무한 Hard 20R', unlocked:false });
+    defs.push({ id:'infinite_normal_10', label:'Infinite Normal 10R', unlocked:false });
+    defs.push({ id:'infinite_normal_20', label:'Infinite Normal 20R', unlocked:false });
+    defs.push({ id:'infinite_hard_10', label:'Infinite Hard 10R', unlocked:false });
+    defs.push({ id:'infinite_hard_20', label:'Infinite Hard 20R', unlocked:false });
+    defs.push({ id:'infinite_round_10', label:'Infinite Round 10R', unlocked:false });
+    defs.push({ id:'infinite_round_20', label:'Infinite Round 20R', unlocked:false });
     const owned = getSpeedBadges();
     return defs.map(d => ({ ...d, unlocked: owned.some(x => x.id === d.id) }));
   }
@@ -5480,7 +5699,7 @@ function showComboToast(n) {
   }
   function updateSpeedInfiniteRanking(mode, score) {
     const map = getSpeedInfiniteRankMap();
-    const key = mode === 'hard' ? 'hard' : 'normal';
+    const key = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     const list = Array.isArray(map[key]) ? map[key] : [];
     list.push({ score: Number(score || 0), ts: Date.now() });
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
@@ -5548,6 +5767,7 @@ function showComboToast(n) {
     if (levelTab) levelTab.classList.toggle('inactive', speedState.popupStep !== 'level');
     if (keyGrid) keyGrid.style.display = speedState.popupStep === 'key' ? 'grid' : 'none';
     if (levelGrid) levelGrid.style.display = speedState.popupStep === 'level' ? 'grid' : 'none';
+    updateSpeedStartButtonState?.();
   }
   window.setSpeedPopupMode = function(mode) {
     speedState.popupMode = mode === 'infinite' ? 'infinite' : 'stage';
@@ -5567,8 +5787,10 @@ function showComboToast(n) {
     syncSpeedPopupStepUI();
     const n = document.getElementById('speedInfiniteBestNormal');
     const h = document.getElementById('speedInfiniteBestHard');
+    const r = document.getElementById('speedInfiniteBestRound');
     if (n) n.textContent = String(getSpeedInfiniteBest('normal'));
     if (h) h.textContent = String(getSpeedInfiniteBest('hard'));
+    if (r) r.textContent = String(getSpeedInfiniteBest('round'));
     closeModeSelectPopup();
     const el = document.getElementById('speedStartPopup');
     if (!el) return;
@@ -5576,12 +5798,55 @@ function showComboToast(n) {
     document.body.classList.add('popup-open');
   }
   window.closeSpeedStartPopup = closeSpeedStartPopup;
+  function closeBrainModePopup() {
+    const el = document.getElementById('brainModePopup');
+    if (el) el.classList.remove('visible');
+    if (!document.getElementById('modeSelectPopup')?.classList.contains('visible') && !document.getElementById('startPopup')?.classList.contains('visible')) {
+      document.body.classList.remove('popup-open');
+    }
+  }
+  function openBrainModePopup() {
+    closeModeSelectPopup();
+    const el = document.getElementById('brainModePopup');
+    if (!el) return;
+    el.classList.add('visible');
+    document.body.classList.add('popup-open');
+  }
+  window.closeBrainModePopup = closeBrainModePopup;
+  window.openBrainStage = function() {
+    brainInfiniteActive = false;
+    closeBrainModePopup();
+    openStartPopup();
+  };
+  window.startBrainInfiniteMode = function() {
+    brainInfiniteActive = true;
+    closeBrainModePopup();
+    closeStartPopup();
+    initAudio();
+    playUiSound('start');
+    pulseVibration([14, 24, 16]);
+    saveProgressState();
+    saveLastPlay();
+    stopBgm();
+    clearInterval(titleTimer);
+    const ts = document.getElementById('titleScreen');
+    ts.classList.add('hidden');
+    const gw = document.getElementById('gameWrapper');
+    gw.style.display = 'flex';
+    gw.classList.remove('hidden');
+    gw.style.opacity = '0';
+    gw.style.transition = 'opacity .6s ease';
+    requestAnimationFrame(() => { gw.style.opacity = '1'; });
+    document.getElementById('overlay').style.display = '';
+    document.getElementById('comboToast').style.display = '';
+    applyLevelLayout();
+    syncPlaySpeedUI();
+    setTimeout(() => { ts.style.display = 'none'; }, 700);
+    setTimeout(startGame, 400);
+  };
   window.selectTrainingMode = function(mode) {
     if (mode === 'speed') openSpeedStartPopup();
-    else {
-      closeModeSelectPopup();
-      openStartPopup();
-    }
+    else openBrainModePopup();
   };
 
   window.enterGame = function() {
@@ -5598,8 +5863,8 @@ function showComboToast(n) {
       const opened = keyMinIdx <= unlockIdx;
       return `
       <button class="speed-key-btn ${count === speedState.selectedKeyCount ? 'active' : ''}" ${opened ? `onclick="selectSpeedStageKey(${count})"` : 'disabled'}>
-        <div class="speed-key-title">${count}키 ${opened ? '' : '🔒'}</div>
-        <div class="speed-key-sub">${opened ? '10R마다 패턴' : '이전 키 필요'}</div>
+        <div class="speed-key-title">${count} Keys ${opened ? '' : '🔒'}</div>
+        <div class="speed-key-sub">${opened ? '10R pattern' : 'Need prev key'}</div>
       </button>
     `}).join('');
   }
@@ -5613,18 +5878,26 @@ function showComboToast(n) {
       <button class="speed-level-btn ${idx === speedState.selectedLevelIdx ? 'active' : ''}" ${opened ? `onclick="selectSpeedStageLevel(${idx})"` : 'disabled'}>
         <div class="speed-level-top">
           <span class="speed-level-emoji">${level.emoji || '🏁'}</span>
-          <span class="speed-level-name">${level.name}${opened ? '' : ' 🔒'}</span>
+          <span class="speed-level-name">${getLevelNameEn(level.name)}${opened ? '' : ' 🔒'}</span>
         </div>
-        <div class="speed-level-meta">${speedState.selectedKeyCount}키 · ${SPEED_STAGE_DURATIONS[idx] || 60}초 · 최고 ${getSpeedStageBest(speedState.selectedKeyCount, idx)}R</div>
+        <div class="speed-level-meta">${speedState.selectedKeyCount} Keys · ${SPEED_STAGE_DURATIONS[idx] || 60} sec · Best ${getSpeedStageBest(speedState.selectedKeyCount, idx)}R</div>
       </button>
     `}).join('');
+  }
+  function updateSpeedStartButtonState() {
+    const btn = document.getElementById('speedStartConfirmBtn');
+    if (!btn) return;
+    const ready = speedState.popupStep === 'level' && isSpeedStageUnlocked(speedState.selectedKeyCount, speedState.selectedLevelIdx);
+    btn.disabled = !ready;
+    btn.classList.toggle('disabled', !ready);
   }
   function updateSpeedStageSummary() {
     const levels = getStageLevels();
     const level = levels[speedState.selectedLevelIdx] || levels[0];
     const note = document.getElementById('speedStageNote');
     const opened = isSpeedStageUnlocked(speedState.selectedKeyCount, speedState.selectedLevelIdx);
-    if (note) note.textContent = `${speedState.selectedKeyCount}키 · ${level.name} 단계 · 제한시간 ${SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60}초 · 최대 시퀀스 10칸${opened ? '' : ' · 잠금'}`;
+    if (note) note.textContent = `${speedState.selectedKeyCount} Keys · ${getLevelNameEn(level.name)} · ${SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60} sec · Max 10${opened ? '' : ' · Lock'}`;
+    updateSpeedStartButtonState();
   }
   window.selectSpeedStageKey = function(count) {
     speedState.selectedKeyCount = Math.max(3, Math.min(6, Number(count || 3)));
@@ -5634,11 +5907,13 @@ function showComboToast(n) {
     speedState.popupMode = 'stage';
     speedState.popupStep = 'level';
     syncSpeedPopupStepUI();
+    updateSpeedStartButtonState();
   };
   window.selectSpeedStageLevel = function(idx) {
     speedState.selectedLevelIdx = idx;
     renderSpeedLevelOptions();
     updateSpeedStageSummary();
+    updateSpeedStartButtonState();
   };
 
   function setStageScene(sceneIdx) {
@@ -5667,13 +5942,33 @@ function showComboToast(n) {
     screen.classList.remove('visible');
     setTimeout(() => { screen.style.display = 'none'; }, 250);
   }
-  function getInfiniteButtonCount(round) {
+  function getInfiniteRoundDuration(round, mode) {
+    if (mode === 'round') return Math.max(8, 20 - ((Math.max(1, round) - 1) * 2));
+    return SPEED_INFINITE_DURATIONS[mode === 'hard' ? 'hard' : 'normal'] || 60;
+  }
+  function getInfiniteButtonCount(round, mode) {
+    if (mode === 'round') {
+      if (round >= 13) return 6;
+      if (round >= 8) return 5;
+      if (round >= 4) return 4;
+      return 3;
+    }
     if (round >= 13) return 6;
     if (round >= 8) return 5;
     if (round >= 4) return 4;
     return 3;
   }
   function getInfiniteSeqLen(round, mode) {
+    if (mode === 'round') {
+      if (round >= 15) return 11;
+      if (round >= 12) return 10;
+      if (round >= 9) return 9;
+      if (round >= 7) return 8;
+      if (round >= 5) return 7;
+      if (round >= 3) return 6;
+      if (round >= 2) return 5;
+      return 4;
+    }
     if (mode === 'hard') {
       if (round >= 15) return 10;
       if (round >= 12) return 9;
@@ -5696,7 +5991,9 @@ function showComboToast(n) {
     return Math.min(10, base + Math.floor((round - 1) / 2));
   }
   function getActiveShapes() {
-    const count = speedState.type === 'stage' ? speedState.selectedKeyCount : getInfiniteButtonCount(speedState.round);
+    const count = speedState.type === 'stage'
+      ? speedState.selectedKeyCount
+      : getInfiniteButtonCount(speedState.round, speedState.infiniteMode);
     return SHAPES.slice(0, count);
   }
   function applySpeedLayout() {
@@ -5746,8 +6043,8 @@ function showComboToast(n) {
     const sub = document.getElementById('speedScreenSub');
     if (badge) {
       const left = speedState.type === 'stage'
-        ? `${level.emoji || '🏁'} ${level.name} · ${speedState.selectedKeyCount}키`
-        : `${speedState.infiniteMode === 'hard' ? '🔴 Hard' : '🟠 Normal'} · 가변키`;
+        ? `${level.emoji || '🏁'} ${getLevelNameEn(level.name)} · ${speedState.selectedKeyCount} Keys`
+        : `${speedState.infiniteMode === 'hard' ? '🔴 Hard' : speedState.infiniteMode === 'round' ? '🟡 Round' : '🟠 Normal'} · Auto Keys`;
       badge.textContent = left;
     }
     if (round) round.textContent = String(speedState.round);
@@ -5759,8 +6056,10 @@ function showComboToast(n) {
     }
     if (sub) {
       sub.textContent = speedState.type === 'stage'
-        ? `${level.name} 단계 · 제한시간 ${speedState.currentDuration}초`
-        : `${speedState.currentDuration}초 안에 최대 라운드 기록전`;
+        ? `${level.name} · ${speedState.currentDuration} sec`
+        : (speedState.infiniteMode === 'round'
+            ? `Round ${speedState.round} · ${speedState.currentDuration} sec`
+            : `${speedState.currentDuration} sec run`);
     }
   }
   function updateSpeedStatus(msg) {
@@ -5783,7 +6082,7 @@ function showComboToast(n) {
       readout.classList.toggle('danger', left <= 10);
       readout.classList.toggle('critical', left <= 3);
     }
-    if (label) label.textContent = left <= 10 ? '남은 시간' : '남은 시간';
+    if (label) label.textContent = 'Time';
   }
   function maybePlayCountdown() {
     const sec = Math.ceil(speedState.remaining);
@@ -5831,6 +6130,9 @@ function showComboToast(n) {
     }, 80);
   }
   function prepareSpeedRound() {
+    if (speedState.type === 'infinite') {
+      speedState.currentDuration = getInfiniteRoundDuration(speedState.round, speedState.infiniteMode);
+    }
     applySpeedLayout();
     speedState.sequence = genSpeedSequence();
     speedState.progress = 0;
@@ -5861,9 +6163,9 @@ function showComboToast(n) {
   };
   window.startSpeedInfinite = function(mode) {
     speedState.type = 'infinite';
-    speedState.infiniteMode = mode === 'hard' ? 'hard' : 'normal';
+    speedState.infiniteMode = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     speedState.round = 1;
-    speedState.currentDuration = SPEED_INFINITE_DURATIONS[speedState.infiniteMode];
+    speedState.currentDuration = getInfiniteRoundDuration(1, speedState.infiniteMode);
     speedState.selectedLevelIdx = 0;
     startSpeedCore();
   };
@@ -5906,7 +6208,7 @@ function showComboToast(n) {
     } else {
       speedState.progress = 0;
       renderSpeedSequence();
-      updateSpeedStatus('처음부터');
+      updateSpeedStatus('Reset');
       playUiSound?.('wrong');
       if (btn) {
         btn.classList.add('wrong');
@@ -5930,11 +6232,13 @@ function showComboToast(n) {
     let newBadges = 0;
     if (speedState.type === 'stage' && success) {
       const level = (getStageLevels()[speedState.selectedLevelIdx] || {}).name || '';
-      newBadges += addSpeedBadge(`stage_${speedState.selectedKeyCount}_${speedState.selectedLevelIdx}`, `${speedState.selectedKeyCount}키 ${level} 클리어`);
+      newBadges += addSpeedBadge(`stage_${speedState.selectedKeyCount}_${speedState.selectedLevelIdx}`, `${speedState.selectedKeyCount} Keys ${level} Clear`);
       unlockNextSpeedStage();
     }
-    if (speedState.type === 'infinite' && score >= 10) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_10`, `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 10R`);
-    if (speedState.type === 'infinite' && score >= 20) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_20`, `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 20R`);
+    const infiniteLabel = speedState.infiniteMode === 'hard' ? 'Hard' : (speedState.infiniteMode === 'round' ? 'Round' : 'Normal');
+    if (speedState.type === 'infinite' && score >= 10) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_10`, `${infiniteLabel} 10R`);
+    if (speedState.type === 'infinite' && score >= 20) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_20`, `${infiniteLabel} 20R`);
+    if (newBadges > 0 && typeof addPoints === 'function') addPoints(newBadges, 'Speed Badge');
 
     const title = document.getElementById('speedResultTitle');
     const scoreEl = document.getElementById('speedResultScore');
@@ -5942,15 +6246,15 @@ function showComboToast(n) {
     const badgeInfo = document.getElementById('speedResultBadgeInfo');
     const nextBtn = document.getElementById('speedNextStageBtn');
     if (title) title.textContent = speedState.type === 'stage'
-      ? (success ? '클리어!' : '실패')
-      : `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 기록 종료`;
+      ? (success ? 'Clear!' : 'Fail')
+      : `${infiniteLabel} End`;
     if (scoreEl) scoreEl.textContent = String(score);
     if (meta) {
       meta.textContent = speedState.type === 'stage'
-        ? `${speedState.selectedKeyCount}키 · ${(getStageLevels()[speedState.selectedLevelIdx] || {}).name || ''} · 최고 기록 ${best}R`
-        : `${speedState.currentDuration}초 기록전 · 최고 기록 ${best}R`;
+        ? `${speedState.selectedKeyCount} Keys · ${getLevelNameEn((getStageLevels()[speedState.selectedLevelIdx] || {}).name || '')} · Best ${best}R`
+        : `${infiniteLabel} · Best ${best}R`;
     }
-    if (badgeInfo) badgeInfo.textContent = `새 배지 ${newBadges}개 · 보유 ${getSpeedBadges().length}개`;
+    if (badgeInfo) badgeInfo.textContent = `New Badge ${newBadges} · Total ${getSpeedBadges().length}`;
     if (nextBtn) nextBtn.style.display = (speedState.type === 'stage' && success && stageIndexFor(speedState.selectedKeyCount, speedState.selectedLevelIdx) < 27) ? '' : 'none';
     document.getElementById('speedResultPopup')?.classList.add('visible');
   }
@@ -5972,16 +6276,17 @@ function showComboToast(n) {
   window.openSpeedInfiniteRanking = function() {
     const listNormal = getSpeedInfiniteRanking('normal');
     const listHard = getSpeedInfiniteRanking('hard');
+    const listRound = getSpeedInfiniteRanking('round');
     const root = document.getElementById('speedRankList');
     const meta = document.getElementById('speedRankMeta');
-    if (meta) meta.textContent = '이 기기 기준 Top 10';
+    if (meta) meta.textContent = 'Top 10 on this device';
     if (root) {
       const renderRows = (arr) => {
-        if (!arr.length) return '<div class="speed-empty">기록 없음</div>';
+        if (!arr.length) return '<div class="speed-empty">No Record</div>';
         return arr.map((r,i)=>`
           <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
-            <div class="speed-rank-pos">${i+1}위</div>
-            <div class="speed-rank-label">${i===0 ? '최고 기록' : '기록'}</div>
+            <div class="speed-rank-pos">#${i+1}</div>
+            <div class="speed-rank-label">${i===0 ? 'Best' : 'Run'}</div>
             <div class="speed-rank-score">${r.score}R</div>
           </div>
         `).join('');
@@ -5994,6 +6299,10 @@ function showComboToast(n) {
         <div class="speed-rank-section">
           <div class="speed-rank-title">Hard</div>
           ${renderRows(listHard)}
+        </div>
+        <div class="speed-rank-section">
+          <div class="speed-rank-title">Round</div>
+          ${renderRows(listRound)}
         </div>
       `;
     }
@@ -6008,7 +6317,7 @@ function showComboToast(n) {
     const arr = getAllSpeedBadges();
     const root = document.getElementById('speedBadgeList');
     const meta = document.getElementById('speedBadgeMeta');
-    if (meta) meta.textContent = `보유 ${arr.filter(x=>x.unlocked).length} / ${arr.length}`;
+    if (meta) meta.textContent = `Owned ${arr.filter(x=>x.unlocked).length} / ${arr.length}`;
     const iconForBadge = (id) => {
       if (id.startsWith('stage_3_')) return '🥉';
       if (id.startsWith('stage_4_')) return '🥈';
@@ -6016,6 +6325,7 @@ function showComboToast(n) {
       if (id.startsWith('stage_6_')) return '👑';
       if (id.includes('normal')) return '⚡';
       if (id.includes('hard')) return '🔥';
+      if (id.includes('round')) return '🌀';
       return '🏅';
     };
     if (root) {
@@ -6023,7 +6333,7 @@ function showComboToast(n) {
         <div class="speed-badge-item ${b.unlocked ? '' : 'locked'}">
           <div class="speed-badge-icon">${b.unlocked ? iconForBadge(b.id) : '🔒'}</div>
           <div class="speed-badge-name">${b.label}</div>
-          <div class="speed-badge-state">${b.unlocked ? '획득' : '미획득'}</div>
+          <div class="speed-badge-state">${b.unlocked ? 'On' : 'Off'}</div>
         </div>
       `).join('') + `</div>`;
     }
@@ -6075,13 +6385,7 @@ function showComboToast(n) {
 
   document.addEventListener('click', function(e) {
     if (e.target === document.getElementById('modeSelectPopup')) closeModeSelectPopup();
-    if (e.target === document.getElementById('speedStartPopup')) closeSpeedStartPopup();
-    if (e.target === document.getElementById('speedResultPopup')) document.getElementById('speedResultPopup').classList.remove('visible');
-    if (e.target === document.getElementById('speedPausePopup')) resumeSpeedGame();
-  });
-
-  document.addEventListener('click', function(e) {
-    if (e.target === document.getElementById('modeSelectPopup')) closeModeSelectPopup();
+    if (e.target === document.getElementById('brainModePopup')) closeBrainModePopup();
     if (e.target === document.getElementById('speedStartPopup')) closeSpeedStartPopup();
     if (e.target === document.getElementById('speedResultPopup')) document.getElementById('speedResultPopup').classList.remove('visible');
     if (e.target === document.getElementById('speedPausePopup')) resumeSpeedGame();

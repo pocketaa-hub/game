@@ -2401,29 +2401,29 @@ body.haptic-flash::after {
   font-size: 15px;
 }
 .speed-play-wrap {
-  width: min(430px, 100%);
+  width: min(390px, 100%);
   flex: 1;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 8px 0 0;
+  padding: 4px 0 0;
 }
 .speed-grid {
   width: 100%;
   display:grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(108px, 1fr));
+  gap: 10px;
 }
 .speed-play-btn {
   aspect-ratio: 1;
-  border-radius: 22px;
-  border: 4px solid rgba(0,0,0,.18);
-  box-shadow: 0 7px 0 rgba(0,0,0,.20), 0 12px 24px rgba(0,0,0,.16);
+  border-radius: 18px;
+  border: 3px solid rgba(0,0,0,.18);
+  box-shadow: 0 5px 0 rgba(0,0,0,.20), 0 9px 18px rgba(0,0,0,.16);
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap: 8px;
+  gap: 6px;
   color:#fff;
   position: relative;
   overflow: hidden;
@@ -2436,9 +2436,9 @@ body.haptic-flash::after {
   pointer-events:none;
 }
 .speed-play-btn .speed-btn-shape {
-  width: 66px;
-  height: 66px;
-  border-radius: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
   background: rgba(255,255,255,.12);
   display:flex;
   align-items:center;
@@ -2446,13 +2446,13 @@ body.haptic-flash::after {
   border: 3px solid rgba(255,255,255,.80);
 }
 .speed-play-btn .speed-btn-shape svg {
-  width: 46px;
-  height: 46px;
+  width: 34px;
+  height: 34px;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,.18));
 }
 .speed-play-btn .speed-btn-name {
   font-family:'Nanum Pen Script', cursive;
-  font-size: 26px;
+  font-size: 22px;
   line-height: 1;
   text-shadow: 0 2px 4px rgba(0,0,0,.22);
 }
@@ -2470,8 +2470,8 @@ body.haptic-flash::after {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: max(10px, env(safe-area-inset-bottom, 0));
-  width: min(430px, calc(100vw - 20px));
+  bottom: max(8px, env(safe-area-inset-bottom, 0));
+  width: min(390px, calc(100vw - 16px));
   z-index: 6;
 }
 .speed-timer-card {
@@ -2559,6 +2559,11 @@ body.haptic-flash::after {
   color:#8a5a00;
   font-size: 14px;
   line-height:1.45;
+}
+.speed-result-badges {
+  margin-top: 8px;
+  color:#8a5a00;
+  font-size: 14px;
 }
 .speed-result-actions {
   display:grid;
@@ -3031,9 +3036,37 @@ body.haptic-flash::after {
     <div class="speed-result-title" id="speedResultTitle">Speed Training</div>
     <div class="speed-result-score" id="speedResultScore">0</div>
     <div class="speed-result-meta" id="speedResultMeta">최고 기록 0R</div>
+    <div class="speed-result-badges" id="speedResultBadgeInfo">새 배지 0개</div>
     <div class="speed-result-actions">
       <button class="speed-ghost-btn" onclick="speedGoHome()">처음으로</button>
       <button class="speed-primary-btn" onclick="restartSpeedCurrent()">다시 시작</button>
+      <button class="speed-ghost-btn" id="speedNextStageBtn" onclick="goNextSpeedStage()" style="display:none;">다음 단계</button>
+      <button class="speed-ghost-btn" onclick="openSpeedInfiniteRanking()">무한 순위</button>
+      <button class="speed-ghost-btn" onclick="openSpeedBadgePopup()">스피드 배지</button>
+    </div>
+  </div>
+</div>
+
+<div class="speed-result-popup" id="speedRankPopup">
+  <div class="speed-result-card">
+    <button class="modal-x-btn" onclick="closeSpeedInfiniteRanking()" aria-label="닫기">✕</button>
+    <div class="speed-result-title">무한 모드 순위</div>
+    <div class="speed-result-meta" id="speedRankMeta">이 기기 기준 기록</div>
+    <div id="speedRankList" style="text-align:left;margin-top:14px;"></div>
+    <div class="speed-result-actions">
+      <button class="speed-primary-btn" onclick="closeSpeedInfiniteRanking()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="speed-result-popup" id="speedBadgePopup">
+  <div class="speed-result-card">
+    <button class="modal-x-btn" onclick="closeSpeedBadgePopup()" aria-label="닫기">✕</button>
+    <div class="speed-result-title">스피드 배지</div>
+    <div class="speed-result-meta" id="speedBadgeMeta">획득한 스피드 배지</div>
+    <div id="speedBadgeList" style="text-align:left;margin-top:14px;"></div>
+    <div class="speed-result-actions">
+      <button class="speed-primary-btn" onclick="closeSpeedBadgePopup()">닫기</button>
     </div>
   </div>
 </div>
@@ -5154,8 +5187,11 @@ function showComboToast(n) {
 <script>
 (function() {
   const SPEED_STAGE_BEST_KEY = 'limitgame_speed_stage_best_v1';
+  const SPEED_STAGE_UNLOCK_KEY = 'limitgame_speed_stage_unlock_v1';
+  const SPEED_BADGE_KEY = 'limitgame_speed_badges_v1';
+  const SPEED_INFINITE_RANK_KEY = 'limitgame_speed_infinite_rank_v1';
   const SPEED_INFINITE_BEST_KEY = 'limitgame_speed_infinite_best_v1';
-  const SPEED_STAGE_DURATIONS = [60, 58, 56, 54, 51, 48, 45];
+  const SPEED_STAGE_DURATIONS = [50, 47, 44, 41, 38, 35, 32];
   const SPEED_INFINITE_DURATIONS = { normal: 60, hard: 45 };
   const SHAPES = ['circle','square','triangle','star','diamond','hex'];
   const SHAPE_META = {
@@ -5225,6 +5261,70 @@ function showComboToast(n) {
     saveSpeedStageBestMap(map);
     return next;
   }
+  
+  function getSpeedStageUnlock() {
+    return Math.max(0, Number(localStorage.getItem(SPEED_STAGE_UNLOCK_KEY) || 0));
+  }
+  function saveSpeedStageUnlock(v) {
+    localStorage.setItem(SPEED_STAGE_UNLOCK_KEY, String(Math.max(0, Number(v || 0))));
+  }
+  function stageIndexFor(keyCount, levelIdx) {
+    return ((Math.max(3, keyCount) - 3) * 7) + Math.max(0, Number(levelIdx || 0));
+  }
+  function parseStageIndex(idx) {
+    const keyCount = 3 + Math.floor(idx / 7);
+    const levelIdx = idx % 7;
+    return { keyCount, levelIdx };
+  }
+  function isSpeedStageUnlocked(keyCount, levelIdx) {
+    return stageIndexFor(keyCount, levelIdx) <= getSpeedStageUnlock();
+  }
+  function unlockNextSpeedStage() {
+    const current = stageIndexFor(speedState.selectedKeyCount, speedState.selectedLevelIdx);
+    const next = Math.min(27, current + 1);
+    const prev = getSpeedStageUnlock();
+    if (next > prev) saveSpeedStageUnlock(next);
+    return next > prev ? next : prev;
+  }
+  function getSpeedBadges() {
+    try {
+      const obj = JSON.parse(localStorage.getItem(SPEED_BADGE_KEY) || '[]');
+      return Array.isArray(obj) ? obj : [];
+    } catch (e) { return []; }
+  }
+  function saveSpeedBadges(arr) {
+    localStorage.setItem(SPEED_BADGE_KEY, JSON.stringify(arr || []));
+  }
+  function addSpeedBadge(id, label) {
+    const arr = getSpeedBadges();
+    if (arr.some(x => x.id === id)) return 0;
+    arr.push({ id, label });
+    saveSpeedBadges(arr);
+    return 1;
+  }
+  function getSpeedInfiniteRankMap() {
+    try {
+      const obj = JSON.parse(localStorage.getItem(SPEED_INFINITE_RANK_KEY) || '{}');
+      return obj && typeof obj === 'object' ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function saveSpeedInfiniteRankMap(map) {
+    localStorage.setItem(SPEED_INFINITE_RANK_KEY, JSON.stringify(map || {}));
+  }
+  function updateSpeedInfiniteRanking(mode, score) {
+    const map = getSpeedInfiniteRankMap();
+    const key = mode === 'hard' ? 'hard' : 'normal';
+    const list = Array.isArray(map[key]) ? map[key] : [];
+    list.push({ score: Number(score || 0), ts: Date.now() });
+    list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
+    map[key] = list.slice(0, 10);
+    saveSpeedInfiniteRankMap(map);
+  }
+  function getSpeedInfiniteRanking(mode) {
+    const map = getSpeedInfiniteRankMap();
+    return Array.isArray(map[mode]) ? map[mode] : [];
+  }
+
   function getSpeedInfiniteBestMap() {
     try {
       const obj = JSON.parse(localStorage.getItem(SPEED_INFINITE_BEST_KEY) || '{}');
@@ -5325,32 +5425,39 @@ function showComboToast(n) {
     const root = document.getElementById('speedKeyGrid');
     if (!root) return;
     const counts = [3,4,5,6];
-    root.innerHTML = counts.map(count => `
-      <button class="speed-key-btn ${count === speedState.selectedKeyCount ? 'active' : ''}" onclick="selectSpeedStageKey(${count})">
-        <div class="speed-key-title">${count}키</div>
-        <div class="speed-key-sub">고정 배치 · 10R마다 패턴 변경</div>
+    const unlockIdx = getSpeedStageUnlock();
+    root.innerHTML = counts.map(count => {
+      const keyMinIdx = stageIndexFor(count, 0);
+      const opened = keyMinIdx <= unlockIdx;
+      return `
+      <button class="speed-key-btn ${count === speedState.selectedKeyCount ? 'active' : ''}" ${opened ? `onclick="selectSpeedStageKey(${count})"` : 'disabled'}>
+        <div class="speed-key-title">${count}키 ${opened ? '' : '🔒'}</div>
+        <div class="speed-key-sub">${opened ? '고정 배치 · 10R마다 패턴 변경' : '이전 키를 먼저 클리어'}</div>
       </button>
-    `).join('');
+    `}).join('');
   }
   function renderSpeedLevelOptions() {
     const root = document.getElementById('speedLevelGrid');
     if (!root) return;
     const levels = getStageLevels();
-    root.innerHTML = levels.map((level, idx) => `
-      <button class="speed-level-btn ${idx === speedState.selectedLevelIdx ? 'active' : ''}" onclick="selectSpeedStageLevel(${idx})">
+    root.innerHTML = levels.map((level, idx) => {
+      const opened = isSpeedStageUnlocked(speedState.selectedKeyCount, idx);
+      return `
+      <button class="speed-level-btn ${idx === speedState.selectedLevelIdx ? 'active' : ''}" ${opened ? `onclick="selectSpeedStageLevel(${idx})"` : 'disabled'}>
         <div class="speed-level-top">
           <span class="speed-level-emoji">${level.emoji || '🏁'}</span>
-          <span class="speed-level-name">${level.name}</span>
+          <span class="speed-level-name">${level.name}${opened ? '' : ' 🔒'}</span>
         </div>
         <div class="speed-level-meta">${speedState.selectedKeyCount}키 · ${SPEED_STAGE_DURATIONS[idx] || 60}초 · 최고 ${getSpeedStageBest(speedState.selectedKeyCount, idx)}R</div>
       </button>
-    `).join('');
+    `}).join('');
   }
   function updateSpeedStageSummary() {
     const levels = getStageLevels();
     const level = levels[speedState.selectedLevelIdx] || levels[0];
     const note = document.getElementById('speedStageNote');
-    if (note) note.textContent = `${speedState.selectedKeyCount}키 · ${level.name} 단계 · 제한시간 ${SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60}초 · 최대 시퀀스 10칸`;
+    const opened = isSpeedStageUnlocked(speedState.selectedKeyCount, speedState.selectedLevelIdx);
+    if (note) note.textContent = `${speedState.selectedKeyCount}키 · ${level.name} 단계 · 제한시간 ${SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60}초 · 최대 시퀀스 10칸${opened ? '' : ' · 잠금'}`;
   }
   window.selectSpeedStageKey = function(count) {
     speedState.selectedKeyCount = Math.max(3, Math.min(6, Number(count || 3)));
@@ -5543,7 +5650,7 @@ function showComboToast(n) {
     speedState.progress = 0;
     renderSpeedSequence();
     updateSpeedHud();
-    updateSpeedStatus('순서를 보고 빠르게 눌러');
+    updateSpeedStatus(speedState.type === 'stage' ? `라운드 ${speedState.round}/10` : '순서를 보고 빠르게 눌러');
   }
   function startSpeedCore() {
     showSpeedScreen();
@@ -5559,6 +5666,7 @@ function showComboToast(n) {
   }
   window.startSpeedStageTraining = function() {
     speedState.type = 'stage';
+    if (!isSpeedStageUnlocked(speedState.selectedKeyCount, speedState.selectedLevelIdx)) return;
     speedState.round = 1;
     speedState.currentDuration = SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60;
     startSpeedCore();
@@ -5597,6 +5705,10 @@ function showComboToast(n) {
           setTimeout(() => btn.classList.remove('correct'), 240);
         }
         playUiSound?.('correct');
+        if (speedState.type === 'stage' && speedState.round >= 10) {
+          speedFinish(true);
+          return;
+        }
         speedState.round += 1;
         setSceneByRound();
         prepareSpeedRound();
@@ -5614,27 +5726,88 @@ function showComboToast(n) {
       }
     }
   }
-  function speedFinish() {
-    const score = Math.max(0, Number(speedState.round || 1) - 1);
+  function speedFinish(success=false) {
+    const score = speedState.type === 'stage'
+      ? (success ? 10 : Math.max(0, Number(speedState.round || 1) - 1))
+      : Math.max(0, Number(speedState.round || 1) - 1);
     const best = speedState.type === 'stage'
       ? updateSpeedStageBest(speedState.selectedKeyCount, speedState.selectedLevelIdx, score)
       : updateSpeedInfiniteBest(speedState.infiniteMode, score);
+    if (speedState.type === 'infinite') updateSpeedInfiniteRanking(speedState.infiniteMode, score);
+
+    let newBadges = 0;
+    if (speedState.type === 'stage' && success) {
+      const level = (getStageLevels()[speedState.selectedLevelIdx] || {}).name || '';
+      newBadges += addSpeedBadge(`stage_${speedState.selectedKeyCount}_${speedState.selectedLevelIdx}`, `${speedState.selectedKeyCount}키 ${level} 클리어`);
+      unlockNextSpeedStage();
+    }
+    if (speedState.type === 'infinite' && score >= 10) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_10`, `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 10R`);
+    if (speedState.type === 'infinite' && score >= 20) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_20`, `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 20R`);
+
     const title = document.getElementById('speedResultTitle');
     const scoreEl = document.getElementById('speedResultScore');
     const meta = document.getElementById('speedResultMeta');
-    if (title) title.textContent = speedState.type === 'stage' ? '스테이지 도전 종료' : `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 기록 종료`;
+    const badgeInfo = document.getElementById('speedResultBadgeInfo');
+    const nextBtn = document.getElementById('speedNextStageBtn');
+    if (title) title.textContent = speedState.type === 'stage'
+      ? (success ? '스테이지 클리어!' : '스테이지 실패')
+      : `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 기록 종료`;
     if (scoreEl) scoreEl.textContent = String(score);
     if (meta) {
       meta.textContent = speedState.type === 'stage'
         ? `${speedState.selectedKeyCount}키 · ${(getStageLevels()[speedState.selectedLevelIdx] || {}).name || ''} · 최고 기록 ${best}R`
         : `${speedState.currentDuration}초 기록전 · 최고 기록 ${best}R`;
     }
+    if (badgeInfo) badgeInfo.textContent = `새 배지 ${newBadges}개 · 보유 ${getSpeedBadges().length}개`;
+    if (nextBtn) nextBtn.style.display = (speedState.type === 'stage' && success && stageIndexFor(speedState.selectedKeyCount, speedState.selectedLevelIdx) < 27) ? '' : 'none';
     document.getElementById('speedResultPopup')?.classList.add('visible');
   }
   window.restartSpeedCurrent = function() {
     document.getElementById('speedResultPopup')?.classList.remove('visible');
     if (speedState.type === 'stage') window.startSpeedStageTraining();
     else window.startSpeedInfinite(speedState.infiniteMode);
+  };
+  window.goNextSpeedStage = function() {
+    const nextIdx = stageIndexFor(speedState.selectedKeyCount, speedState.selectedLevelIdx) + 1;
+    if (nextIdx > 27) return;
+    const next = parseStageIndex(nextIdx);
+    speedState.selectedKeyCount = next.keyCount;
+    speedState.selectedLevelIdx = next.levelIdx;
+    document.getElementById('speedResultPopup')?.classList.remove('visible');
+    window.startSpeedStageTraining();
+  };
+  window.openSpeedInfiniteRanking = function() {
+    const listNormal = getSpeedInfiniteRanking('normal');
+    const listHard = getSpeedInfiniteRanking('hard');
+    const root = document.getElementById('speedRankList');
+    const meta = document.getElementById('speedRankMeta');
+    if (meta) meta.textContent = '이 기기 기준 무한 모드 Top 10';
+    if (root) {
+      const renderSection = (title, arr) => {
+        if (!arr.length) return `<div style="margin-bottom:12px;"><strong>${title}</strong><div style="margin-top:6px;color:#8a5a00;">기록 없음</div></div>`;
+        return `<div style="margin-bottom:12px;"><strong>${title}</strong>${arr.map((r,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ead7b2;"><span>${i+1}위</span><span>${r.score}R</span></div>`).join('')}</div>`;
+      };
+      root.innerHTML = renderSection('Normal', listNormal) + renderSection('Hard', listHard);
+    }
+    document.getElementById('speedRankPopup')?.classList.add('visible');
+  };
+  window.closeSpeedInfiniteRanking = function() {
+    document.getElementById('speedRankPopup')?.classList.remove('visible');
+  };
+  window.openSpeedBadgePopup = function() {
+    const arr = getSpeedBadges();
+    const root = document.getElementById('speedBadgeList');
+    const meta = document.getElementById('speedBadgeMeta');
+    if (meta) meta.textContent = `보유 배지 ${arr.length}개`;
+    if (root) {
+      root.innerHTML = arr.length
+        ? arr.map((b,i)=>`<div style="padding:8px 0;border-bottom:1px solid #ead7b2;">🏅 ${b.label}</div>`).join('')
+        : '<div style="color:#8a5a00;">아직 획득한 배지가 없습니다.</div>';
+    }
+    document.getElementById('speedBadgePopup')?.classList.add('visible');
+  };
+  window.closeSpeedBadgePopup = function() {
+    document.getElementById('speedBadgePopup')?.classList.remove('visible');
   };
   window.speedGoHome = function() {
     stopSpeedTimer();
@@ -5679,6 +5852,9 @@ function showComboToast(n) {
     btn.addEventListener('click', function(e) { e.preventDefault(); }, { passive: false });
   });
 
+  const initialStage = parseStageIndex(getSpeedStageUnlock());
+  speedState.selectedKeyCount = initialStage.keyCount;
+  speedState.selectedLevelIdx = initialStage.levelIdx;
   renderSpeedKeyOptions();
   renderSpeedLevelOptions();
   updateSpeedStageSummary();

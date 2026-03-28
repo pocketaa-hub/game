@@ -1748,8 +1748,9 @@ body.haptic-flash::after {
         <button class="feedback-chip" id="bgmChip" onclick="toggleBgm()">🎵 BGM ON</button>
       </div>
       <div class="feedback-note">효과음만 남기고 진동/시각 반응은 제외했다</div>
-      <div class="mission-open-wrap">
-        <button class="mission-open-btn" onclick="openMissionPopup()">📅 오늘의 미션 <span class="mission-open-meta" id="dailyStampCountMini">0 / 3 완료 · 스탬프 0</span></button>
+      <div class="mission-open-wrap multi-tools-row">
+        <button class="mission-open-btn" onclick="openMissionPopup()">📅 미션 보기 <span class="mission-open-meta" id="dailyStampCountMini">일일 0 / 3 · 주간 0 / 3</span></button>
+        <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 프로필 보기</button>
       </div>
     </div>
 
@@ -1768,16 +1769,44 @@ body.haptic-flash::after {
 </div>
 
 
-<!-- ══ 오늘의 미션 팝업 ══ -->
+<!-- ══ 미션 팝업 ══ -->
 <div class="mission-popup" id="missionPopup">
   <div class="mission-card">
     <div class="mission-card-header">
-      <div class="mission-card-title">📅 오늘의 미션</div>
-      <div class="daily-panel-stamp" id="dailyStampCount">0 / 3 완료 · 누적 스탬프 0</div>
+      <div class="mission-card-title">📅 미션 보드</div>
+      <div class="daily-panel-stamp" id="dailyStampCount">일일 0 / 3 완료</div>
     </div>
-    <div class="daily-list" id="dailyMissionList"></div>
-    <div class="daily-panel-foot" id="dailyMissionFoot">자정에 새로운 미션으로 바뀐다.</div>
+    <div class="mission-tabs">
+      <button class="mission-tab active" id="missionTabDaily" onclick="setMissionTab('daily')">일일</button>
+      <button class="mission-tab" id="missionTabWeekly" onclick="setMissionTab('weekly')">주간</button>
+      <button class="mission-tab" id="missionTabMonthly" onclick="setMissionTab('monthly')">월간</button>
+    </div>
+    <div class="mission-panel active" id="missionPanelDaily">
+      <div class="daily-list" id="dailyMissionList"></div>
+      <div class="daily-panel-foot" id="dailyMissionFoot">오늘 미션 3개를 전부 끝내면 ⭐ 1P를 준다.</div>
+    </div>
+    <div class="mission-panel" id="missionPanelWeekly">
+      <div class="daily-list" id="weeklyMissionList"></div>
+      <div class="daily-panel-foot" id="weeklyMissionFoot">주간 미션 3개를 전부 끝내면 ⭐ 3P를 준다.</div>
+    </div>
+    <div class="mission-panel" id="missionPanelMonthly">
+      <div class="daily-list" id="monthlyMissionList"></div>
+      <div class="daily-panel-foot" id="monthlyMissionFoot">월간 미션 3개를 전부 끝내면 ⭐ 5P를 준다.</div>
+    </div>
     <button class="mission-close-btn" onclick="closeMissionPopup()">닫기</button>
+  </div>
+</div>
+
+<!-- ══ 프로필 팝업 ══ -->
+<div class="mission-popup" id="profilePopup">
+  <div class="mission-card profile-card">
+    <div class="mission-card-header">
+      <div class="mission-card-title">👤 내 프로필</div>
+      <div class="daily-panel-stamp" id="profileTierText">현재 기기 기준 기록</div>
+    </div>
+    <div class="profile-grid" id="profileStatGrid"></div>
+    <div class="daily-panel-foot" id="profileFoot">순위는 서버 연동이 없는 현재 버전에서는 이 기기에 저장된 기록 기준으로 계산된다.</div>
+    <button class="mission-close-btn" onclick="closeProfilePopup()">닫기</button>
   </div>
 </div>
 
@@ -2167,14 +2196,14 @@ const BADGE_DEFS = [
   { id:'daily_longest30',       icon:'🪙', name:'루틴 전설',        desc:'최장 연속 완료 30일 달성',             category:'daily', check:(ctx)=> Number(ctx.daily?.longestStreak || 0) >= 30 },
 
   // 모드 완주 / 마스터
-  { id:'easy_all_clear',   icon:'⭐', name:'EASY 올클리어',  desc:'EASY 모든 단계 해금 완료', category:'speed', reward:10, check:(ctx)=> hasModeAllClear('easy') },
-  { id:'normal_all_clear', icon:'🌟', name:'NORMAL 올클리어',desc:'NORMAL 모든 단계 해금 완료', category:'speed', reward:10, check:(ctx)=> hasModeAllClear('normal') },
-  { id:'hard_all_clear',   icon:'✨', name:'HARD 올클리어',  desc:'HARD 모든 단계 해금 완료', category:'speed', reward:10, check:(ctx)=> hasModeAllClear('hard') },
-  { id:'hell_all_clear',   icon:'👑', name:'HELL 올클리어',  desc:'HELL 모든 단계 해금 완료', category:'speed', reward:10, check:(ctx)=> hasModeAllClear('hell') },
-  { id:'easy_all_20',      icon:'🏅', name:'EASY 20 챌린지', desc:'EASY 모든 단계에서 20라운드', category:'speed', reward:20, check:(ctx)=> hasModeAll20('easy') },
-  { id:'normal_all_20',    icon:'🏆', name:'NORMAL 20 챌린지',desc:'NORMAL 모든 단계에서 20라운드', category:'speed', reward:20, check:(ctx)=> hasModeAll20('normal') },
-  { id:'hard_all_20',      icon:'💠', name:'HARD 20 챌린지', desc:'HARD 모든 단계에서 20라운드', category:'speed', reward:20, check:(ctx)=> hasModeAll20('hard') },
-  { id:'hell_all_20',      icon:'🔥', name:'HELL 20 챌린지', desc:'HELL 모든 단계에서 20라운드', category:'speed', reward:20, check:(ctx)=> hasModeAll20('hell') },
+  { id:'easy_all_clear',   icon:'⭐', name:'EASY 올클리어',  desc:'EASY 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('easy') },
+  { id:'normal_all_clear', icon:'🌟', name:'NORMAL 올클리어',desc:'NORMAL 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('normal') },
+  { id:'hard_all_clear',   icon:'✨', name:'HARD 올클리어',  desc:'HARD 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('hard') },
+  { id:'hell_all_clear',   icon:'👑', name:'HELL 올클리어',  desc:'HELL 모든 단계 해금 완료', category:'speed', reward:1, check:(ctx)=> hasModeAllClear('hell') },
+  { id:'easy_all_20',      icon:'🏅', name:'EASY 20 챌린지', desc:'EASY 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('easy') },
+  { id:'normal_all_20',    icon:'🏆', name:'NORMAL 20 챌린지',desc:'NORMAL 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('normal') },
+  { id:'hard_all_20',      icon:'💠', name:'HARD 20 챌린지', desc:'HARD 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('hard') },
+  { id:'hell_all_20',      icon:'🔥', name:'HELL 20 챌린지', desc:'HELL 모든 단계에서 20라운드', category:'speed', reward:1, check:(ctx)=> hasModeAll20('hell') },
 ];
 
 function getBadges() {
@@ -2187,7 +2216,7 @@ function getGameStats() {
   catch(e) { return {}; }
 }
 
-function updateGameStats(score, mode) {
+function updateGameStats(score, mode, maxCombo = 0) {
   const todayKey = new Date().toLocaleDateString('sv-SE');
   const prev = getGameStats();
   const stats = Object.assign({
@@ -2201,6 +2230,8 @@ function updateGameStats(score, mode) {
     bounceBack: false,
     last3Over5: false,
     modeGames: { easy: 0, normal: 0, hard: 0, hell: 0 },
+    totalCombo: 0,
+    bestScore: 0,
   }, prev);
 
   if (!stats.modeGames || typeof stats.modeGames !== 'object') {
@@ -2219,6 +2250,8 @@ function updateGameStats(score, mode) {
 
   stats.totalGames += 1;
   stats.totalRounds += score;
+  stats.totalCombo = Number(stats.totalCombo || 0) + Number(maxCombo || 0);
+  stats.bestScore = Math.max(Number(stats.bestScore || 0), Number(score || 0));
   stats.modeGames[mode] = Number(stats.modeGames[mode] || 0) + 1;
   stats.todayGames += 1;
 
@@ -2239,7 +2272,7 @@ function updateGameStats(score, mode) {
 function checkAndAwardBadges(score, maxCombo, isNewBest) {
   const earned = getBadges();
   const earnedIds = new Set(earned.map(b => b.id));
-  const stats = updateGameStats(score, difficulty);
+  const stats = updateGameStats(score, difficulty, maxCombo);
   const daily = getDailyMissionState();
   const ctx = { score, maxCombo, isNewBest, stats, mode: difficulty, daily };
   const newBadges = [];
@@ -2392,6 +2425,7 @@ function confirmName() {
   const overlay = document.getElementById('overlay');
   overlay.style.display = '';
   overlay.classList.add('visible');
+  renderProfilePopup();
 }
 
 function skipName() {
@@ -2399,6 +2433,7 @@ function skipName() {
   const overlay = document.getElementById('overlay');
   overlay.style.display = '';
   overlay.classList.add('visible');
+  renderProfilePopup();
 }
 
 function openRanking() {
@@ -2618,6 +2653,10 @@ function missionProgressText(def, progress) {
 function openMissionPopup() {
   const popup = document.getElementById('missionPopup');
   if (!popup) return;
+  renderDailyMissions();
+  renderWeeklyMissions();
+  renderMonthlyMissions();
+  setMissionTab(currentMissionTab || 'daily');
   popup.classList.add('visible');
   document.body.classList.add('popup-open');
 }
@@ -2638,8 +2677,8 @@ function renderDailyMissions() {
   const foot = document.getElementById('dailyMissionFoot');
   if (!stamp || !mini || !list || !foot) return;
 
-  stamp.textContent = `${completed} / ${state.missions.length} 완료 · 누적 스탬프 ${state.totalStamps}`;
-  mini.textContent = `${completed} / ${state.missions.length} 완료 · 스탬프 ${state.totalStamps}`;
+  stamp.textContent = `일일 ${completed} / ${state.missions.length} 완료 · 누적 완주 ${state.clearedDays}일`;
+  mini.textContent = `일일 ${completed} / ${state.missions.length} · 주간 ${getWeeklyMissionState().missions.filter(m => m.completed).length}/3`;
   list.innerHTML = state.missions.map(m => {
     const def = getDailyMissionDef(m.id);
     if (!def) return '';
@@ -2650,13 +2689,13 @@ function renderDailyMissions() {
           <div class="daily-item-name">${def.name}</div>
           <div class="daily-item-desc">${def.desc}</div>
         </div>
-        <div class="daily-item-progress">${m.completed ? '완료 · ⭐1P' : `${missionProgressText(def, state.progress)} · ⭐1P`}</div>
+        <div class="daily-item-progress">${m.completed ? '완료' : missionProgressText(def, state.progress)}</div>
       </div>`;
   }).join('');
 
   foot.textContent = state.dayCleared
-    ? `오늘 미션 완료! 내일 새로운 도전이 열린다. · 완료한 날 ${state.clearedDays}일`
-    : `자정에 새로운 미션으로 바뀐다. · 완료한 날 ${state.clearedDays}일`;
+    ? `오늘 미션 3개를 전부 끝냈어. 오늘 보상 ⭐ ${DAILY_POINT_REWARD}P 지급 완료 · 누적 완료 ${state.clearedDays}일`
+    : `오늘 미션 3개를 전부 끝내면 ⭐ ${DAILY_POINT_REWARD}P · 누적 완료 ${state.clearedDays}일`;
 }
 
 function updateDailyMissions(score, maxCombo, mode) {
@@ -2681,8 +2720,10 @@ function updateDailyMissions(score, maxCombo, mode) {
     }
   });
 
+  let justCleared = false;
   if (!state.dayCleared && state.missions.length && state.missions.every(m => m.completed)) {
     state.dayCleared = true;
+    justCleared = true;
     state.clearedDays += 1;
     const todayKey = getTodayKey();
     if (state.lastClearedDate !== todayKey) {
@@ -2705,7 +2746,205 @@ renderLevelOptions();
 applyLevelLayout();
 ensureBgmReady();
 playBgmFor('title');
-  return { completedNow, state };
+  return { completedNow, state, justCleared };
+}
+
+
+let currentMissionTab = 'daily';
+const WEEKLY_MISSION_KEY = 'limitgame_weekly_missions_v1';
+const MONTHLY_MISSION_KEY = 'limitgame_monthly_missions_v1';
+const PROFILE_STATS_KEY = 'limitgame_profile_stats_v1';
+
+const WEEKLY_MISSION_DEFS = [
+  { id:'weekly_daily5', icon:'🗓️', name:'주간 루틴', desc:'일일 미션 5회 완료', target:5, progress:(p)=> Number(p.dailyClears || 0), check:(p)=> Number(p.dailyClears || 0) >= 5 },
+  { id:'weekly_play20', icon:'🎮', name:'주간 몰입', desc:'이번 주 20판 플레이', target:20, progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 20 },
+  { id:'weekly_combo60', icon:'🔥', name:'주간 콤보 러시', desc:'이번 주 누적 콤보 60', target:60, progress:(p)=> Number(p.comboSum || 0), check:(p)=> Number(p.comboSum || 0) >= 60 },
+];
+const MONTHLY_MISSION_DEFS = [
+  { id:'monthly_daily20', icon:'📆', name:'월간 루틴', desc:'일일 미션 20회 완료', target:20, progress:(p)=> Number(p.dailyClears || 0), check:(p)=> Number(p.dailyClears || 0) >= 20 },
+  { id:'monthly_play80', icon:'🕹️', name:'월간 출석왕', desc:'이번 달 80판 플레이', target:80, progress:(p)=> Number(p.games || 0), check:(p)=> Number(p.games || 0) >= 80 },
+  { id:'monthly_combo200', icon:'⚡', name:'월간 집중 폭발', desc:'이번 달 누적 콤보 200', target:200, progress:(p)=> Number(p.comboSum || 0), check:(p)=> Number(p.comboSum || 0) >= 200 },
+];
+
+function getWeekKey(date = new Date()) {
+  const d = new Date(date);
+  const day = (d.getDay() + 6) % 7;
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() - day);
+  return d.toLocaleDateString('sv-SE');
+}
+function getMonthKey(date = new Date()) {
+  const d = new Date(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+function normalizeMissionPeriodState(raw, type) {
+  const key = type === 'weekly' ? getWeekKey() : getMonthKey();
+  const defs = type === 'weekly' ? WEEKLY_MISSION_DEFS : MONTHLY_MISSION_DEFS;
+  const base = {
+    key,
+    rewardClaimed:false,
+    missions: defs.map(d => ({ id:d.id, completed:false, completedAt:null })),
+    progress:{ games:0, comboSum:0, dailyClears:0 }
+  };
+  const state = Object.assign(base, raw || {});
+  if (state.key !== key || !Array.isArray(state.missions) || state.missions.length !== defs.length) {
+    return JSON.parse(JSON.stringify(base));
+  }
+  state.rewardClaimed = !!state.rewardClaimed;
+  if (!state.progress || typeof state.progress !== 'object') state.progress = {};
+  state.progress.games = Number(state.progress.games || 0);
+  state.progress.comboSum = Number(state.progress.comboSum || 0);
+  state.progress.dailyClears = Number(state.progress.dailyClears || 0);
+  state.missions = defs.map(def => {
+    const found = (state.missions || []).find(m => m.id === def.id) || {};
+    return { id:def.id, completed:!!found.completed, completedAt:found.completedAt || null };
+  });
+  return state;
+}
+function getWeeklyMissionState() {
+  try { return normalizeMissionPeriodState(JSON.parse(localStorage.getItem(WEEKLY_MISSION_KEY) || '{}'), 'weekly'); }
+  catch(e) { return normalizeMissionPeriodState({}, 'weekly'); }
+}
+function saveWeeklyMissionState(state) { localStorage.setItem(WEEKLY_MISSION_KEY, JSON.stringify(state)); }
+function getMonthlyMissionState() {
+  try { return normalizeMissionPeriodState(JSON.parse(localStorage.getItem(MONTHLY_MISSION_KEY) || '{}'), 'monthly'); }
+  catch(e) { return normalizeMissionPeriodState({}, 'monthly'); }
+}
+function saveMonthlyMissionState(state) { localStorage.setItem(MONTHLY_MISSION_KEY, JSON.stringify(state)); }
+
+function renderMissionSection(listEl, footEl, state, defs, reward, title) {
+  if (!listEl || !footEl) return;
+  const completed = state.missions.filter(m => m.completed).length;
+  listEl.innerHTML = state.missions.map(m => {
+    const def = defs.find(d => d.id === m.id);
+    const progress = def ? `${Math.min(def.target, def.progress(state.progress))}/${def.target}` : '';
+    return `
+      <div class="daily-item ${m.completed ? 'done' : ''}">
+        <div class="daily-item-icon">${m.completed ? '✅' : (def?.icon || '🎯')}</div>
+        <div class="daily-item-main">
+          <div class="daily-item-name">${def?.name || ''}</div>
+          <div class="daily-item-desc">${def?.desc || ''}</div>
+        </div>
+        <div class="daily-item-progress">${m.completed ? '완료' : progress}</div>
+      </div>`;
+  }).join('');
+  footEl.textContent = completed >= defs.length
+    ? `${title} 미션을 전부 끝냈어. 보상 ⭐ ${reward}P ${state.rewardClaimed ? '지급 완료' : '지급 대기'}`
+    : `${title} 미션 3개를 전부 끝내면 ⭐ ${reward}P를 준다.`;
+}
+function renderWeeklyMissions() {
+  const state = getWeeklyMissionState();
+  renderMissionSection(document.getElementById('weeklyMissionList'), document.getElementById('weeklyMissionFoot'), state, WEEKLY_MISSION_DEFS, WEEKLY_POINT_REWARD, '주간');
+}
+function renderMonthlyMissions() {
+  const state = getMonthlyMissionState();
+  renderMissionSection(document.getElementById('monthlyMissionList'), document.getElementById('monthlyMissionFoot'), state, MONTHLY_MISSION_DEFS, MONTHLY_POINT_REWARD, '월간');
+}
+function setMissionTab(tab) {
+  currentMissionTab = tab;
+  ['daily','weekly','monthly'].forEach(key => {
+    const btn = document.getElementById('missionTab' + key.charAt(0).toUpperCase() + key.slice(1));
+    const panel = document.getElementById('missionPanel' + key.charAt(0).toUpperCase() + key.slice(1));
+    if (btn) btn.classList.toggle('active', key === tab);
+    if (panel) panel.classList.toggle('active', key === tab);
+  });
+}
+function updatePeriodMissions(storageGetter, storageSetter, defs, score, maxCombo, justCleared) {
+  const state = storageGetter();
+  state.progress.games += 1;
+  state.progress.comboSum += Number(maxCombo || 0);
+  if (justCleared) state.progress.dailyClears += 1;
+  const completedNow = [];
+  state.missions.forEach(m => {
+    if (m.completed) return;
+    const def = defs.find(d => d.id === m.id);
+    if (def && def.check(state.progress)) {
+      m.completed = true;
+      m.completedAt = Date.now();
+      completedNow.push(def);
+    }
+  });
+  const justCompletedAll = !state.rewardClaimed && state.missions.length && state.missions.every(m => m.completed);
+  if (justCompletedAll) state.rewardClaimed = true;
+  storageSetter(state);
+  return { state, completedNow, justCompletedAll };
+}
+function updateWeeklyMissions(score, maxCombo, justCleared) {
+  const result = updatePeriodMissions(getWeeklyMissionState, saveWeeklyMissionState, WEEKLY_MISSION_DEFS, score, maxCombo, justCleared);
+  renderWeeklyMissions();
+  return result;
+}
+function updateMonthlyMissions(score, maxCombo, justCleared) {
+  const result = updatePeriodMissions(getMonthlyMissionState, saveMonthlyMissionState, MONTHLY_MISSION_DEFS, score, maxCombo, justCleared);
+  renderMonthlyMissions();
+  return result;
+}
+
+function getProfileStats() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_STATS_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveProfileStats(stats) { localStorage.setItem(PROFILE_STATS_KEY, JSON.stringify(stats)); }
+function updateProfileStatsAfterGame(score, maxCombo) {
+  const prev = getProfileStats();
+  const stats = Object.assign({ totalGames:0, totalCombo:0, bestScore:0 }, prev || {});
+  stats.totalGames = Number(stats.totalGames || 0) + 1;
+  stats.totalCombo = Number(stats.totalCombo || 0) + Number(maxCombo || 0);
+  stats.bestScore = Math.max(Number(stats.bestScore || 0), Number(score || 0));
+  saveProfileStats(stats);
+  return stats;
+}
+function getMyBestRankInfo(period = 'all') {
+  const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
+  let records = getRanking();
+  const todayKey = getTodayKey();
+  const weekKey = getWeekKey();
+  if (period === 'today') records = records.filter(r => r.dateKey === todayKey);
+  if (period === 'week') records = records.filter(r => getWeekKey(new Date(r.ts || Date.now())) === weekKey);
+  if (!records.length) return '—';
+  if (!myName) return '기록 필요';
+  const mine = records.filter(r => r.name === myName);
+  if (!mine.length) return '기록 필요';
+  const bestMine = [...mine].sort((a,b) => (b.score - a.score) || (a.ts - b.ts))[0];
+  const sorted = [...records].sort((a,b) => (b.score - a.score) || (a.ts - b.ts));
+  const idx = sorted.findIndex(r => r.name === bestMine.name && r.score === bestMine.score && r.ts === bestMine.ts);
+  return idx >= 0 ? `${idx+1}위` : '—';
+}
+function openProfilePopup() {
+  closeMissionPopup(); closeStartPopup(); closeRanking(); closeBadges();
+  renderProfilePopup();
+  const popup = document.getElementById('profilePopup');
+  if (popup) popup.classList.add('visible');
+  document.body.classList.add('popup-open');
+}
+function closeProfilePopup() {
+  const popup = document.getElementById('profilePopup');
+  if (popup) popup.classList.remove('visible');
+  document.body.classList.remove('popup-open');
+}
+function renderProfilePopup() {
+  const stats = getProfileStats();
+  const grid = document.getElementById('profileStatGrid');
+  const tier = document.getElementById('profileTierText');
+  const totalGames = Number(stats.totalGames || 0);
+  const totalCombo = Number(stats.totalCombo || 0);
+  const totalPoints = getPoints();
+  const myBestRank = getMyBestRankInfo('all');
+  const weekRank = getMyBestRankInfo('week');
+  const todayRank = getMyBestRankInfo('today');
+  if (tier) tier.textContent = '순위는 현재 기기 저장 기준';
+  if (!grid) return;
+  grid.innerHTML = [
+    ['누적 플레이 횟수', `${totalGames}회`, '이 기기 기준 누적'],
+    ['누적 콤보', `${totalCombo}`, '판별 콤보 합계'],
+    ['보유 포인트', `⭐ ${totalPoints}P`, '희소 자원'],
+    ['내 최고 기록', `${Number(stats.bestScore || 0)}R`, '최고 라운드'],
+    ['내 최고 순위', myBestRank, '전체 기록 기준'],
+    ['이번 주 순위', weekRank, '이번 주 저장 기록'],
+    ['오늘의 순위', todayRank, '오늘 저장 기록'],
+    ['미션 완주', `${getDailyMissionState().clearedDays || 0}일`, '일일 미션 완료일']
+  ].map(([label, value, sub]) => `<div class="profile-stat"><div class="profile-stat-label">${label}</div><div class="profile-stat-value">${value}</div><div class="profile-stat-sub">${sub}</div></div>`).join('');
 }
 
 function showMissionToast(missions, startDelay = 0) {
@@ -3188,6 +3427,8 @@ document.addEventListener('pointerdown', () => { ensureBgmReady(); initAudio(); 
 document.addEventListener('click', (e) => {
   const popup = document.getElementById('missionPopup');
   if (popup && e.target === popup) closeMissionPopup();
+  const profilePopup = document.getElementById('profilePopup');
+  if (profilePopup && e.target === profilePopup) closeProfilePopup();
   const startPopup = document.getElementById('startPopup');
   if (startPopup && e.target === startPopup) closeStartPopup();
 });
@@ -3206,8 +3447,10 @@ const DEFAULT_MSGS = ["아깝다.", "한 끗 차이였다.", "다시 하면 될 
 const EMOJI  = { circle:'🔴', square:'🔵', triangle:'🟡', star:'🟢', diamond:'🟣', hex:'🟦' };
 
 const POINT_KEY = 'limitgame_points_v1';
-const BADGE_POINT_REWARD = 5;
+const BADGE_POINT_REWARD = 1;
 const DAILY_POINT_REWARD = 1;
+const WEEKLY_POINT_REWARD = 3;
+const MONTHLY_POINT_REWARD = 5;
 const RETRY_COSTS = [1, 2];
 
 function getPoints() { return Math.max(0, Number(localStorage.getItem(POINT_KEY) || 0)); }
@@ -3496,18 +3739,18 @@ function showSecondChancePopup() {
   const title = document.getElementById('secondChanceTitle');
   const desc = document.getElementById('secondChanceDesc');
   const btn = document.getElementById('secondChanceConfirmBtn');
-  if (title) title.textContent = retryCost === 1 ? '다시 도전할까?' : '마지막으로 한 번 더 갈까?';
+  if (title) title.textContent = retryCost === 1 ? '여기서 끝낼 거야?' : '지금 포기하면 기록이 끊겨.';
   if (desc) {
     if (retryCost == null) {
       desc.innerHTML = '이번 판에서는 더 이상 재도전할 수 없어.';
     } else if (canAfford(retryCost)) {
-      desc.innerHTML = `같은 라운드를 처음부터 다시 보여줄게.<br>${retryCost === 1 ? '첫 번째 재도전' : '두 번째이자 마지막 재도전'}에는 ⭐ ${retryCost}P가 필요해.`;
+      desc.innerHTML = `이번 판을 여기서 접기엔 아까워.<br>${retryCost === 1 ? '첫 번째 재도전' : '마지막 재도전'}에 ⭐ ${retryCost}P를 쓰면 같은 라운드를 다시 보여줄게.`;
     } else {
       desc.innerHTML = `포인트가 부족해.<br>필요 포인트 ⭐ ${retryCost}P · 현재 ⭐ ${points}P`;
     }
   }
   if (btn) {
-    btn.textContent = retryCost != null ? (retryCost === 1 ? '⭐ 1P 사용하고 계속' : '⭐ 2P 사용하고 마지막 재도전') : '재도전 종료';
+    btn.textContent = retryCost != null ? (retryCost === 1 ? '⭐ 1P 쓰고 한 번 더' : '⭐ 2P 쓰고 마지막 기회') : '재도전 종료';
     btn.disabled = retryCost == null || !canAfford(retryCost);
     btn.style.opacity = btn.disabled ? '.5' : '1';
   }
@@ -3616,9 +3859,9 @@ function gameOver() {
   const resultDaily = document.getElementById('resultDaily');
   if (resultDaily) {
     if (newMissions.length) {
-      resultDaily.innerHTML = `<strong>오늘 미션 ${newMissions.length}개 달성!</strong> · ${dailyDoneCount}/${dailyTotalCount} 완료 · 누적 스탬프 ${missionUpdate.state.totalStamps}`;
+      resultDaily.innerHTML = `<strong>오늘 미션 ${newMissions.length}개 달성!</strong> · ${dailyDoneCount}/${dailyTotalCount} 완료${missionUpdate.justCleared ? ` · 일일 보상 ⭐ ${DAILY_POINT_REWARD}P 지급` : ''}${weeklyUpdate.justCompletedAll ? ` · 주간 보상 ⭐ ${WEEKLY_POINT_REWARD}P` : ''}${monthlyUpdate.justCompletedAll ? ` · 월간 보상 ⭐ ${MONTHLY_POINT_REWARD}P` : ''}`;
     } else {
-      resultDaily.innerHTML = `오늘 미션 진행도 ${dailyDoneCount}/${dailyTotalCount} · 누적 스탬프 ${missionUpdate.state.totalStamps}`;
+      resultDaily.innerHTML = `오늘 미션 진행도 ${dailyDoneCount}/${dailyTotalCount}${missionUpdate.justCleared ? ` · 일일 보상 ⭐ ${DAILY_POINT_REWARD}P 지급` : ''}${weeklyUpdate.justCompletedAll ? ` · 주간 보상 ⭐ ${WEEKLY_POINT_REWARD}P` : ''}${monthlyUpdate.justCompletedAll ? ` · 월간 보상 ⭐ ${MONTHLY_POINT_REWARD}P` : ''}`;
     }
   }
 

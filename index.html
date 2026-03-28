@@ -2091,6 +2091,41 @@ body.haptic-flash::after {
 .speed-panel-section {
   margin-top: 16px;
 }
+.speed-start-popup,
+.speed-start-popup * {
+  touch-action: auto;
+}
+.speed-start-popup .mode-select-card {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  padding-bottom: 110px;
+}
+.speed-step-tabs {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0 12px;
+}
+.speed-step-tab {
+  appearance:none;
+  border: 0;
+  border-radius: 999px;
+  background: #a53700;
+  color:#ffe8b0;
+  padding: 12px 14px;
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 26px;
+  line-height:1;
+  cursor:pointer;
+  box-shadow: 0 4px 0 #6e1f00;
+}
+.speed-step-tab.inactive {
+  background:#ead7b2;
+  color:#9a6a1d;
+  box-shadow: 0 4px 0 #c7aa76;
+}
 .speed-panel-label {
   font-family:'Nanum Pen Script', cursive;
   font-size: 28px;
@@ -2106,9 +2141,9 @@ body.haptic-flash::after {
 .speed-level-btn {
   appearance:none;
   border: 2px solid #b8b8b8;
-  border-radius: 12px;
+  border-radius: 16px;
   background: #f4f4f4;
-  padding: 10px 12px;
+  padding: 12px 12px;
   text-align:center;
   cursor:pointer;
 }
@@ -2120,18 +2155,18 @@ body.haptic-flash::after {
 }
 .speed-key-title {
   font-family:'Nanum Pen Script', cursive;
-  font-size: 26px;
+  font-size: 28px;
   color:#39200d;
   line-height:1;
 }
 .speed-key-sub {
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 12px;
   color:#5c4d42;
 }
 .speed-level-grid {
   display:grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
+  grid-template-columns: repeat(2, minmax(0,1fr));
   gap: 10px;
 }
 .speed-level-btn .speed-level-top {
@@ -2142,29 +2177,33 @@ body.haptic-flash::after {
   margin-bottom:4px;
 }
 .speed-level-emoji {
-  font-size: 20px;
+  font-size: 24px;
 }
 .speed-level-name {
   font-family:'Nanum Pen Script', cursive;
-  font-size: 24px;
+  font-size: 26px;
   color:#8B2500;
   line-height:1;
 }
 .speed-level-meta {
-  font-size: 12px;
+  font-size: 13px;
   color:#8a5a00;
 }
 .speed-stage-note {
-  margin-top: 10px;
+  margin-top: 12px;
   text-align:center;
   font-size: 14px;
   color:#8B2500;
 }
 .speed-start-actions {
+  position: sticky;
+  bottom: 0;
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 12px;
   margin-top: 14px;
+  padding-top: 10px;
+  background: linear-gradient(180deg, rgba(255,251,240,0) 0%, rgba(255,251,240,.96) 24%, rgba(255,251,240,1) 100%);
 }
 .speed-ghost-btn,
 .speed-primary-btn {
@@ -2173,7 +2212,7 @@ body.haptic-flash::after {
   padding: 14px 12px;
   cursor:pointer;
   font-family:'Nanum Pen Script', cursive;
-  font-size: 22px;
+  font-size: 24px;
 }
 .speed-ghost-btn {
   border: 3px solid #d0b78e;
@@ -2189,6 +2228,21 @@ body.haptic-flash::after {
 .speed-primary-btn:active {
   transform: translateY(2px);
   box-shadow: 0 2px 0 #6e1f00;
+}
+@media (max-width: 520px) {
+  .speed-start-popup .mode-select-card {
+    width: min(680px, 96vw);
+    max-height: min(84vh, 760px);
+    padding: 16px 14px 104px;
+    border-radius: 22px;
+  }
+  .speed-step-tab {
+    font-size: 22px;
+    padding: 11px 10px;
+  }
+  .speed-key-title { font-size: 25px; }
+  .speed-level-name { font-size: 24px; }
+  .speed-level-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 .speed-record-card {
   position: relative;
@@ -2696,22 +2750,27 @@ body.haptic-flash::after {
   </div>
 </div>
 
-<div class="speed-start-popup" id="speedStartPopup">
+<div class="speed-start-popup" id="speedStartPopup" onclick="if(event.target===this) closeSpeedStartPopup()">
   <div class="mode-select-card">
     <div class="mode-select-header">
       <div class="mode-select-title">⚡ Speed Training</div>
       <button class="modal-x-btn" onclick="closeSpeedStartPopup()" aria-label="닫기">✕</button>
     </div>
-    <div class="mode-select-sub">스피드 모드는 Brain과 별도 화면으로 분리했다. 스테이지 도전은 3키~6키와 유아~대학원 단계를 고르는 방식이고, 무제한 기록전은 60초/45초 기록 경쟁으로 유지한다.</div>
+    <div class="mode-select-sub">스테이지 도전은 브레인처럼 ① 키 선택 → ② 단계 선택 순서로 고르고 시작한다. 무제한 기록전은 별도로 60초/45초 기록 경쟁으로 유지한다.</div>
 
     <div class="speed-panel-section">
+      <div class="speed-step-tabs">
+        <button class="speed-step-tab" id="speedStepTabKey" onclick="setSpeedPopupStep('key')">1. 키 선택</button>
+        <button class="speed-step-tab inactive" id="speedStepTabLevel" onclick="setSpeedPopupStep('level')">2. 단계 선택</button>
+      </div>
+
       <div class="speed-panel-label">스테이지 도전</div>
       <div class="speed-key-grid" id="speedKeyGrid"></div>
       <div class="speed-level-grid" id="speedLevelGrid" style="margin-top:10px;"></div>
       <div class="speed-stage-note" id="speedStageNote">3키 · 유아 단계 · 제한시간 60초</div>
       <div class="speed-start-actions">
         <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">닫기</button>
-        <button class="speed-primary-btn" onclick="startSpeedStageTraining()">선택한 단계로 시작</button>
+        <button class="speed-primary-btn" id="speedStartConfirmBtn" onclick="startSpeedStageTraining()">선택한 단계로 시작</button>
       </div>
     </div>
 
@@ -5095,6 +5154,8 @@ function showComboToast(n) {
     timer: null,
     tickSecond: null,
     sceneIdx: 0
+  ,
+    popupStep: 'key'
   };
 
   function getStageLevels() {
@@ -5169,10 +5230,26 @@ function showComboToast(n) {
       document.body.classList.remove('popup-open');
     }
   }
+  function syncSpeedPopupStepUI() {
+    const keyTab = document.getElementById('speedStepTabKey');
+    const levelTab = document.getElementById('speedStepTabLevel');
+    const keyGrid = document.getElementById('speedKeyGrid');
+    const levelGrid = document.getElementById('speedLevelGrid');
+    if (keyTab) keyTab.classList.toggle('inactive', speedState.popupStep !== 'key');
+    if (levelTab) levelTab.classList.toggle('inactive', speedState.popupStep !== 'level');
+    if (keyGrid) keyGrid.style.display = speedState.popupStep === 'key' ? 'grid' : 'none';
+    if (levelGrid) levelGrid.style.display = speedState.popupStep === 'level' ? 'grid' : 'none';
+  }
+  window.setSpeedPopupStep = function(step) {
+    speedState.popupStep = step === 'level' ? 'level' : 'key';
+    syncSpeedPopupStepUI();
+  };
   function openSpeedStartPopup() {
+    speedState.popupStep = 'key';
     renderSpeedKeyOptions();
     renderSpeedLevelOptions();
     updateSpeedStageSummary();
+    syncSpeedPopupStepUI();
     const n = document.getElementById('speedInfiniteBestNormal');
     const h = document.getElementById('speedInfiniteBestHard');
     if (n) n.textContent = String(getSpeedInfiniteBest('normal'));
@@ -5183,6 +5260,7 @@ function showComboToast(n) {
     el.classList.add('visible');
     document.body.classList.add('popup-open');
   }
+  window.closeSpeedStartPopup = closeSpeedStartPopup;
   window.selectTrainingMode = function(mode) {
     if (mode === 'speed') openSpeedStartPopup();
     else {
@@ -5233,7 +5311,7 @@ function showComboToast(n) {
     updateSpeedStageSummary();
   };
   window.selectSpeedStageLevel = function(idx) {
-    speedState.selectedLevelIdx = Math.max(0, Math.min(getStageLevels().length - 1, Number(idx || 0)));
+    speedState.selectedLevelIdx = idx;
     renderSpeedLevelOptions();
     updateSpeedStageSummary();
   };

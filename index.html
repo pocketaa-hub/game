@@ -7,7 +7,6 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>기억의 한계: 1%의 도전</title>
-<!-- merged stage + service update: brain speed toolbar -->
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,6 +56,13 @@ body {
     background-size: cover;
     background-position: 30% top;
   }
+}
+
+@media (max-width: 500px) {
+  .speed-toolbar { gap: 6px; margin-top: -6px; }
+  .speed-toolbar-label { font-size: 12px; }
+  .speed-chip { font-size: 18px; padding: 5px 11px 6px; }
+  .speed-chip-note { font-size: 11px; }
 }
 
 audio#bgm { display: none; }
@@ -147,7 +153,6 @@ audio#bgm { display: none; }
   letter-spacing: 1px;
 }
 
-
 .speed-toolbar {
   width: 100%;
   display: flex;
@@ -194,13 +199,6 @@ audio#bgm { display: none; }
   margin-top: -2px;
   min-height: 16px;
 }
-@media (max-width: 500px) {
-  .speed-toolbar { gap: 6px; margin-top: -6px; }
-  .speed-toolbar-label { font-size: 12px; }
-  .speed-chip { font-size: 18px; padding: 5px 11px 6px; }
-  .speed-chip-note { font-size: 11px; }
-}
-
 
 /* 점수판 */
 .stats-board {
@@ -1988,120 +1986,520 @@ body.haptic-flash::after {
 }
 
 
-
-/* === Speed / Brain mode selection draft === */
-.mode-select-popup, .speed-start-popup {
-  position: fixed; inset: 0; z-index: 5400;
-  background: rgba(0,0,0,.76);
-  display: flex; align-items: center; justify-content: center;
+/* ══ 모드 선택 / 스피드 모드 추가 ══ */
+.mode-select-popup,
+.speed-start-popup,
+.speed-result-popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 18px;
-  opacity: 0; pointer-events: none;
-  transition: opacity .25s ease;
+  background: rgba(0,0,0,.72);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .22s ease, visibility .22s ease;
+  z-index: 5200;
   backdrop-filter: blur(6px);
 }
-.mode-select-popup.visible, .speed-start-popup.visible { opacity: 1; pointer-events: all; }
+.mode-select-popup.visible,
+.speed-start-popup.visible,
+.speed-result-popup.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
 .mode-select-card {
-  width: min(430px, 94vw);
-  background: rgba(255,251,238,.98);
+  position: relative;
+  width: min(680px, 94vw);
+  max-height: min(88vh, 760px);
+  overflow: auto;
+  padding: 18px 18px 20px;
+  border-radius: 28px;
   border: 4px solid #c88a30;
-  border-radius: 22px;
-  box-shadow: 0 8px 0 #8B6000, 0 20px 34px rgba(0,0,0,.35);
-  padding: 18px 16px 18px;
+  background: rgba(255,251,240,.985);
+  box-shadow: 0 10px 0 #8B6000, 0 22px 34px rgba(0,0,0,.34);
 }
-.mode-select-header { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.mode-select-title { font-family: 'Nanum Pen Script', cursive; font-size: 32px; color:#8B2500; }
-.mode-select-sub { margin-top:4px; font-size:13px; color:#8c6a2f; line-height:1.4; }
-.mode-choice-grid { display:grid; grid-template-columns:1fr; gap:12px; margin-top:14px; }
+.mode-select-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 8px;
+}
+.mode-select-title {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 34px;
+  color:#8B2500;
+  line-height:1;
+}
+.mode-select-sub {
+  font-size: 15px;
+  color:#8a5a00;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.mode-choice-grid {
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
 .mode-choice-btn {
-  appearance:none; width:100%; text-align:left; cursor:pointer;
-  border:3px solid #d3b16f; border-radius:18px;
-  padding:14px 14px 13px;
-  background: linear-gradient(180deg, #fff9ec 0%, #f7e8c0 100%);
-  color:#6a2800; box-shadow:0 5px 0 #c59b44, 0 10px 18px rgba(0,0,0,.14);
+  appearance:none;
+  border: 3px solid #c88a30;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fffdf6 0%, #f7ecd0 100%);
+  padding: 16px 16px 14px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #caa04d, 0 10px 18px rgba(0,0,0,.10);
 }
-.mode-choice-btn:active { transform: translateY(2px); box-shadow:0 2px 0 #c59b44, 0 5px 10px rgba(0,0,0,.12); }
-.mode-choice-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.mode-choice-name { font-family:'Nanum Pen Script', cursive; font-size:32px; line-height:1; }
-.mode-choice-icon { font-size:30px; }
-.mode-choice-desc { margin-top:8px; font-size:13px; line-height:1.4; color:#7c5520; }
-.mode-choice-meta { margin-top:8px; font-size:12px; color:#8d6c36; }
-.speed-sequence-wrap { width:100%; display:none; flex-direction:column; gap:8px; }
-.speed-sequence-wrap.visible { display:flex; }
-.speed-sequence-head { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.speed-sequence-title { font-size:12px; color:#9b6a20; font-weight:700; letter-spacing:1px; }
-.speed-time-readout { font-family:'Nanum Pen Script', cursive; font-size:26px; color:#8B2500; line-height:1; transition: color .18s ease, text-shadow .18s ease, transform .18s ease; }
-.speed-time-readout.danger { color:#c62828; text-shadow:0 0 12px rgba(244,67,54,.28); }
-.speed-time-readout.critical { color:#ffebee; text-shadow:0 0 16px rgba(244,67,54,.55); transform: scale(1.06); }
-.speed-sequence-row {
+.mode-choice-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #caa04d, 0 6px 12px rgba(0,0,0,.08);
+}
+.mode-choice-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom: 8px;
+}
+.mode-choice-name {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 32px;
+  color:#8B2500;
+  line-height:1;
+}
+.mode-choice-icon {
+  font-size: 38px;
+  line-height:1;
+}
+.mode-choice-desc {
+  font-size: 15px;
+  color:#7a4a10;
+  line-height: 1.45;
+}
+.mode-choice-meta {
+  margin-top: 8px;
+  font-size: 13px;
+  color:#a56b18;
+  font-weight:700;
+}
+.speed-panel-section {
+  margin-top: 16px;
+}
+.speed-panel-label {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 28px;
+  color:#8B2500;
+  margin-bottom: 8px;
+}
+.speed-key-grid {
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+}
+.speed-key-btn,
+.speed-level-btn {
+  appearance:none;
+  border: 2px solid #b8b8b8;
+  border-radius: 12px;
+  background: #f4f4f4;
+  padding: 10px 12px;
+  text-align:center;
+  cursor:pointer;
+}
+.speed-key-btn.active,
+.speed-level-btn.active {
+  border-color:#c88a30;
+  background: linear-gradient(180deg, #fff3c4 0%, #ffd769 100%);
+  box-shadow: 0 4px 0 #b7770d;
+}
+.speed-key-title {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 26px;
+  color:#39200d;
+  line-height:1;
+}
+.speed-key-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color:#5c4d42;
+}
+.speed-level-grid {
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+.speed-level-btn .speed-level-top {
+  display:flex;
+  justify-content:space-between;
+  gap:6px;
+  align-items:center;
+  margin-bottom:4px;
+}
+.speed-level-emoji {
+  font-size: 20px;
+}
+.speed-level-name {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 24px;
+  color:#8B2500;
+  line-height:1;
+}
+.speed-level-meta {
+  font-size: 12px;
+  color:#8a5a00;
+}
+.speed-stage-note {
+  margin-top: 10px;
+  text-align:center;
+  font-size: 14px;
+  color:#8B2500;
+}
+.speed-start-actions {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+.speed-ghost-btn,
+.speed-primary-btn {
+  appearance:none;
+  border-radius: 18px;
+  padding: 14px 12px;
+  cursor:pointer;
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 22px;
+}
+.speed-ghost-btn {
+  border: 3px solid #d0b78e;
+  background: #fffdf6;
+  color:#8a5a00;
+}
+.speed-primary-btn {
+  border: 3px solid #6e1f00;
+  background: #a53700;
+  color:#ffe8b0;
+  box-shadow: 0 5px 0 #6e1f00;
+}
+.speed-primary-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #6e1f00;
+}
+.speed-record-card {
+  position: relative;
+  border: 4px solid #d1a65a;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #fff9e6 0%, #f6e7ba 100%);
+  padding: 18px 20px 18px;
+  box-shadow: 0 8px 0 rgba(191,143,54,.45);
+  margin-top: 10px;
+  cursor:pointer;
+}
+.speed-record-title {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 36px;
+  color:#8B2500;
+}
+.speed-record-desc {
+  font-size: 15px;
+  color:#8a5a00;
+  line-height:1.45;
+  margin-top: 10px;
+}
+.speed-record-dot {
+  position:absolute;
+  top: 26px;
+  right: 26px;
+  width: 46px;
+  height: 46px;
+  border-radius:50%;
+  border: 4px solid #111;
+}
+.speed-record-dot.normal { background:#ff6d00; }
+.speed-record-dot.hard { background:#ff1744; }
+
+.speed-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 510;
+  display: none;
+  opacity: 0;
+  transition: opacity .35s ease;
+  padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+}
+.speed-screen.visible {
+  display:block;
+  opacity:1;
+}
+.speed-screen-inner {
+  position: relative;
+  z-index: 4;
+  min-height: 100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding: 12px 14px 92px;
+  background: linear-gradient(180deg, rgba(255,248,232,.20) 0%, rgba(255,248,232,.08) 55%, rgba(0,0,0,.12) 100%);
+}
+.speed-top-card {
+  width: min(420px, 100%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: 8px;
+}
+.speed-stage-badge {
+  background: rgba(255,248,220,0.95);
+  border: 3px solid #c88a30;
+  border-radius: 999px;
+  padding: 7px 18px;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 22px;
+  color: #8B2500;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+.speed-info-row {
+  width:min(320px, 92%);
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.speed-stat-card {
+  background: rgba(255,248,220,0.95);
+  border: 3px solid #c88a30;
+  border-radius: 18px;
+  padding: 10px 8px 8px;
+  text-align:center;
+  box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+.speed-stat-label {
+  font-size: 12px;
+  color:#8a5a00;
+}
+.speed-stat-value {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 32px;
+  color:#5c2a00;
+  line-height:1.05;
+}
+.speed-sequence-wrap {
+  width:min(420px, 100%);
+  min-height: 82px;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:8px;
-  width:100%;
-  min-height:40px;
-  overflow-x:auto;
-  padding:4px 10px 6px;
-  scrollbar-width:none;
+  padding: 0 8px;
 }
-.speed-sequence-row::-webkit-scrollbar { display:none; }
-.speed-card {
-  flex:0 0 auto;
-  width:32px;
-  height:32px;
-  display:inline-flex;
+.speed-sequence-row {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap: 8px;
+}
+.speed-seq-dot {
+  width: 32px;
+  height: 32px;
+  border-radius:50%;
+  border: 3px solid rgba(255,255,255,.8);
+  box-shadow: 0 2px 10px rgba(0,0,0,.20);
+  opacity: .45;
+  transform: scale(.92);
+  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.speed-seq-dot.done {
+  opacity: .25;
+  filter: grayscale(.15);
+}
+.speed-seq-dot.current {
+  opacity: 1;
+  transform: scale(1.12);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.40), 0 2px 16px rgba(255,255,255,.35);
+}
+.speed-status {
+  min-height: 34px;
+  padding: 6px 18px;
+  background: rgba(255,248,220,0.92);
+  border: 2px solid #c88a30;
+  border-radius: 999px;
+  color:#7a4a10;
+  font-size: 15px;
+}
+.speed-play-wrap {
+  width: min(430px, 100%);
+  flex: 1;
+  display:flex;
   align-items:center;
   justify-content:center;
-  border-radius:999px;
-  border:2px solid #d9b86a;
-  background: rgba(255,255,255,.96);
-  font-size:16px;
+  padding: 8px 0 0;
+}
+.speed-grid {
+  width: 100%;
+  display:grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 14px;
+}
+.speed-play-btn {
+  aspect-ratio: 1;
+  border-radius: 22px;
+  border: 4px solid rgba(0,0,0,.18);
+  box-shadow: 0 7px 0 rgba(0,0,0,.20), 0 12px 24px rgba(0,0,0,.16);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap: 8px;
+  color:#fff;
+  position: relative;
+  overflow: hidden;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.speed-play-btn.hidden {
+  visibility:hidden;
+  pointer-events:none;
+}
+.speed-play-btn .speed-btn-shape {
+  width: 66px;
+  height: 66px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border: 3px solid rgba(255,255,255,.80);
+}
+.speed-play-btn .speed-btn-shape svg {
+  width: 46px;
+  height: 46px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.18));
+}
+.speed-play-btn .speed-btn-name {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 26px;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0,0,0,.22);
+}
+.speed-play-btn.red { background: linear-gradient(145deg,#ff8d8d,#d44334); }
+.speed-play-btn.blue { background: linear-gradient(145deg,#7ab9ff,#2377d7); }
+.speed-play-btn.yellow { background: linear-gradient(145deg,#ffe57f,#f0b53b); }
+.speed-play-btn.green { background: linear-gradient(145deg,#92d48d,#4b9c50); }
+.speed-play-btn.purple { background: linear-gradient(145deg,#c894ea,#8f53ba); }
+.speed-play-btn.teal { background: linear-gradient(145deg,#80e0db,#2db1aa); }
+.speed-play-btn.tap { transform: scale(.96); filter: brightness(1.08); }
+.speed-play-btn.wrong { animation: shake .35s ease; }
+.speed-play-btn.correct { animation: correctPop .3s ease; }
+
+.speed-bottom-timer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(10px, env(safe-area-inset-bottom, 0));
+  width: min(430px, calc(100vw - 20px));
+  z-index: 6;
+}
+.speed-timer-card {
+  border-radius: 18px;
+  border: 3px solid #6b1e00;
+  background: rgba(40,8,0,.72);
+  box-shadow: 0 10px 18px rgba(0,0,0,.26);
+  overflow: hidden;
+}
+.speed-timer-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 8px 12px 6px;
+  color:#ffe6b6;
+  font-size: 12px;
+}
+.speed-timer-readout {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 28px;
   line-height:1;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-  transition: transform .12s ease, opacity .12s ease, border-color .12s ease, box-shadow .12s ease, filter .12s ease;
+  color:#ffe566;
 }
-.speed-card.done { opacity:.34; filter:saturate(.75); }
-.speed-card.current {
-  transform: translateY(-1px) scale(1.1);
-  border-color:#c62828;
-  box-shadow:0 0 0 3px rgba(244,67,54,.16), 0 4px 10px rgba(0,0,0,.12);
-}
-.speed-timer-wrap { width:100%; display:none; margin-top:4px; }
-.speed-timer-wrap.visible { display:block; }
-.speed-timer-label { text-align:center; font-size:11px; color:#8d6c36; margin-bottom:5px; }
-.speed-timer-bar {
-  position:relative; height:16px; border-radius:999px; overflow:hidden;
-  background: rgba(92,24,0,.22); border:2px solid rgba(200,138,48,.6);
+.speed-timer-track {
+  height: 18px;
+  background: rgba(255,255,255,.08);
+  position:relative;
+  overflow:hidden;
 }
 .speed-timer-fill {
-  position:absolute; inset:0 auto 0 0; width:100%;
-  background: linear-gradient(90deg, #ffb300 0%, #ff7043 48%, #c62828 100%);
-  border-radius:inherit; transition: width .08s linear, filter .12s ease;
-  box-shadow: inset 0 0 12px rgba(255,255,255,.24), 0 0 12px rgba(255,112,67,.28);
+  height:100%;
+  width:100%;
+  background: linear-gradient(90deg, #ffcf55 0%, #ff7a18 48%, #ff3d00 100%);
+  transition: width .08s linear, filter .12s ease;
+  position:relative;
 }
 .speed-timer-fill::after {
-  content:''; position:absolute; inset:0; opacity:.82;
-  background: repeating-linear-gradient(120deg, rgba(255,255,255,.18) 0 8px, transparent 8px 16px);
+  content:'';
+  position:absolute;
+  inset: -8px 0 auto 0;
+  height: 20px;
+  background:
+    radial-gradient(circle at 10% 100%, rgba(255,235,140,.7) 0 8px, transparent 9px),
+    radial-gradient(circle at 28% 100%, rgba(255,170,60,.85) 0 10px, transparent 11px),
+    radial-gradient(circle at 55% 100%, rgba(255,130,30,.8) 0 9px, transparent 10px),
+    radial-gradient(circle at 78% 100%, rgba(255,80,0,.78) 0 11px, transparent 12px);
+  opacity: .88;
+  pointer-events:none;
 }
-.speed-timer-fill.danger { filter:saturate(1.18) brightness(1.08); }
-.speed-timer-fill.critical { filter:saturate(1.28) brightness(1.18); box-shadow: inset 0 0 18px rgba(255,255,255,.26), 0 0 18px rgba(244,67,54,.42); }
-.speed-timer-embers {
-  position:absolute; inset:0; pointer-events:none; opacity:0;
-  background: radial-gradient(circle at 8% 60%, rgba(255,245,157,.8) 0 4%, transparent 5%),
-              radial-gradient(circle at 28% 30%, rgba(255,183,77,.7) 0 4%, transparent 5%),
-              radial-gradient(circle at 48% 75%, rgba(255,112,67,.68) 0 4%, transparent 5%),
-              radial-gradient(circle at 72% 35%, rgba(255,204,128,.75) 0 4%, transparent 5%),
-              radial-gradient(circle at 92% 68%, rgba(255,138,101,.7) 0 4%, transparent 5%);
+.speed-timer-fill.danger {
+  background: linear-gradient(90deg, #ff9357 0%, #ff4d2f 48%, #d50000 100%);
 }
-.speed-timer-wrap.danger .speed-timer-embers { opacity:.9; animation: emberDrift .8s linear infinite; }
-.speed-timer-wrap.critical .speed-timer-embers { opacity:1; animation: emberDrift .52s linear infinite; }
-@keyframes emberDrift {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
+.speed-timer-fill.critical {
+  filter: saturate(1.25) brightness(1.08);
 }
-@media (max-width: 430px) {
-  .mode-choice-name { font-size:28px; }
-  .speed-card { width:28px; height:28px; font-size:15px; }
-  .speed-time-readout { font-size:24px; }
+.speed-timer-readout.danger { color:#ff9d8f; }
+.speed-timer-readout.critical { color:#fff1a8; }
+.speed-screen .modal-x-btn {
+  top: 14px;
+  right: 14px;
+}
+.speed-result-card {
+  width: min(330px, 92vw);
+  background: #fffbee;
+  border: 4px solid #c88a30;
+  border-radius: 22px;
+  padding: 24px 20px 20px;
+  box-shadow: 0 8px 0 #8B6000, 0 14px 40px rgba(0,0,0,.45);
+  text-align:center;
+  position: relative;
+}
+.speed-result-title {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 34px;
+  color:#8B2500;
+}
+.speed-result-score {
+  font-family:'Nanum Pen Script', cursive;
+  font-size: 58px;
+  color:#8B2500;
+  line-height:1;
+  margin: 6px 0 2px;
+}
+.speed-result-meta {
+  color:#8a5a00;
+  font-size: 14px;
+  line-height:1.45;
+}
+.speed-result-actions {
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+@media (max-width: 560px) {
+  .mode-choice-grid { grid-template-columns: 1fr; }
+  .speed-level-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .mode-select-title { font-size: 30px; }
 }
 
 </style>
@@ -2150,7 +2548,7 @@ body.haptic-flash::after {
     </div>
 
     <div class="title-mode-picker title-mode-picker-compact">
-      <div class="title-mode-label">시작 버튼을 누르면 레벨과 속도를 고를 수 있어</div>
+      <div class="title-mode-label">시작 버튼을 누르면 Brain / Speed를 먼저 고를 수 있어</div>
       <div class="title-feedback-row">
         <button class="feedback-chip" id="soundChip" onclick="toggleSound()">🔊 소리 ON</button>
         <button class="feedback-chip" id="bgmChip" onclick="toggleBgm()">🎵 BGM ON</button>
@@ -2172,78 +2570,6 @@ body.haptic-flash::after {
       <div class="title-dot" id="tdot-4"></div>
       <div class="title-dot" id="tdot-5"></div>
       <div class="title-dot" id="tdot-6"></div>
-    </div>
-  </div>
-</div>
-
-<div class="mode-select-popup" id="modeSelectPopup">
-  <div class="mode-select-card">
-    <div class="mode-select-header">
-      <div class="mode-select-title">🧠 트레이닝 선택</div>
-      <button class="start-close-btn" onclick="closeModeSelectPopup()" aria-label="닫기">✕</button>
-    </div>
-    <div class="mode-select-sub">오늘은 기억력을 볼지, 속도를 볼지 먼저 고르면 돼.</div>
-    <div class="mode-choice-grid">
-      <button class="mode-choice-btn" onclick="selectTrainingMode('brain')">
-        <div class="mode-choice-top">
-          <div class="mode-choice-name">Brain Training</div>
-          <div class="mode-choice-icon">🧠</div>
-        </div>
-        <div class="mode-choice-desc">빛나는 순서를 보고 그대로 기억해서 입력하는 기존 기억력 모드.</div>
-        <div class="mode-choice-meta">레벨/단계 선택 후 시작</div>
-      </button>
-      <button class="mode-choice-btn" onclick="selectTrainingMode('speed')">
-        <div class="mode-choice-top">
-          <div class="mode-choice-name">Speed Training</div>
-          <div class="mode-choice-icon">⚡</div>
-        </div>
-        <div class="mode-choice-desc">스테이지 도전(3키~6키 · 유아~대학원)과 무제한 기록전을 함께 고를 수 있는 속도 모드.</div>
-        <div class="mode-choice-meta">스테이지 도전 · Infinite 기록전</div>
-      </button>
-    </div>
-  </div>
-</div>
-
-<div class="speed-start-popup" id="speedStartPopup">
-  <div class="mode-select-card">
-    <div class="mode-select-header">
-      <div class="mode-select-title">⚡ Speed Training</div>
-      <button class="start-close-btn" onclick="closeSpeedStartPopup()" aria-label="닫기">✕</button>
-    </div>
-    <div class="mode-select-sub">스테이지 도전은 3키~6키와 유아~대학원 단계를 고르는 연속형 모드, 무제한 기록전은 지금처럼 60초/45초 기록용으로 남겨둘게.</div>
-
-    <div class="start-steps" style="margin-top:10px;">
-      <div class="start-step-chip active">1. 키 선택</div>
-      <div class="start-step-chip active">2. 단계 선택</div>
-    </div>
-
-    <div class="start-section-label" style="margin-top:14px;">스테이지 도전</div>
-    <div class="mode-level-grid" id="speedKeyGrid"></div>
-    <div class="level-grid" id="speedLevelGrid"></div>
-    <div class="mode-note" id="speedStageNote">3키 · 유아 단계 · 제한시간 60초</div>
-    <div class="start-sub-actions" style="margin-top:10px;">
-      <button class="start-ghost-btn" onclick="closeSpeedStartPopup()">닫기</button>
-      <button class="start-confirm-btn" onclick="startSpeedStageTraining()">선택한 단계로 시작</button>
-    </div>
-
-    <div class="start-section-label" style="margin-top:18px;">무제한 기록전</div>
-    <div class="mode-choice-grid">
-      <button class="mode-choice-btn" onclick="startSpeedTraining('normal')">
-        <div class="mode-choice-top">
-          <div class="mode-choice-name">Normal</div>
-          <div class="mode-choice-icon">🟠</div>
-        </div>
-        <div class="mode-choice-desc">60초 안에 최대 라운드. 기존 기록 경쟁용.</div>
-        <div class="mode-choice-meta">무제한 라운드</div>
-      </button>
-      <button class="mode-choice-btn" onclick="startSpeedTraining('hard')">
-        <div class="mode-choice-top">
-          <div class="mode-choice-name">Hard</div>
-          <div class="mode-choice-icon">🔴</div>
-        </div>
-        <div class="mode-choice-desc">45초 안에 더 빠른 템포로 기록 경쟁.</div>
-        <div class="mode-choice-meta">무제한 라운드</div>
-      </button>
     </div>
   </div>
 </div>
@@ -2341,6 +2667,73 @@ body.haptic-flash::after {
   </div>
 </div>
 
+
+<div class="mode-select-popup" id="modeSelectPopup">
+  <div class="mode-select-card">
+    <div class="mode-select-header">
+      <div class="mode-select-title">🧠 트레이닝 선택</div>
+      <button class="modal-x-btn" onclick="closeModeSelectPopup()" aria-label="닫기">✕</button>
+    </div>
+    <div class="mode-select-sub">첫 화면은 같이 쓰고, 안으로 들어가면 Brain과 Speed는 서로 따로 움직이도록 분리했다.</div>
+    <div class="mode-choice-grid">
+      <button class="mode-choice-btn" onclick="selectTrainingMode('brain')">
+        <div class="mode-choice-top">
+          <div class="mode-choice-name">Brain Training</div>
+          <div class="mode-choice-icon">🧠</div>
+        </div>
+        <div class="mode-choice-desc">기존 기억력 게임. 현재 정리된 흐름은 그대로 유지하고, 시작 팝업부터 기존 구조를 사용한다.</div>
+        <div class="mode-choice-meta">기존 레벨 / 단계 선택</div>
+      </button>
+      <button class="mode-choice-btn" onclick="selectTrainingMode('speed')">
+        <div class="mode-choice-top">
+          <div class="mode-choice-name">Speed Training</div>
+          <div class="mode-choice-icon">⚡</div>
+        </div>
+        <div class="mode-choice-desc">스테이지 도전과 무제한 기록전을 분리한 속도 모드. 상단 시퀀스와 하단 시간바를 따로 가진다.</div>
+        <div class="mode-choice-meta">스테이지 도전 / 무제한 기록전</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="speed-start-popup" id="speedStartPopup">
+  <div class="mode-select-card">
+    <div class="mode-select-header">
+      <div class="mode-select-title">⚡ Speed Training</div>
+      <button class="modal-x-btn" onclick="closeSpeedStartPopup()" aria-label="닫기">✕</button>
+    </div>
+    <div class="mode-select-sub">스피드 모드는 Brain과 별도 화면으로 분리했다. 스테이지 도전은 3키~6키와 유아~대학원 단계를 고르는 방식이고, 무제한 기록전은 60초/45초 기록 경쟁으로 유지한다.</div>
+
+    <div class="speed-panel-section">
+      <div class="speed-panel-label">스테이지 도전</div>
+      <div class="speed-key-grid" id="speedKeyGrid"></div>
+      <div class="speed-level-grid" id="speedLevelGrid" style="margin-top:10px;"></div>
+      <div class="speed-stage-note" id="speedStageNote">3키 · 유아 단계 · 제한시간 60초</div>
+      <div class="speed-start-actions">
+        <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">닫기</button>
+        <button class="speed-primary-btn" onclick="startSpeedStageTraining()">선택한 단계로 시작</button>
+      </div>
+    </div>
+
+    <div class="speed-panel-section">
+      <div class="speed-panel-label">무제한 기록전</div>
+      <div class="speed-record-card" onclick="startSpeedInfinite('normal')">
+        <div class="speed-record-title">Normal</div>
+        <div class="speed-record-desc">60초 안에 최대 라운드. 기존 기록 경쟁용. 현재 최고 기록 <span id="speedInfiniteBestNormal">0</span>R</div>
+        <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">무제한 라운드</div>
+        <div class="speed-record-dot normal"></div>
+      </div>
+      <div class="speed-record-card" onclick="startSpeedInfinite('hard')">
+        <div class="speed-record-title">Hard</div>
+        <div class="speed-record-desc">45초 안에 더 빠른 템포로 기록 경쟁. 현재 최고 기록 <span id="speedInfiniteBestHard">0</span>R</div>
+        <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">무제한 라운드</div>
+        <div class="speed-record-dot hard"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- 콤보 토스트 -->
 <div class="combo-toast" id="comboToast" style="display:none">
   <span class="combo-stars" id="comboStars">⭐⭐⭐</span>
@@ -2386,22 +2779,12 @@ body.haptic-flash::after {
     </div>
 
     <div class="stage-badge" id="stageBadge">🍼 유아 · 1X</div>
-
     <div class="speed-toolbar" id="speedToolbar">
       <div class="speed-toolbar-label">배속</div>
       <button class="speed-chip active" id="speedChip1" onclick="setPlaySpeed(1)">1배속</button>
       <button class="speed-chip" id="speedChip15" onclick="setPlaySpeed(1.5)">1.5배속</button>
       <button class="speed-chip" id="speedChip2" onclick="setPlaySpeed(2)">2배속</button>
       <div class="speed-chip-note" id="speedChipNote">패턴 재생 속도 조절</div>
-    </div>
-
-
-    <div class="speed-sequence-wrap" id="speedSequenceWrap">
-      <div class="speed-sequence-head">
-        <div class="speed-sequence-title">이번 순서</div>
-        <div class="speed-time-readout" id="speedTimeReadout">60</div>
-      </div>
-      <div class="speed-sequence-row" id="speedSequenceRow"></div>
     </div>
 
     <div class="stats-board">
@@ -2467,14 +2850,6 @@ body.haptic-flash::after {
     </div>
 
     <div class="status-bubble" id="status">— 준비 중 —</div>
-
-    <div class="speed-timer-wrap" id="speedTimerWrap">
-      <div class="speed-timer-label" id="speedTimerLabel">남은 시간</div>
-      <div class="speed-timer-bar">
-        <div class="speed-timer-fill" id="speedTimerFill"></div>
-        <div class="speed-timer-embers"></div>
-      </div>
-    </div>
   </div>
 
   <!-- 오른쪽 캐릭터 (남자) -->
@@ -2488,6 +2863,89 @@ body.haptic-flash::after {
     <div class="char-stage" id="cr-6"><img src="male_6.png" alt=""></div>
   </div><!-- /charRight -->
 </div><!-- /game-wrapper -->
+
+
+<div class="speed-screen" id="speedScreen">
+  <div class="speed-screen-inner">
+    <button class="modal-x-btn" onclick="speedGoHome()" aria-label="닫기">✕</button>
+    <div class="speed-top-card">
+      <div class="signboard">
+        <div class="sign-title">Speed Training</div>
+        <div class="sign-sub" id="speedScreenSub">정확하게 빠르게 눌러서 끝까지 가기</div>
+      </div>
+      <div class="speed-stage-badge" id="speedStageBadge">🍼 유아 · 3키</div>
+      <div class="speed-sequence-wrap" id="speedSequenceWrap">
+        <div class="speed-sequence-row" id="speedSequenceRow"></div>
+      </div>
+      <div class="speed-info-row">
+        <div class="speed-stat-card">
+          <div class="speed-stat-label">라운드</div>
+          <div class="speed-stat-value" id="speedRound">0</div>
+        </div>
+        <div class="speed-stat-card">
+          <div class="speed-stat-label">최고 기록</div>
+          <div class="speed-stat-value" id="speedBest">0</div>
+        </div>
+      </div>
+      <div class="speed-status" id="speedStatus">준비 중</div>
+    </div>
+
+    <div class="speed-play-wrap">
+      <div class="speed-grid" id="speedGrid">
+        <button class="speed-play-btn red" data-shape="circle">
+          <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="white" opacity=".92"/></svg></div>
+          <div class="speed-btn-name">동그라미</div>
+        </button>
+        <button class="speed-play-btn blue" data-shape="square">
+          <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><rect x="10" y="10" width="40" height="40" rx="6" fill="white" opacity=".92"/></svg></div>
+          <div class="speed-btn-name">네모</div>
+        </button>
+        <button class="speed-play-btn yellow" data-shape="triangle">
+          <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,10 50,46 10,46" fill="white" opacity=".92"/></svg></div>
+          <div class="speed-btn-name">세모</div>
+        </button>
+        <button class="speed-play-btn green" data-shape="star">
+          <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,7 35,23 52,23 38,33 43,49 30,39 17,49 22,33 8,23 25,23" fill="white" opacity=".92"/></svg></div>
+          <div class="speed-btn-name">별</div>
+        </button>
+        <button class="speed-play-btn purple" data-shape="diamond">
+          <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,8 50,30 30,52 10,30" fill="white" opacity=".92"/></svg></div>
+          <div class="speed-btn-name">다이아</div>
+        </button>
+        <button class="speed-play-btn teal" data-shape="hex">
+          <div class="speed-btn-shape"><svg viewBox="0 0 60 60"><polygon points="30,8 47,18 47,42 30,52 13,42 13,18" fill="white" opacity=".92"/></svg></div>
+          <div class="speed-btn-name">육각</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="speed-bottom-timer">
+    <div class="speed-timer-card">
+      <div class="speed-timer-top">
+        <div id="speedTimerLabel">남은 시간</div>
+        <div class="speed-timer-readout" id="speedTimeReadout">60</div>
+      </div>
+      <div class="speed-timer-track">
+        <div class="speed-timer-fill" id="speedTimerFill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="speed-result-popup" id="speedResultPopup">
+  <div class="speed-result-card">
+    <button class="modal-x-btn" onclick="speedGoHome()" aria-label="닫기">✕</button>
+    <div class="speed-result-title" id="speedResultTitle">Speed Training</div>
+    <div class="speed-result-score" id="speedResultScore">0</div>
+    <div class="speed-result-meta" id="speedResultMeta">최고 기록 0R</div>
+    <div class="speed-result-actions">
+      <button class="speed-ghost-btn" onclick="speedGoHome()">처음으로</button>
+      <button class="speed-primary-btn" onclick="restartSpeedCurrent()">다시 시작</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- 결과 오버레이 -->
 <div class="overlay" id="overlay">
@@ -2510,7 +2968,7 @@ body.haptic-flash::after {
     </div>
     <div class="result-daily" id="resultDaily"></div>
     <div class="result-action-row">
-      <button class="restart-btn" onclick="restartCurrentTraining()">다시 시작</button>
+      <button class="restart-btn" onclick="startGame()">다시 시작</button>
       <button class="result-next-btn" onclick="goToNextStage()">다음 단계</button>
     </div>
     <div class="result-secondary-grid">
@@ -2902,26 +3360,14 @@ function saveRanking(records) {
 
 function addRankRecord(name, score, stageName) {
   const records = getRanking();
-  let rankModeLabel = getDifficultyConfig().label;
-  let rankModeKey = difficulty;
-  if (currentTrainingMode === 'speed') {
-    if (currentSpeedPlayType === 'stage') {
-      const level = LEVELS[selectedSpeedStageLevelIdx] || LEVELS[0];
-      rankModeLabel = `SPEED STAGE ${level.name} · ${selectedSpeedStageKeyCount}키`;
-      rankModeKey = `speed_stage_${selectedSpeedStageKeyCount}_${selectedSpeedStageLevelIdx}`;
-    } else {
-      rankModeLabel = `SPEED ${SPEED_MODE_DEFS[speedMode].label}`;
-      rankModeKey = `speed_${speedMode}`;
-    }
-  }
   const cleanName = (name || '익명').trim().slice(0, 10) || '익명';
   const now = new Date();
   records.push({
     name: cleanName,
     score,
     stage: stageName,
-    mode: rankModeKey,
-    modeLabel: rankModeLabel,
+    mode: difficulty,
+    modeLabel: getDifficultyConfig().label,
     date: now.toLocaleDateString('ko-KR', {month:'2-digit', day:'2-digit'}),
     dateKey: now.toLocaleDateString('sv-SE'),
     ts: now.getTime()
@@ -3622,14 +4068,14 @@ function setPlaySpeed(value) {
   saveProgressState();
   syncPlaySpeedUI();
   syncDifficultyUI();
-  if (currentTrainingMode === 'brain' && gameState === STATE.SHOWING) {
+  if (gameState === STATE.SHOWING) {
     clearAllTimers();
+    const cfg = getDifficultyConfig();
     setStatus(`배속 변경 · ${formatPlaySpeedLabel(playSpeed)}배 적용`);
     safeTimeout(() => showSequence(()=> { gameState = STATE.INPUT; setStatus('따라해봐.'); }), 0);
-  } else if (currentTrainingMode === 'brain') {
-    setStatus(`배속 변경 · ${formatPlaySpeedLabel(playSpeed)}배 적용`);
   }
 }
+
 function updateStageBadge() {
   const badge = document.getElementById('stageBadge');
   if (!badge) return;
@@ -3641,8 +4087,7 @@ function syncDifficultyUI() {
   const summary = document.getElementById('selectedModeSummary');
   if (summary) summary.textContent = `${getModeConfig().label} · ${getModeConfig().buttons}키`;
   const note = document.getElementById('modeNote');
-  if (note) note.textContent = `${getModeConfig().label} · ${getModeConfig().buttons}키 · ${getSelectedLevel().name} ${getSelectedLevel().speedMul.toFixed(1)}배 · 재생 ${formatPlaySpeedLabel(playSpeed)}배`;
-  syncPlaySpeedUI();
+  if (note) note.textContent = `${getModeConfig().label} · ${getModeConfig().buttons}키 · ${getSelectedLevel().name} ${getSelectedLevel().speedMul.toFixed(1)}배 · 재생 ${formatPlaySpeedLabel(playSpeed)}배`; syncPlaySpeedUI();
   updateStageBadge();
 }
 function setDifficulty(mode) {
@@ -3752,21 +4197,17 @@ function openStartPopup() {
   playUiSound('tap');
   renderModeOptions();
   renderLevelOptions();
+  syncPlaySpeedUI();
   goToModeStep();
   document.getElementById('startPopup').classList.add('visible');
   document.body.classList.add('popup-open');
 }
 function closeStartPopup() {
   document.getElementById('startPopup').classList.remove('visible');
-  if (!document.getElementById('modeSelectPopup').classList.contains('visible') && !document.getElementById('speedStartPopup').classList.contains('visible')) {
-    document.body.classList.remove('popup-open');
-  }
+  document.body.classList.remove('popup-open');
 }
 function enterGame() { openModeSelectPopup(); }
 function confirmStartGame() {
-  currentTrainingMode = 'brain';
-  localStorage.setItem(TRAINING_MODE_KEY, currentTrainingMode);
-  toggleTrainingHud(false);
   initAudio();
   playUiSound('start');
   pulseVibration([14, 24, 16]);
@@ -3786,6 +4227,7 @@ function confirmStartGame() {
   document.getElementById('overlay').style.display = '';
   document.getElementById('comboToast').style.display = '';
   applyLevelLayout();
+  syncPlaySpeedUI();
   setTimeout(() => { ts.style.display = 'none'; }, 700);
   setTimeout(startGame, 400);
 }
@@ -3903,12 +4345,6 @@ function playUiSound(kind) {
       break;
     case 'light':
       playTone(660, 0.06, 'sine', 0.036);
-      break;
-    case 'tick':
-      playTone(840, 0.038, 'square', 0.022);
-      break;
-    case 'tickCritical':
-      playTone(980, 0.042, 'square', 0.028);
       break;
     case 'tap':
       playTone(540, 0.05, 'triangle', 0.05);
@@ -4044,516 +4480,12 @@ const MSGS = {
 const DEFAULT_MSGS = ["아깝다.", "한 끗 차이였다.", "다시 하면 될 거 같은데."];
 const EMOJI  = { circle:'🔴', square:'🔵', triangle:'🟡', star:'🟢', diamond:'🟣', hex:'🟦' };
 
-
-
-const TRAINING_MODE_KEY = 'limitgame_training_mode_v1';
-const SPEED_RANK_KEY = 'limitgame_speed_best_v1';
-const SPEED_STAGE_BEST_KEY = 'limitgame_speed_stage_best_v1';
-const SPEED_MODE_DEFS = {
-  normal: { key:'normal', label:'NORMAL', duration:60 },
-  hard: { key:'hard', label:'HARD', duration:45 },
-};
-const SPEED_STAGE_DURATIONS = [60, 58, 56, 54, 51, 48, 45];
-const SPEED_LAYOUT_PATTERNS = {
-  3: [[0,1,2],[1,0,2],[2,0,1]],
-  4: [[0,1,2,3],[1,0,3,2],[2,3,0,1]],
-  5: [[0,1,2,3,4],[1,0,2,4,3],[2,3,4,0,1]],
-  6: [[0,1,2,3,4,5],[1,0,3,2,5,4],[2,3,0,1,4,5]],
-};
-
-let currentTrainingMode = localStorage.getItem(TRAINING_MODE_KEY) || 'brain';
-let currentSpeedPlayType = 'stage'; // stage | infinite
-let speedMode = 'normal';
-let selectedSpeedStageKeyCount = 3;
-let selectedSpeedStageLevelIdx = 0;
-let speedTimerInterval = null;
-let speedTimerEndAt = 0;
-let speedRemaining = 0;
-let speedSequence = [];
-let speedProgress = 0;
-let speedButtonCount = 3;
-let speedShowTickSecond = null;
-
-function getCurrentModeLabel() {
-  if (currentTrainingMode !== 'speed') return getDifficultyConfig().label;
-  if (currentSpeedPlayType === 'stage') {
-    const level = LEVELS[selectedSpeedStageLevelIdx] || LEVELS[0];
-    return `Speed Stage · ${level.name} · ${selectedSpeedStageKeyCount}키`;
-  }
-  return `Speed Infinite · ${SPEED_MODE_DEFS[speedMode].label}`;
-}
-function getSpeedBestMap() {
-  try {
-    const obj = JSON.parse(localStorage.getItem(SPEED_RANK_KEY) || '{}');
-    return obj && typeof obj === 'object' ? obj : {};
-  } catch (e) { return {}; }
-}
-function getSpeedBest(mode = speedMode) {
-  return Math.max(0, Number(getSpeedBestMap()[mode] || 0));
-}
-function updateSpeedBest(score, mode = speedMode) {
-  const map = getSpeedBestMap();
-  const next = Math.max(Number(map[mode] || 0), Number(score || 0));
-  map[mode] = next;
-  localStorage.setItem(SPEED_RANK_KEY, JSON.stringify(map));
-  return next;
-}
-function getSpeedStageBestMap() {
-  try {
-    const obj = JSON.parse(localStorage.getItem(SPEED_STAGE_BEST_KEY) || '{}');
-    return obj && typeof obj === 'object' ? obj : {};
-  } catch (e) { return {}; }
-}
-function getSpeedStageBest(keyCount = selectedSpeedStageKeyCount, levelIdx = selectedSpeedStageLevelIdx) {
-  const key = `k${keyCount}`;
-  const map = getSpeedStageBestMap();
-  const stageMap = map[key] && typeof map[key] === 'object' ? map[key] : {};
-  return Math.max(0, Number(stageMap[levelIdx] || 0));
-}
-function updateSpeedStageBest(score, keyCount = selectedSpeedStageKeyCount, levelIdx = selectedSpeedStageLevelIdx) {
-  const key = `k${keyCount}`;
-  const map = getSpeedStageBestMap();
-  if (!map[key] || typeof map[key] !== 'object') map[key] = {};
-  const next = Math.max(Number(map[key][levelIdx] || 0), Number(score || 0));
-  map[key][levelIdx] = next;
-  localStorage.setItem(SPEED_STAGE_BEST_KEY, JSON.stringify(map));
-  return next;
-}
-function getSpeedStageConfig(keyCount = selectedSpeedStageKeyCount, levelIdx = selectedSpeedStageLevelIdx) {
-  const level = LEVELS[levelIdx] || LEVELS[0];
-  const duration = SPEED_STAGE_DURATIONS[levelIdx] || 60;
-  const baseLen = [3, 3, 4, 4, 5, 5, 6][levelIdx] || 3;
-  const growEvery = levelIdx >= 4 ? 1 : 2;
-  return {
-    keyCount,
-    levelIdx,
-    level,
-    duration,
-    baseLen,
-    growEvery,
-    maxLen: 10,
-  };
-}
-function getCurrentSpeedDuration() {
-  if (currentSpeedPlayType === 'stage') return getSpeedStageConfig().duration;
-  return (SPEED_MODE_DEFS[speedMode] || SPEED_MODE_DEFS.normal).duration;
-}
-function closeAllStartLayers() {
-  closeModeSelectPopup();
-  closeSpeedStartPopup();
-  closeStartPopup();
-}
-function openModeSelectPopup() {
-  initAudio();
-  playUiSound('tap');
-  document.getElementById('modeSelectPopup').classList.add('visible');
-  document.body.classList.add('popup-open');
-}
-function closeModeSelectPopup() {
-  document.getElementById('modeSelectPopup').classList.remove('visible');
-  if (!document.getElementById('speedStartPopup').classList.contains('visible') && !document.getElementById('startPopup').classList.contains('visible')) {
-    document.body.classList.remove('popup-open');
-  }
-}
-function openSpeedStartPopup() {
-  closeModeSelectPopup();
-  renderSpeedKeyOptions();
-  renderSpeedLevelOptions();
-  updateSpeedStageSummary();
-  document.getElementById('speedStartPopup').classList.add('visible');
-  document.body.classList.add('popup-open');
-}
-function closeSpeedStartPopup() {
-  document.getElementById('speedStartPopup').classList.remove('visible');
-  if (!document.getElementById('modeSelectPopup').classList.contains('visible') && !document.getElementById('startPopup').classList.contains('visible')) {
-    document.body.classList.remove('popup-open');
-  }
-}
-function selectTrainingMode(mode) {
-  currentTrainingMode = mode === 'speed' ? 'speed' : 'brain';
-  localStorage.setItem(TRAINING_MODE_KEY, currentTrainingMode);
-  if (currentTrainingMode === 'brain') {
-    closeModeSelectPopup();
-    openStartPopup();
-  } else {
-    openSpeedStartPopup();
-  }
-}
-function renderSpeedKeyOptions() {
-  const root = document.getElementById('speedKeyGrid');
-  if (!root) return;
-  const counts = [3, 4, 5, 6];
-  root.innerHTML = counts.map(count => {
-    const active = count === selectedSpeedStageKeyCount;
-    return `
-      <button class="mode-level-btn ${active ? 'active' : ''}" onclick="selectSpeedStageKey(${count})">
-        <div class="mode-level-title">${count}키</div>
-        <div class="mode-level-sub">고정 배치 · 10R마다 패턴 변경</div>
-      </button>
-    `;
-  }).join('');
-}
-function renderSpeedLevelOptions() {
-  const root = document.getElementById('speedLevelGrid');
-  if (!root) return;
-  root.innerHTML = LEVELS.map((level, idx) => {
-    const active = idx === selectedSpeedStageLevelIdx;
-    const best = getSpeedStageBest(selectedSpeedStageKeyCount, idx);
-    const duration = SPEED_STAGE_DURATIONS[idx] || 60;
-    return `
-      <button class="level-btn ${active ? 'active' : ''}" onclick="selectSpeedStageLevel(${idx})">
-        <div class="level-top">
-          <span class="level-emoji">${level.emoji}</span>
-          <span class="level-name">${level.name}</span>
-        </div>
-        <div class="level-meta">${selectedSpeedStageKeyCount}키 · ${duration}초 · 최고 ${best}R</div>
-      </button>
-    `;
-  }).join('');
-}
-function updateSpeedStageSummary() {
-  const note = document.getElementById('speedStageNote');
-  if (!note) return;
-  const cfg = getSpeedStageConfig();
-  note.textContent = `${cfg.keyCount}키 · ${cfg.level.name} 단계 · 제한시간 ${cfg.duration}초 · 최대 10칸`;
-}
-function selectSpeedStageKey(count) {
-  selectedSpeedStageKeyCount = Math.max(3, Math.min(6, Number(count || 3)));
-  renderSpeedKeyOptions();
-  renderSpeedLevelOptions();
-  updateSpeedStageSummary();
-}
-function selectSpeedStageLevel(idx) {
-  selectedSpeedStageLevelIdx = Math.max(0, Math.min(LEVELS.length - 1, Number(idx || 0)));
-  renderSpeedLevelOptions();
-  updateSpeedStageSummary();
-}
-function toggleTrainingHud(showSpeed) {
-  document.getElementById('speedSequenceWrap').classList.toggle('visible', !!showSpeed);
-  document.getElementById('speedTimerWrap').classList.toggle('visible', !!showSpeed);
-  const toolbar = document.getElementById('speedToolbar');
-  if (toolbar) toolbar.style.display = showSpeed ? 'none' : 'flex';
-}
-function getSpeedButtonCountForRound(r) {
-  if (currentSpeedPlayType === 'stage') return selectedSpeedStageKeyCount;
-  if (r >= 13) return 6;
-  if (r >= 8) return 5;
-  if (r >= 4) return 4;
-  return 3;
-}
-function getSpeedSequenceLengthForRound(r) {
-  if (currentSpeedPlayType === 'stage') {
-    const cfg = getSpeedStageConfig();
-    const nextLen = cfg.baseLen + Math.floor(Math.max(0, r - 1) / cfg.growEvery);
-    return Math.max(3, Math.min(cfg.maxLen, nextLen));
-  }
-  if (speedMode === 'hard') {
-    if (r >= 15) return 10;
-    if (r >= 12) return 9;
-    if (r >= 9) return 8;
-    if (r >= 6) return 7;
-    if (r >= 4) return 6;
-    if (r >= 2) return 5;
-    return 4;
-  }
-  if (r >= 17) return 10;
-  if (r >= 14) return 9;
-  if (r >= 11) return 8;
-  if (r >= 8) return 7;
-  if (r >= 5) return 6;
-  if (r >= 3) return 5;
-  return 4;
-}
-function getSpeedActiveFruits() {
-  return LEVEL_BUTTONS[speedButtonCount] || LEVEL_BUTTONS[3];
-}
-function getSpeedRoundStatusText() {
-  const seqLen = speedSequence.length || getSpeedSequenceLengthForRound(round || 1);
-  const shuffled = round >= 10 && (round - 10) % 10 === 0;
-  if (currentSpeedPlayType === 'stage') {
-    const level = LEVELS[selectedSpeedStageLevelIdx] || LEVELS[0];
-    if (shuffled) return `${level.name} · ${speedButtonCount}키 · 배치 패턴 변경`;
-    return `${level.name} · ${speedButtonCount}키 · ${seqLen}칸 순서를 빠르게 입력해`;
-  }
-  if (shuffled) return `배치 변경 · ${speedButtonCount}키 · ${seqLen}칸 순서`;
-  return `${speedButtonCount}키 · ${seqLen}칸 순서를 시간 안에 입력해`;
-}
-function applySpeedLayoutPattern() {
-  const activeFruits = getSpeedActiveFruits();
-  const grid = document.getElementById('gameGrid');
-  if (grid) {
-    grid.classList.remove('grid-3', 'grid-4', 'grid-5', 'grid-6');
-    grid.classList.add(`grid-${speedButtonCount}`);
-  }
-  let orderMap = activeFruits.slice();
-  if (round >= 10) {
-    const patterns = SPEED_LAYOUT_PATTERNS[speedButtonCount] || [activeFruits.map((_, idx) => idx)];
-    const patternIdx = Math.floor((round - 10) / 10) % patterns.length;
-    orderMap = patterns[patternIdx].map(i => activeFruits[i]);
-  }
-  document.querySelectorAll('#gameGrid .btn').forEach(btn => {
-    const fruit = btn.dataset.fruit;
-    const visible = activeFruits.includes(fruit);
-    btn.classList.toggle('hidden-btn', !visible);
-    btn.classList.remove('lit', 'wrong', 'correct', 'tap', 'ripple');
-    btn.style.opacity = '';
-    btn.style.order = visible ? String(orderMap.indexOf(fruit)) : '99';
-  });
-}
-function updateSpeedBadge() {
-  if (currentSpeedPlayType === 'stage') {
-    const cfg = getSpeedStageConfig();
-    document.getElementById('stageBadge').textContent = `${cfg.level.emoji} Speed · ${cfg.level.name} · ${cfg.keyCount}키`;
-    return;
-  }
-  const def = SPEED_MODE_DEFS[speedMode];
-  document.getElementById('stageBadge').textContent = `⚡ ${def.label} · ${def.duration}초 · ${speedButtonCount}키`;
-}
-function renderSpeedSequence() {
-  const row = document.getElementById('speedSequenceRow');
-  if (!row) return;
-  const compact = speedSequence.length >= 8;
-  row.innerHTML = speedSequence.map((shape, idx) => {
-    const cls = idx < speedProgress ? 'done' : (idx === speedProgress ? 'current' : '');
-    return `<div class="speed-card ${compact ? 'compact' : ''} ${cls}" title="${shape}">${EMOJI[shape] || '•'}</div>`;
-  }).join('');
-}
-function generateSpeedSequence() {
-  const active = getSpeedActiveFruits();
-  const len = getSpeedSequenceLengthForRound(round);
-  const seq = [];
-  for (let i = 0; i < len; i++) {
-    seq.push(active[Math.floor(Math.random() * active.length)]);
-  }
-  return seq;
-}
-function updateSpeedTimerUI() {
-  const duration = getCurrentSpeedDuration();
-  const left = Math.max(0, speedRemaining);
-  const percent = Math.max(0, Math.min(100, (left / duration) * 100));
-  const fill = document.getElementById('speedTimerFill');
-  const wrap = document.getElementById('speedTimerWrap');
-  const readout = document.getElementById('speedTimeReadout');
-  if (fill) {
-    fill.style.width = `${percent}%`;
-    fill.classList.toggle('danger', left <= 10);
-    fill.classList.toggle('critical', left <= 5);
-  }
-  if (wrap) {
-    wrap.classList.toggle('danger', left <= 10);
-    wrap.classList.toggle('critical', left <= 5);
-  }
-  if (readout) {
-    readout.classList.toggle('danger', left <= 10);
-    readout.classList.toggle('critical', left <= 3);
-    readout.textContent = String(Math.max(0, Math.ceil(left)));
-  }
-  const label = document.getElementById('speedTimerLabel');
-  if (label) label.textContent = left <= 10 ? '남은 시간 · 위험 구간' : '남은 시간';
-}
-function maybePlaySpeedCountdown() {
-  const sec = Math.ceil(speedRemaining);
-  if (speedRemaining > 10 || speedRemaining <= 0) return;
-  if (sec === speedShowTickSecond) return;
-  speedShowTickSecond = sec;
-  if (sec <= 5) playUiSound('tickCritical');
-  else playUiSound('tick');
-}
-function startSpeedTimer() {
-  clearInterval(speedTimerInterval);
-  const duration = getCurrentSpeedDuration();
-  speedTimerEndAt = Date.now() + duration * 1000;
-  speedShowTickSecond = null;
-  speedRemaining = duration;
-  updateSpeedTimerUI();
-  speedTimerInterval = setInterval(() => {
-    speedRemaining = Math.max(0, (speedTimerEndAt - Date.now()) / 1000);
-    updateSpeedTimerUI();
-    maybePlaySpeedCountdown();
-    if (speedRemaining <= 0) {
-      clearInterval(speedTimerInterval);
-      speedTimerInterval = null;
-      speedRemaining = 0;
-      speedGameOver();
-    }
-  }, 80);
-}
-function stopSpeedTimer() {
-  clearInterval(speedTimerInterval);
-  speedTimerInterval = null;
-}
-function bootstrapTrainingGame() {
-  initAudio();
-  playUiSound('start');
-  pulseVibration([14, 24, 16]);
-  closeAllStartLayers();
-  stopBgm();
-  if (typeof titleTimer !== 'undefined') clearInterval(titleTimer);
-  const ts = document.getElementById('titleScreen');
-  if (ts) ts.classList.add('hidden');
-  const gw = document.getElementById('gameWrapper');
-  if (gw) {
-    gw.style.display = 'flex';
-    gw.style.opacity = '0';
-    gw.style.transition = 'opacity .6s ease';
-    requestAnimationFrame(() => { gw.style.opacity = '1'; });
-  }
-  toggleTrainingHud(true);
-}
-function startSpeedTraining(mode = 'normal') {
-  speedMode = SPEED_MODE_DEFS[mode] ? mode : 'normal';
-  currentSpeedPlayType = 'infinite';
-  currentTrainingMode = 'speed';
-  localStorage.setItem(TRAINING_MODE_KEY, currentTrainingMode);
-  bootstrapTrainingGame();
-  speedStartGame();
-}
-function startSpeedStageTraining() {
-  currentSpeedPlayType = 'stage';
-  currentTrainingMode = 'speed';
-  localStorage.setItem(TRAINING_MODE_KEY, currentTrainingMode);
-  bootstrapTrainingGame();
-  speedStartGame();
-}
-function speedStartGame() {
-  closeMissionPopup();
-  clearAllTimers();
-  stopSpeedTimer();
-  gameState = STATE.WAITING;
-  retryCount = 0;
-  pendingRetry = false;
-  hideSecondChancePopup();
-  speedSequence = [];
-  speedProgress = 0;
-  round = 0;
-  combo = 0;
-  updateComboBadge(0);
-  updateRound(0);
-  speedButtonCount = getSpeedButtonCountForRound(1);
-  updateSpeedBadge();
-  document.getElementById('best').textContent = currentSpeedPlayType === 'stage'
-    ? getSpeedStageBest(selectedSpeedStageKeyCount, selectedSpeedStageLevelIdx)
-    : getSpeedBest(speedMode);
-  if (currentSpeedPlayType === 'stage') {
-    const cfg = getSpeedStageConfig();
-    setStatus(`${cfg.level.name} · ${cfg.keyCount}키 · 틀리면 처음부터 다시, 시간 안에 최대한 올라가자!`);
-  } else {
-    setStatus('상단 순서를 보고 바로 눌러봐. 틀리면 처음부터 다시 시작!');
-  }
-  applySpeedLayoutPattern();
-  renderSpeedSequence();
-  updateStageUI();
-  nextSpeedRound();
-  startSpeedTimer();
-}
-function nextSpeedRound() {
-  if (gameState === STATE.GAMEOVER) return;
-  round += 1;
-  speedProgress = 0;
-  speedButtonCount = getSpeedButtonCountForRound(round);
-  speedSequence = generateSpeedSequence();
-  updateRound(round);
-  updateSpeedBadge();
-  applySpeedLayoutPattern();
-  renderSpeedSequence();
-  setStatus(getSpeedRoundStatusText());
-}
-function handleSpeedInput(shape) {
-  if (gameState !== STATE.WAITING) return;
-  const btn = document.getElementById('btn-' + shape);
-  if (!btn) return;
-  if (shape !== speedSequence[speedProgress]) {
-    playUiSound('wrong');
-    pulseVibration([30, 20, 40]);
-    speedProgress = 0;
-    renderSpeedSequence();
-    btn.classList.add('wrong');
-    combo = 0;
-    updateComboBadge(combo);
-    setStatus('틀림! 처음부터 다시 입력해. 시간은 계속 흐른다.');
-    setTimeout(() => btn.classList.remove('wrong'), 320);
-    return;
-  }
-  btn.classList.add('tap', 'ripple');
-  playUiSound('tap');
-  pulseVibration(10);
-  setTimeout(() => { btn.classList.remove('tap'); btn.classList.remove('ripple'); }, 140);
-  speedProgress += 1;
-  renderSpeedSequence();
-  if (speedProgress >= speedSequence.length) {
-    combo += 1;
-    updateComboBadge(combo);
-    document.querySelectorAll('#gameGrid .btn:not(.hidden-btn)').forEach(b => {
-      b.classList.add('correct');
-      setTimeout(() => b.classList.remove('correct'), 260);
-    });
-    playUiSound(combo >= 5 && COMBO_DATA[combo] ? 'combo' : 'correct');
-    if (COMBO_DATA[combo]) showComboToast(combo);
-    setStatus('성공! 다음 라운드로 간다.');
-    safeTimeout(nextSpeedRound, 260);
-  }
-}
-function speedGameOver() {
-  if (gameState === STATE.GAMEOVER) return;
-  gameState = STATE.GAMEOVER;
-  clearAllTimers();
-  stopSpeedTimer();
-  const finalScore = round;
-  let bestScore = 0;
-  let lineText = '';
-  let summaryMode = '';
-  let dailyText = '';
-  let stageLabel = '';
-  let resultEmoji = '⚡';
-
-  if (currentSpeedPlayType === 'stage') {
-    const cfg = getSpeedStageConfig();
-    bestScore = updateSpeedStageBest(finalScore, cfg.keyCount, cfg.levelIdx);
-    resultEmoji = cfg.level.emoji || '⚡';
-    lineText = `Stage · ${cfg.level.name} · ${cfg.keyCount}키 · 제한 ${cfg.duration}초 · 최고 ${bestScore}R`;
-    summaryMode = `STAGE · ${cfg.level.name} · ${cfg.keyCount}키`;
-    dailyText = `Speed Stage 기록 · <strong>${cfg.level.name}</strong> · ${cfg.keyCount}키 · ${finalScore}라운드`;
-    stageLabel = `Speed Stage ${cfg.level.name} ${cfg.keyCount}키`;
-  } else {
-    bestScore = updateSpeedBest(finalScore, speedMode);
-    resultEmoji = speedMode === 'hard' ? '⚡' : '🔥';
-    lineText = `${SPEED_MODE_DEFS[speedMode].label} · 제한 ${SPEED_MODE_DEFS[speedMode].duration}초 · 최고 ${bestScore}R`;
-    summaryMode = `INFINITE · ${SPEED_MODE_DEFS[speedMode].label}`;
-    dailyText = `Speed Infinite 기록 · <strong>${SPEED_MODE_DEFS[speedMode].label}</strong> · ${finalScore}라운드`;
-    stageLabel = `Speed ${SPEED_MODE_DEFS[speedMode].label}`;
-  }
-
-  const newBest = finalScore >= bestScore && finalScore > 0;
-  document.getElementById('resultStageEmoji').textContent = resultEmoji;
-  document.getElementById('resultStageName').textContent = 'Speed Training';
-  document.getElementById('resultLine').textContent = lineText;
-  document.getElementById('resultRound').textContent = finalScore;
-  document.getElementById('resultBest').innerHTML = `최고기록 <span>${bestScore}</span> 라운드${newBest ? ' 🎉' : ''}`;
-  document.getElementById('resultSeq').textContent = speedSequence.map(f => EMOJI[f]).join(' ');
-  document.getElementById('resultMsg').textContent = finalScore >= 15 ? '손이 완전히 붙었다. 상위권 기록도 노려볼 만하다.' : (finalScore >= 9 ? '속도감이 올라왔다. 다음 판이면 최고기록 갱신 각이다.' : '손 풀기 완료. 패턴 익히고 다시 들어가면 더 오른다.');
-  document.getElementById('resultSummaryMode').textContent = summaryMode;
-  document.getElementById('resultSummaryCombo').textContent = combo;
-  document.getElementById('resultSummaryBadges').textContent = '0';
-  const resultDaily = document.getElementById('resultDaily');
-  if (resultDaily) resultDaily.innerHTML = dailyText;
-  document.getElementById('resultCharLeft').src = `female_0.png`;
-  document.getElementById('resultCharRight').src = `male_0.png`;
-  window._finalScore = finalScore;
-  window._finalStage = stageLabel;
-  const overlay = document.getElementById('overlay');
-  const popup = document.getElementById('namePopup');
-  playBgmFor('result');
-  if (overlay) { overlay.classList.remove('visible'); overlay.style.display = 'none'; }
-  if (popup) popup.classList.remove('visible');
-  window.setTimeout(() => {
-    try {
-      openNamePopup(window._finalScore, window._finalStage);
-    } catch (e) {
-      const overlay = document.getElementById('overlay');
-      if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
-    }
-  }, 260);
-}
+const POINT_KEY = 'limitgame_points_v1';
+const BADGE_POINT_REWARD = 1;
+const DAILY_POINT_REWARD = 1;
+const WEEKLY_POINT_REWARD = 3;
+const MONTHLY_POINT_REWARD = 5;
+const RETRY_COSTS = [1, 2];
 
 function getPoints() { return Math.max(0, Number(localStorage.getItem(POINT_KEY) || 0)); }
 let points = getPoints();
@@ -4622,7 +4554,6 @@ if (__namePopup) __namePopup.classList.remove('visible');
 
 // 핵심 상태 초기화 이후 UI 동기화
 syncDifficultyUI();
-syncPlaySpeedUI();
 syncFeedbackUI();
 renderDailyMissions();
 renderModeOptions();
@@ -4653,8 +4584,7 @@ function handleFastButtonPress(shape) {
   const now = performance.now();
   if (now - lastFastInputAt < 35) return;
   lastFastInputAt = now;
-  if (currentTrainingMode === 'speed') handleSpeedInput(shape);
-  else handleInput(shape);
+  handleInput(shape);
 }
 
 document.querySelectorAll('.btn').forEach(b => {
@@ -4688,10 +4618,6 @@ function clearAllTimers() {
 }
 
 function applyLevelLayout() {
-  if (currentTrainingMode === 'speed') {
-    applySpeedLayoutPattern();
-    return;
-  }
   const mode = getModeConfig();
   const activeFruits = LEVEL_BUTTONS[mode.buttons] || LEVEL_BUTTONS[4];
   const grid = document.getElementById('gameGrid');
@@ -4727,9 +4653,6 @@ function tryUnlockNextLevel(finalScore) {
 
 // ── 게임 흐름 ──
 function startGame() {
-  currentTrainingMode = 'brain';
-  localStorage.setItem(TRAINING_MODE_KEY, currentTrainingMode);
-  toggleTrainingHud(false);
   closeMissionPopup();
   closeStartPopup();
   clearAllTimers();
@@ -5019,37 +4942,13 @@ function gameOver() {
   }, newBadges.length ? 700 : 260);
 }
 
-
-function restartCurrentTraining() {
-  if (currentTrainingMode === 'speed') {
-    speedStartGame();
-    return;
-  }
-  startGame();
-}
-
 // ── 헬퍼 ──
 
-
 function getNextStageTarget() {
-  if (currentTrainingMode === 'speed' && currentSpeedPlayType === 'stage') {
-    if (selectedSpeedStageLevelIdx < LEVELS.length - 1) {
-      return {
-        type: 'speed-stage',
-        keyCount: selectedSpeedStageKeyCount,
-        levelIdx: selectedSpeedStageLevelIdx + 1,
-        locked: false,
-        label: `${LEVELS[selectedSpeedStageLevelIdx + 1].name} · ${selectedSpeedStageKeyCount}키`
-      };
-    }
-    return null;
-  }
-
   const modeIdx = MODE_ORDER.indexOf(difficulty);
   if (selectedLevelIdx < LEVELS.length - 1) {
     const nextLevelIdx = selectedLevelIdx + 1;
     return {
-      type: 'brain-stage',
       mode: difficulty,
       levelIdx: nextLevelIdx,
       locked: nextLevelIdx > getUnlockedStageIdx(difficulty),
@@ -5060,7 +4959,6 @@ function getNextStageTarget() {
   if (modeIdx < MODE_ORDER.length - 1) {
     const nextMode = MODE_ORDER[modeIdx + 1];
     return {
-      type: 'brain-stage',
       mode: nextMode,
       levelIdx: 0,
       locked: modeIdx + 1 > unlockedModeIdx,
@@ -5085,21 +4983,12 @@ function updateNextStageButton() {
 
   btn.disabled = !!target.locked;
   btn.classList.toggle('locked', !!target.locked);
-  btn.title = target.locked ? `이동 불가: ${target.label}` : `${target.label}로 이동`;
+  btn.title = target.locked ? `해금 후 이동 가능: ${target.label}` : `${target.label}로 이동`;
 }
 
 function goToNextStage() {
   const target = getNextStageTarget();
   if (!target || target.locked) return;
-
-  if (target.type === 'speed-stage') {
-    currentTrainingMode = 'speed';
-    currentSpeedPlayType = 'stage';
-    selectedSpeedStageKeyCount = target.keyCount;
-    selectedSpeedStageLevelIdx = target.levelIdx;
-    speedStartGame();
-    return;
-  }
 
   difficulty = target.mode;
   selectedLevelIdx = target.levelIdx;
@@ -5109,36 +4998,17 @@ function goToNextStage() {
 }
 
 function updateStageUI() {
-  if (currentTrainingMode === 'speed') {
-    updateSpeedBadge();
-    let sceneIdx = 0;
-    if (currentSpeedPlayType === 'stage') {
-      const level = LEVELS[selectedSpeedStageLevelIdx] || LEVELS[0];
-      sceneIdx = Number(level.scene || 0);
-    }
-    const prevScene = document.getElementById('scene-' + currentSceneIdx);
-    const nextScene = document.getElementById('scene-' + sceneIdx);
-    if (prevScene) prevScene.classList.remove('active');
-    if (nextScene) nextScene.classList.add('active');
-    currentSceneIdx = sceneIdx;
-    document.querySelectorAll('#charLeft .char-stage').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('#charRight .char-stage').forEach(el => el.classList.remove('active'));
-    const cl = document.getElementById('cl-' + sceneIdx) || document.getElementById('cl-0');
-    const cr = document.getElementById('cr-' + sceneIdx) || document.getElementById('cr-0');
-    if (cl) cl.classList.add('active');
-    if (cr) cr.classList.add('active');
-    return;
-  }
-
   const stage = getSelectedLevel();
-  document.getElementById('stageBadge').textContent = `${stage.emoji} ${getDifficultyConfig().label} · ${stage.name} · ${getModeConfig().buttons}키`;
+  document.getElementById('stageBadge').textContent = `${stage.emoji} ${getDifficultyConfig().label} · ${stage.name} · ${getModeConfig().buttons}키`; syncPlaySpeedUI();
 
+  // 배경 씬 전환
   if (stage.scene !== currentSceneIdx) {
     document.getElementById('scene-' + currentSceneIdx).classList.remove('active');
     document.getElementById('scene-' + stage.scene).classList.add('active');
     currentSceneIdx = stage.scene;
   }
 
+  // 캐릭터 전환
   const idx = stage.scene;
   document.querySelectorAll('#charLeft  .char-stage').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('#charRight .char-stage').forEach(el => el.classList.remove('active'));
@@ -5186,16 +5056,502 @@ function showComboToast(n) {
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
 
+</script>
 
-const __modeSelectPopup = document.getElementById('modeSelectPopup');
-const __speedStartPopup = document.getElementById('speedStartPopup');
-if (__modeSelectPopup) {
-  __modeSelectPopup.addEventListener('click', (e) => { if (e.target === __modeSelectPopup) closeModeSelectPopup(); });
-}
-if (__speedStartPopup) {
-  __speedStartPopup.addEventListener('click', (e) => { if (e.target === __speedStartPopup) closeSpeedStartPopup(); });
-}
 
+<script>
+(function() {
+  const SPEED_STAGE_BEST_KEY = 'limitgame_speed_stage_best_v1';
+  const SPEED_INFINITE_BEST_KEY = 'limitgame_speed_infinite_best_v1';
+  const SPEED_STAGE_DURATIONS = [60, 58, 56, 54, 51, 48, 45];
+  const SPEED_INFINITE_DURATIONS = { normal: 60, hard: 45 };
+  const SHAPES = ['circle','square','triangle','star','diamond','hex'];
+  const SHAPE_META = {
+    circle: { color:'#e74c3c' },
+    square: { color:'#2d7fe8' },
+    triangle: { color:'#f3c63f' },
+    star: { color:'#55a95a' },
+    diamond: { color:'#9b59b6' },
+    hex: { color:'#2bb3ac' }
+  };
+  const LAYOUT_PATTERNS = {
+    3: [[0,1,2], [1,0,2], [2,0,1]],
+    4: [[0,1,2,3], [1,0,3,2], [2,3,0,1]],
+    5: [[0,1,2,3,4], [1,0,3,2,4], [4,2,0,1,3]],
+    6: [[0,1,2,3,4,5], [1,0,3,2,5,4], [4,5,2,3,0,1]]
+  };
+
+  const speedState = {
+    type: 'stage',
+    infiniteMode: 'normal',
+    selectedKeyCount: 3,
+    selectedLevelIdx: 0,
+    round: 0,
+    progress: 0,
+    sequence: [],
+    activeShapes: [],
+    currentDuration: 60,
+    remaining: 60,
+    timer: null,
+    tickSecond: null,
+    sceneIdx: 0
+  };
+
+  function getStageLevels() {
+    return Array.isArray(window.LEVELS) ? window.LEVELS : [
+      { name:'유아', emoji:'🍼', scene:0 },
+      { name:'유치원', emoji:'🎒', scene:1 },
+      { name:'초등', emoji:'✏️', scene:2 },
+      { name:'중등', emoji:'🚲', scene:3 },
+      { name:'고등', emoji:'📚', scene:4 },
+      { name:'대학', emoji:'🎓', scene:5 },
+      { name:'대학원', emoji:'🔬', scene:6 }
+    ];
+  }
+  function getSpeedStageBestMap() {
+    try {
+      const obj = JSON.parse(localStorage.getItem(SPEED_STAGE_BEST_KEY) || '{}');
+      return obj && typeof obj === 'object' ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function saveSpeedStageBestMap(map) {
+    localStorage.setItem(SPEED_STAGE_BEST_KEY, JSON.stringify(map || {}));
+  }
+  function getSpeedStageBest(keyCount, levelIdx) {
+    const map = getSpeedStageBestMap();
+    return Math.max(0, Number((((map[keyCount] || {})[levelIdx]) || 0)));
+  }
+  function updateSpeedStageBest(keyCount, levelIdx, score) {
+    const map = getSpeedStageBestMap();
+    if (!map[keyCount] || typeof map[keyCount] !== 'object') map[keyCount] = {};
+    const prev = Math.max(0, Number(map[keyCount][levelIdx] || 0));
+    const next = Math.max(prev, Number(score || 0));
+    map[keyCount][levelIdx] = next;
+    saveSpeedStageBestMap(map);
+    return next;
+  }
+  function getSpeedInfiniteBestMap() {
+    try {
+      const obj = JSON.parse(localStorage.getItem(SPEED_INFINITE_BEST_KEY) || '{}');
+      return obj && typeof obj === 'object' ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function getSpeedInfiniteBest(mode) {
+    return Math.max(0, Number(getSpeedInfiniteBestMap()[mode] || 0));
+  }
+  function updateSpeedInfiniteBest(mode, score) {
+    const map = getSpeedInfiniteBestMap();
+    const prev = Math.max(0, Number(map[mode] || 0));
+    const next = Math.max(prev, Number(score || 0));
+    map[mode] = next;
+    localStorage.setItem(SPEED_INFINITE_BEST_KEY, JSON.stringify(map));
+    return next;
+  }
+  function closeModeSelectPopup() {
+    const el = document.getElementById('modeSelectPopup');
+    if (el) el.classList.remove('visible');
+    if (!document.getElementById('speedStartPopup')?.classList.contains('visible') && !document.getElementById('startPopup')?.classList.contains('visible')) {
+      document.body.classList.remove('popup-open');
+    }
+  }
+  function openModeSelectPopup() {
+    initAudio?.();
+    playUiSound?.('tap');
+    const el = document.getElementById('modeSelectPopup');
+    if (!el) return;
+    el.classList.add('visible');
+    document.body.classList.add('popup-open');
+  }
+  function closeSpeedStartPopup() {
+    const el = document.getElementById('speedStartPopup');
+    if (el) el.classList.remove('visible');
+    if (!document.getElementById('modeSelectPopup')?.classList.contains('visible') && !document.getElementById('startPopup')?.classList.contains('visible')) {
+      document.body.classList.remove('popup-open');
+    }
+  }
+  function openSpeedStartPopup() {
+    renderSpeedKeyOptions();
+    renderSpeedLevelOptions();
+    updateSpeedStageSummary();
+    const n = document.getElementById('speedInfiniteBestNormal');
+    const h = document.getElementById('speedInfiniteBestHard');
+    if (n) n.textContent = String(getSpeedInfiniteBest('normal'));
+    if (h) h.textContent = String(getSpeedInfiniteBest('hard'));
+    closeModeSelectPopup();
+    const el = document.getElementById('speedStartPopup');
+    if (!el) return;
+    el.classList.add('visible');
+    document.body.classList.add('popup-open');
+  }
+  window.selectTrainingMode = function(mode) {
+    if (mode === 'speed') openSpeedStartPopup();
+    else {
+      closeModeSelectPopup();
+      openStartPopup();
+    }
+  };
+
+  window.enterGame = function() {
+    openModeSelectPopup();
+  };
+
+  function renderSpeedKeyOptions() {
+    const root = document.getElementById('speedKeyGrid');
+    if (!root) return;
+    const counts = [3,4,5,6];
+    root.innerHTML = counts.map(count => `
+      <button class="speed-key-btn ${count === speedState.selectedKeyCount ? 'active' : ''}" onclick="selectSpeedStageKey(${count})">
+        <div class="speed-key-title">${count}키</div>
+        <div class="speed-key-sub">고정 배치 · 10R마다 패턴 변경</div>
+      </button>
+    `).join('');
+  }
+  function renderSpeedLevelOptions() {
+    const root = document.getElementById('speedLevelGrid');
+    if (!root) return;
+    const levels = getStageLevels();
+    root.innerHTML = levels.map((level, idx) => `
+      <button class="speed-level-btn ${idx === speedState.selectedLevelIdx ? 'active' : ''}" onclick="selectSpeedStageLevel(${idx})">
+        <div class="speed-level-top">
+          <span class="speed-level-emoji">${level.emoji || '🏁'}</span>
+          <span class="speed-level-name">${level.name}</span>
+        </div>
+        <div class="speed-level-meta">${speedState.selectedKeyCount}키 · ${SPEED_STAGE_DURATIONS[idx] || 60}초 · 최고 ${getSpeedStageBest(speedState.selectedKeyCount, idx)}R</div>
+      </button>
+    `).join('');
+  }
+  function updateSpeedStageSummary() {
+    const levels = getStageLevels();
+    const level = levels[speedState.selectedLevelIdx] || levels[0];
+    const note = document.getElementById('speedStageNote');
+    if (note) note.textContent = `${speedState.selectedKeyCount}키 · ${level.name} 단계 · 제한시간 ${SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60}초 · 최대 시퀀스 10칸`;
+  }
+  window.selectSpeedStageKey = function(count) {
+    speedState.selectedKeyCount = Math.max(3, Math.min(6, Number(count || 3)));
+    renderSpeedKeyOptions();
+    renderSpeedLevelOptions();
+    updateSpeedStageSummary();
+  };
+  window.selectSpeedStageLevel = function(idx) {
+    speedState.selectedLevelIdx = Math.max(0, Math.min(getStageLevels().length - 1, Number(idx || 0)));
+    renderSpeedLevelOptions();
+    updateSpeedStageSummary();
+  };
+
+  function setStageScene(sceneIdx) {
+    speedState.sceneIdx = sceneIdx;
+    document.querySelectorAll('.bg-scene').forEach((el, idx) => {
+      el.classList.toggle('active', idx === sceneIdx);
+    });
+  }
+  function showSpeedScreen() {
+    closeSpeedStartPopup();
+    closeStartPopup();
+    const ts = document.getElementById('titleScreen');
+    const screen = document.getElementById('speedScreen');
+    if (typeof titleTimer !== 'undefined' && titleTimer) clearInterval(titleTimer);
+    stopBgm?.();
+    if (ts) ts.classList.add('hidden');
+    if (screen) {
+      screen.style.display = 'block';
+      requestAnimationFrame(() => screen.classList.add('visible'));
+    }
+    document.body.classList.remove('popup-open');
+  }
+  function hideSpeedScreen() {
+    const screen = document.getElementById('speedScreen');
+    if (!screen) return;
+    screen.classList.remove('visible');
+    setTimeout(() => { screen.style.display = 'none'; }, 250);
+  }
+  function getInfiniteButtonCount(round) {
+    if (round >= 13) return 6;
+    if (round >= 8) return 5;
+    if (round >= 4) return 4;
+    return 3;
+  }
+  function getInfiniteSeqLen(round, mode) {
+    if (mode === 'hard') {
+      if (round >= 15) return 10;
+      if (round >= 12) return 9;
+      if (round >= 9) return 8;
+      if (round >= 6) return 7;
+      if (round >= 4) return 6;
+      if (round >= 2) return 5;
+      return 4;
+    }
+    if (round >= 17) return 10;
+    if (round >= 14) return 9;
+    if (round >= 11) return 8;
+    if (round >= 8) return 7;
+    if (round >= 5) return 6;
+    if (round >= 3) return 5;
+    return 4;
+  }
+  function getStageSeqLen(round, levelIdx) {
+    const base = 3 + Math.min(4, Math.floor(levelIdx / 2));
+    return Math.min(10, base + Math.floor((round - 1) / 2));
+  }
+  function getActiveShapes() {
+    const count = speedState.type === 'stage' ? speedState.selectedKeyCount : getInfiniteButtonCount(speedState.round);
+    return SHAPES.slice(0, count);
+  }
+  function applySpeedLayout() {
+    const grid = document.getElementById('speedGrid');
+    if (!grid) return;
+    const active = getActiveShapes();
+    speedState.activeShapes = active.slice();
+    const count = active.length;
+    const patternSet = LAYOUT_PATTERNS[count] || [active.map((_, i) => i)];
+    const patternIdx = Math.floor(Math.max(0, speedState.round - 1) / 10) % patternSet.length;
+    const order = patternSet[patternIdx].map(i => active[i]);
+    grid.querySelectorAll('.speed-play-btn').forEach(btn => {
+      const shape = btn.dataset.shape;
+      const visible = active.includes(shape);
+      btn.classList.toggle('hidden', !visible);
+      btn.style.order = visible ? String(order.indexOf(shape)) : '99';
+    });
+  }
+  function genSpeedSequence() {
+    const active = speedState.activeShapes.length ? speedState.activeShapes : getActiveShapes();
+    const len = speedState.type === 'stage'
+      ? getStageSeqLen(speedState.round, speedState.selectedLevelIdx)
+      : getInfiniteSeqLen(speedState.round, speedState.infiniteMode);
+    const seq = [];
+    for (let i = 0; i < len; i++) {
+      seq.push(active[Math.floor(Math.random() * active.length)]);
+    }
+    return seq;
+  }
+  function renderSpeedSequence() {
+    const row = document.getElementById('speedSequenceRow');
+    if (!row) return;
+    row.innerHTML = speedState.sequence.map((shape, idx) => {
+      const meta = SHAPE_META[shape] || { color:'#999' };
+      const cls = idx < speedState.progress ? 'done' : (idx === speedState.progress ? 'current' : '');
+      return `<span class="speed-seq-dot ${cls}" style="background:${meta.color}"></span>`;
+    }).join('');
+  }
+  function updateSpeedHud() {
+    const levels = getStageLevels();
+    const level = levels[speedState.selectedLevelIdx] || levels[0];
+    const badge = document.getElementById('speedStageBadge');
+    const round = document.getElementById('speedRound');
+    const best = document.getElementById('speedBest');
+    const sub = document.getElementById('speedScreenSub');
+    if (badge) {
+      const left = speedState.type === 'stage'
+        ? `${level.emoji || '🏁'} ${level.name} · ${speedState.selectedKeyCount}키`
+        : `${speedState.infiniteMode === 'hard' ? '🔴 Hard' : '🟠 Normal'} · 가변키`;
+      badge.textContent = left;
+    }
+    if (round) round.textContent = String(speedState.round);
+    if (best) {
+      const val = speedState.type === 'stage'
+        ? getSpeedStageBest(speedState.selectedKeyCount, speedState.selectedLevelIdx)
+        : getSpeedInfiniteBest(speedState.infiniteMode);
+      best.textContent = String(val);
+    }
+    if (sub) {
+      sub.textContent = speedState.type === 'stage'
+        ? `${level.name} 단계 · 제한시간 ${speedState.currentDuration}초`
+        : `${speedState.currentDuration}초 안에 최대 라운드 기록전`;
+    }
+  }
+  function updateSpeedStatus(msg) {
+    const el = document.getElementById('speedStatus');
+    if (el) el.textContent = msg;
+  }
+  function updateSpeedTimerUI() {
+    const left = Math.max(0, speedState.remaining);
+    const percent = Math.max(0, Math.min(100, (left / speedState.currentDuration) * 100));
+    const fill = document.getElementById('speedTimerFill');
+    const readout = document.getElementById('speedTimeReadout');
+    const label = document.getElementById('speedTimerLabel');
+    if (fill) {
+      fill.style.width = `${percent}%`;
+      fill.classList.toggle('danger', left <= 10);
+      fill.classList.toggle('critical', left <= 5);
+    }
+    if (readout) {
+      readout.textContent = String(Math.max(0, Math.ceil(left)));
+      readout.classList.toggle('danger', left <= 10);
+      readout.classList.toggle('critical', left <= 3);
+    }
+    if (label) label.textContent = left <= 10 ? '남은 시간 · 위험 구간' : '남은 시간';
+  }
+  function maybePlayCountdown() {
+    const sec = Math.ceil(speedState.remaining);
+    if (speedState.remaining > 10 || speedState.remaining <= 0) return;
+    if (speedState.tickSecond === sec) return;
+    speedState.tickSecond = sec;
+    if (sec <= 5) playUiSound?.('wrong');
+    else playUiSound?.('light');
+  }
+  function stopSpeedTimer() {
+    if (speedState.timer) clearInterval(speedState.timer);
+    speedState.timer = null;
+  }
+  function startSpeedTimer() {
+    stopSpeedTimer();
+    speedState.remaining = speedState.currentDuration;
+    speedState.tickSecond = null;
+    const endAt = Date.now() + (speedState.currentDuration * 1000);
+    updateSpeedTimerUI();
+    speedState.timer = setInterval(() => {
+      speedState.remaining = Math.max(0, (endAt - Date.now()) / 1000);
+      updateSpeedTimerUI();
+      maybePlayCountdown();
+      if (speedState.remaining <= 0) {
+        stopSpeedTimer();
+        speedFinish();
+      }
+    }, 80);
+  }
+  function prepareSpeedRound() {
+    applySpeedLayout();
+    speedState.sequence = genSpeedSequence();
+    speedState.progress = 0;
+    renderSpeedSequence();
+    updateSpeedHud();
+    updateSpeedStatus('순서를 보고 빠르게 눌러');
+  }
+  function startSpeedCore() {
+    showSpeedScreen();
+    applyLevelLayout?.();
+    updateSpeedHud();
+    prepareSpeedRound();
+    updateSpeedTimerUI();
+    setStageScene((getStageLevels()[speedState.selectedLevelIdx] || {}).scene || 0);
+    setTimeout(() => {
+      startSpeedTimer();
+      updateSpeedStatus('시작!');
+    }, 180);
+  }
+  window.startSpeedStageTraining = function() {
+    speedState.type = 'stage';
+    speedState.round = 1;
+    speedState.currentDuration = SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60;
+    startSpeedCore();
+  };
+  window.startSpeedInfinite = function(mode) {
+    speedState.type = 'infinite';
+    speedState.infiniteMode = mode === 'hard' ? 'hard' : 'normal';
+    speedState.round = 1;
+    speedState.currentDuration = SPEED_INFINITE_DURATIONS[speedState.infiniteMode];
+    speedState.selectedLevelIdx = 0;
+    startSpeedCore();
+  };
+  function setSceneByRound() {
+    const idx = speedState.type === 'stage'
+      ? speedState.selectedLevelIdx
+      : Math.min(6, Math.floor((speedState.round - 1) / 3));
+    setStageScene(idx);
+  }
+  function handleSpeedPress(shape) {
+    if (!document.getElementById('speedScreen')?.classList.contains('visible')) return;
+    if (!speedState.sequence.length || speedState.remaining <= 0) return;
+    const btn = document.querySelector(`#speedGrid .speed-play-btn[data-shape="${shape}"]`);
+    if (btn) {
+      btn.classList.remove('tap', 'wrong', 'correct');
+      void btn.offsetWidth;
+      btn.classList.add('tap');
+      setTimeout(() => btn.classList.remove('tap'), 120);
+    }
+    if (shape === speedState.sequence[speedState.progress]) {
+      playUiSound?.('tap');
+      speedState.progress += 1;
+      renderSpeedSequence();
+      if (speedState.progress >= speedState.sequence.length) {
+        if (btn) {
+          btn.classList.add('correct');
+          setTimeout(() => btn.classList.remove('correct'), 240);
+        }
+        playUiSound?.('correct');
+        speedState.round += 1;
+        setSceneByRound();
+        prepareSpeedRound();
+      } else {
+        updateSpeedStatus(`${speedState.progress}/${speedState.sequence.length} 성공`);
+      }
+    } else {
+      speedState.progress = 0;
+      renderSpeedSequence();
+      updateSpeedStatus('틀렸어. 처음부터 다시!');
+      playUiSound?.('wrong');
+      if (btn) {
+        btn.classList.add('wrong');
+        setTimeout(() => btn.classList.remove('wrong'), 260);
+      }
+    }
+  }
+  function speedFinish() {
+    const score = Math.max(0, Number(speedState.round || 1) - 1);
+    const best = speedState.type === 'stage'
+      ? updateSpeedStageBest(speedState.selectedKeyCount, speedState.selectedLevelIdx, score)
+      : updateSpeedInfiniteBest(speedState.infiniteMode, score);
+    const title = document.getElementById('speedResultTitle');
+    const scoreEl = document.getElementById('speedResultScore');
+    const meta = document.getElementById('speedResultMeta');
+    if (title) title.textContent = speedState.type === 'stage' ? '스테이지 도전 종료' : `${speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal'} 기록 종료`;
+    if (scoreEl) scoreEl.textContent = String(score);
+    if (meta) {
+      meta.textContent = speedState.type === 'stage'
+        ? `${speedState.selectedKeyCount}키 · ${(getStageLevels()[speedState.selectedLevelIdx] || {}).name || ''} · 최고 기록 ${best}R`
+        : `${speedState.currentDuration}초 기록전 · 최고 기록 ${best}R`;
+    }
+    document.getElementById('speedResultPopup')?.classList.add('visible');
+  }
+  window.restartSpeedCurrent = function() {
+    document.getElementById('speedResultPopup')?.classList.remove('visible');
+    if (speedState.type === 'stage') window.startSpeedStageTraining();
+    else window.startSpeedInfinite(speedState.infiniteMode);
+  };
+  window.speedGoHome = function() {
+    stopSpeedTimer();
+    document.getElementById('speedResultPopup')?.classList.remove('visible');
+    hideSpeedScreen();
+    closeSpeedStartPopup();
+    closeModeSelectPopup();
+    const ts = document.getElementById('titleScreen');
+    if (ts) {
+      ts.style.display = 'flex';
+      void ts.offsetWidth;
+      ts.classList.remove('hidden');
+    }
+    if (typeof titleTimer !== 'undefined') {
+      clearInterval(titleTimer);
+      titleTimer = setInterval(titleNext, 1800);
+    }
+    playBgmFor?.('title');
+    document.body.classList.remove('popup-open');
+  };
+
+  document.addEventListener('click', function(e) {
+    if (e.target === document.getElementById('modeSelectPopup')) closeModeSelectPopup();
+    if (e.target === document.getElementById('speedStartPopup')) closeSpeedStartPopup();
+    if (e.target === document.getElementById('speedResultPopup')) document.getElementById('speedResultPopup').classList.remove('visible');
+  });
+
+  document.querySelectorAll('#speedGrid .speed-play-btn').forEach(btn => {
+    const shape = btn.dataset.shape;
+    btn.addEventListener('pointerdown', function(e) {
+      e.preventDefault();
+      initAudio?.();
+      handleSpeedPress(shape);
+    }, { passive: false });
+    btn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      initAudio?.();
+      handleSpeedPress(shape);
+    }, { passive: false });
+    btn.addEventListener('click', function(e) { e.preventDefault(); }, { passive: false });
+  });
+
+  renderSpeedKeyOptions();
+  renderSpeedLevelOptions();
+  updateSpeedStageSummary();
+})();
 </script>
 
 <script>

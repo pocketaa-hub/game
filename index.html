@@ -46,6 +46,11 @@ body {
   background-position: center top;
 }
 .bg-scene.active { opacity: 1; }
+
+.mission-close-btn,
+.rank-close-btn,
+.badge-close-btn { display:none !important; }
+
 @media (max-width: 500px) {
   .bg-scene {
     background-size: cover;
@@ -861,6 +866,43 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: non
   .profile-rank-value { font-size: 22px; }
   .profile-hero-value { font-size: 30px; }
   .profile-card-compact { max-height: min(80vh, 640px); }
+}
+
+.modal-x-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 2px solid #c88a30;
+  background: rgba(255,251,240,.96);
+  color: #8B2500;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.14);
+  z-index: 5;
+}
+.modal-x-btn:active { transform: scale(.94); }
+.mission-card,
+.badge-card,
+.rank-card,
+.result-card {
+  position: relative;
+}
+@media (max-width: 500px) {
+  .modal-x-btn {
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    font-size: 17px;
+  }
 }
 .mission-close-btn {
   display:block; width:100%; margin-top: 12px;
@@ -1935,6 +1977,7 @@ body.haptic-flash::after {
 <!-- ══ 미션 팝업 ══ -->
 <div class="mission-popup" id="missionPopup">
   <div class="mission-card mission-card-board">
+    <button class="modal-x-btn" onclick="closeMissionPopup()" aria-label="닫기">✕</button>
     <div class="mission-card-header">
       <div class="mission-card-title">📅 미션 보드</div>
       <div class="daily-panel-stamp" id="dailyStampCount">일일 0 / 3 완료</div>
@@ -1963,6 +2006,7 @@ body.haptic-flash::after {
 <!-- ══ 프로필 팝업 ══ -->
 <div class="mission-popup" id="profilePopup">
   <div class="mission-card profile-card profile-card-compact">
+    <button class="modal-x-btn" onclick="closeProfilePopup()" aria-label="닫기">✕</button>
     <div class="mission-card-header profile-head">
       <div class="mission-card-title">👤 내 프로필</div>
       <div class="daily-panel-stamp" id="profileTierText"></div>
@@ -2150,6 +2194,7 @@ body.haptic-flash::after {
   <div class="result-chars">
     <div class="result-char-left"><img id="resultCharLeft" src="female_0.png" alt=""></div>
     <div class="result-card">
+      <button class="modal-x-btn" onclick="returnHome()" aria-label="닫기">✕</button>
     <div class="result-stage-emoji" id="resultStageEmoji">🍼</div>
     <div class="result-stage-name"  id="resultStageName">유아</div>
     <div class="result-line" id="resultLine">여기까지였네</div>
@@ -2211,6 +2256,7 @@ body.haptic-flash::after {
 <!-- ══ 랭킹 팝업 ══ -->
 <div class="rank-popup" id="rankPopup">
   <div class="rank-card">
+    <button class="modal-x-btn" onclick="closeRanking()" aria-label="닫기">✕</button>
     <div class="rank-header">🏆 명예의 전당</div>
     <div class="rank-tabs">
       <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('all')">전체</button>
@@ -2240,6 +2286,7 @@ body.haptic-flash::after {
 <!-- ══ 배지 팝업 ══ -->
 <div class="badge-popup" id="badgePopup">
   <div class="badge-card">
+    <button class="modal-x-btn" onclick="closeBadges()" aria-label="닫기">✕</button>
     <div class="badge-card-header">🏅 나의 배지</div>
     <div class="badge-card-summary" id="badgeSummary"></div>
     <div class="badge-tabs">

@@ -3292,14 +3292,14 @@ body.popup-open {
 
 
 <style>
-/* === unified button size patch === */
+/* === responsive grid fit patch === */
 :root {
   --btn-grid-gap: 10px;
-  --btn-size-2: min(112px, 24vw);
-  --btn-size-3: min(88px, 18vw);
-  --btn-size-4: min(88px, 18vw);
-  --btn-size-5: min(88px, 18vw);
-  --btn-size-6: min(82px, 16.5vw);
+  --btn-size-2: min(132px, 30vw);
+  --btn-size-3: min(118px, 25vw);
+  --btn-size-4: min(98px, 20vw);
+  --btn-size-5: min(86px, 17vw);
+  --btn-size-6: min(76px, 15vw);
 }
 
 .grid {
@@ -3321,11 +3321,11 @@ body.popup-open {
 @media (max-width: 500px) {
   :root {
     --btn-grid-gap: 8px;
-    --btn-size-2: min(108px, 25vw);
-    --btn-size-3: min(84px, 19vw);
-    --btn-size-4: min(84px, 19vw);
-    --btn-size-5: min(84px, 19vw);
-    --btn-size-6: min(78px, 17vw);
+    --btn-size-2: min(126px, 29vw);
+    --btn-size-3: min(108px, 24vw);
+    --btn-size-4: min(84px, 18vw);
+    --btn-size-5: min(72px, 15vw);
+    --btn-size-6: min(66px, 13.5vw);
   }
 
   .container {
@@ -3379,10 +3379,9 @@ body.popup-open {
 @media (max-height: 760px) and (max-width: 520px) {
   :root {
     --btn-grid-gap: 6px;
-    --btn-size-3: min(80px, 18vw);
-    --btn-size-4: min(80px, 18vw);
-    --btn-size-5: min(80px, 18vw);
-    --btn-size-6: min(74px, 16vw);
+    --btn-size-4: min(76px, 16.5vw);
+    --btn-size-5: min(66px, 14vw);
+    --btn-size-6: min(60px, 12.4vw);
   }
 
   .container {
@@ -7349,325 +7348,18 @@ window.speedGoHome = window.speedGoHome || function(){
 </script>
 
 
-<script>
-(function () {
-  const popupIds = [
-    'missionPopup',
-    'profilePopup',
-    'startPopup',
-    'modeSelectPopup',
-    'brainModePopup',
-    'speedStartPopup',
-    'speedRankPopup',
-    'speedBadgePopup',
-    'rankPopup',
-    'badgePopup'
-  ];
 
-  const closeMap = {
-    missionPopup: () => window.closeMissionPopup && window.closeMissionPopup(),
-    profilePopup: () => window.closeProfilePopup && window.closeProfilePopup(),
-    startPopup: () => window.closeStartPopup && window.closeStartPopup(),
-    modeSelectPopup: () => window.closeModeSelectPopup && window.closeModeSelectPopup(),
-    brainModePopup: () => window.closeBrainModePopup && window.closeBrainModePopup(),
-    speedStartPopup: () => window.closeSpeedStartPopup && window.closeSpeedStartPopup(),
-    speedRankPopup: () => window.closeSpeedInfiniteRanking && window.closeSpeedInfiniteRanking(),
-    speedBadgePopup: () => window.closeSpeedBadgePopup && window.closeSpeedBadgePopup(),
-    rankPopup: () => window.closeRanking && window.closeRanking(),
-    badgePopup: () => {
-      if (window.closeBadges) window.closeBadges();
-      else {
-        const el = document.getElementById('badgePopup');
-        if (el) el.classList.remove('visible');
-      }
-    }
-  };
+<!-- popup stability patch removed -->
 
-  function isShown(el) {
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    const rect = el.getBoundingClientRect();
-    return style.display !== 'none' &&
-      style.visibility !== 'hidden' &&
-      style.opacity !== '0' &&
-      rect.width > 0 &&
-      rect.height > 0 &&
-      (el.classList.contains('visible') || style.pointerEvents !== 'none');
-  }
-
-  function currentPopupId() {
-    for (const id of popupIds) {
-      const el = document.getElementById(id);
-      if (isShown(el)) return id;
-    }
-    return null;
-  }
-
-  function syncGlobalClose() {
-    const btn = document.getElementById('globalCloseBtn');
-    if (!btn) return;
-    const activeId = currentPopupId();
-
-    // Never show during in-game speed play or pause flow
-    const speedPause = document.getElementById('speedPausePopup');
-    const speedResult = document.getElementById('speedResultPopup');
-    if (isShown(speedPause) || isShown(speedResult)) {
-      btn.classList.remove('show');
-      btn.dataset.targetPopup = '';
-      return;
-    }
-
-    if (activeId) {
-      btn.classList.add('show');
-      btn.dataset.targetPopup = activeId;
-    } else {
-      btn.classList.remove('show');
-      btn.dataset.targetPopup = '';
-    }
-  }
-
-  function closeCurrentPopup(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    const btn = document.getElementById('globalCloseBtn');
-    const targetId = (btn && btn.dataset && btn.dataset.targetPopup) || currentPopupId();
-    if (!targetId) return;
-
-    const fn = closeMap[targetId];
-    if (typeof fn === 'function') fn();
-    else {
-      const el = document.getElementById(targetId);
-      if (el) {
-        el.classList.remove('visible');
-        el.style.display = 'none';
-      }
-    }
-
-    window.setTimeout(syncGlobalClose, 30);
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    const btn = document.getElementById('globalCloseBtn');
-    if (btn) {
-      btn.addEventListener('click', closeCurrentPopup, true);
-      btn.addEventListener('touchend', closeCurrentPopup, { passive: false, capture: true });
-    }
-
-    syncGlobalClose();
-
-    const observer = new MutationObserver(syncGlobalClose);
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
-    });
-
-    document.addEventListener('click', function () { window.setTimeout(syncGlobalClose, 20); }, true);
-    document.addEventListener('touchend', function () { window.setTimeout(syncGlobalClose, 20); }, true);
-    window.addEventListener('resize', syncGlobalClose);
-    window.addEventListener('orientationchange', syncGlobalClose);
-
-    window.syncGlobalClose = syncGlobalClose;
-  });
-})();
-</script>
 
 
 <script src="./js/config.js"></script>
 <script type="module" src="./js/game-connect.js"></script>
 
 
-<script>
-(function () {
-  if (window.__fullStabilityPatchApplied) return;
-  window.__fullStabilityPatchApplied = true;
 
-  const popupIds = [
-    'missionPopup',
-    'profilePopup',
-    'startPopup',
-    'modeSelectPopup',
-    'brainModePopup',
-    'speedStartPopup',
-    'rankPopup',
-    'badgePopup',
-    'speedRankPopup',
-    'speedBadgePopup'
-  ];
+<!-- full stability patch removed -->
 
-  let globalCloseLockedUntil = 0;
-
-  function isVisible(el) {
-    if (!el) return false;
-    const s = window.getComputedStyle(el);
-    return s.display !== 'none' &&
-      s.visibility !== 'hidden' &&
-      s.opacity !== '0' &&
-      (el.classList.contains('visible') || s.pointerEvents !== 'none');
-  }
-
-  function activePopupId() {
-    for (const id of popupIds) {
-      const el = document.getElementById(id);
-      if (isVisible(el)) return id;
-    }
-    return '';
-  }
-
-  function hideGlobalCloseDuringGameplay() {
-    const speedScreen = document.getElementById('speedScreen');
-    if (!speedScreen) return false;
-    return !speedScreen.classList.contains('hidden');
-  }
-
-  function syncGlobalCloseSafe() {
-    const btn = document.getElementById('globalCloseBtn');
-    if (!btn) return;
-    const activeId = activePopupId();
-    if (activeId && !hideGlobalCloseDuringGameplay()) {
-      btn.classList.add('show');
-      btn.dataset.targetPopup = activeId;
-    } else {
-      btn.classList.remove('show');
-      btn.dataset.targetPopup = '';
-    }
-  }
-
-  function closePopupById(id) {
-    const map = {
-      missionPopup: () => window.closeMissionPopup && window.closeMissionPopup(),
-      profilePopup: () => window.closeProfilePopup && window.closeProfilePopup(),
-      startPopup: () => window.closeStartPopup && window.closeStartPopup(),
-      modeSelectPopup: () => window.closeModeSelectPopup && window.closeModeSelectPopup(),
-      brainModePopup: () => window.closeBrainModePopup && window.closeBrainModePopup(),
-      speedStartPopup: () => window.closeSpeedStartPopup && window.closeSpeedStartPopup(),
-      rankPopup: () => window.closeRanking && window.closeRanking(),
-      badgePopup: () => window.closeBadgePopup && window.closeBadgePopup(),
-      speedRankPopup: () => window.closeSpeedInfiniteRanking && window.closeSpeedInfiniteRanking(),
-      speedBadgePopup: () => window.closeSpeedBadgePopup && window.closeSpeedBadgePopup(),
-    };
-    if (map[id]) {
-      map[id]();
-      return;
-    }
-    const el = document.getElementById(id);
-    if (el) {
-      el.classList.remove('visible');
-      el.style.display = 'none';
-    }
-  }
-
-  function closeActivePopupSafely(ev) {
-    if (ev) {
-      ev.preventDefault();
-      ev.stopPropagation();
-      if (typeof ev.stopImmediatePropagation === 'function') ev.stopImmediatePropagation();
-    }
-    const now = Date.now();
-    if (now < globalCloseLockedUntil) return;
-    globalCloseLockedUntil = now + 250;
-
-    const btn = document.getElementById('globalCloseBtn');
-    const targetId = btn?.dataset?.targetPopup || activePopupId();
-    if (!targetId) return;
-    closePopupById(targetId);
-    window.setTimeout(syncGlobalCloseSafe, 30);
-  }
-
-  function bindGlobalCloseSafely() {
-    const btn = document.getElementById('globalCloseBtn');
-    if (!btn || btn.dataset.boundClose === '1') return;
-    btn.dataset.boundClose = '1';
-    btn.addEventListener('click', closeActivePopupSafely, true);
-    btn.addEventListener('touchend', closeActivePopupSafely, { passive: false, capture: true });
-  }
-
-  function patchSpeedPopupDefaults() {
-    const openFn = window.openSpeedStartPopup;
-    if (typeof openFn === 'function' && !window.__openSpeedStartPopupPatched) {
-      window.__openSpeedStartPopupPatched = true;
-      window.openSpeedStartPopup = function patchedOpenSpeedStartPopup() {
-        const result = openFn.apply(this, arguments);
-        if (typeof window.setSpeedPopupMode === 'function') window.setSpeedPopupMode('stage');
-        if (typeof window.setSpeedPopupStep === 'function') window.setSpeedPopupStep('key');
-        window.setTimeout(syncGlobalCloseSafe, 30);
-        return result;
-      };
-    }
-  }
-
-  function patchRankingOpeners() {
-    const names = ['openRanking', 'openSpeedInfiniteRanking', 'openMissionPopup', 'openProfilePopup', 'openBadgePopup'];
-    names.forEach((name) => {
-      const fn = window[name];
-      if (typeof fn === 'function' && !fn.__stabilityWrapped) {
-        const wrapped = function () {
-          const result = fn.apply(this, arguments);
-          window.setTimeout(syncGlobalCloseSafe, 30);
-          return result;
-        };
-        wrapped.__stabilityWrapped = true;
-        window[name] = wrapped;
-      }
-    });
-  }
-
-  function patchRankingLists() {
-    const brain = document.getElementById('rankList');
-    const speed = document.getElementById('speedRankList');
-    if (brain) {
-      brain.style.maxHeight = brain.style.maxHeight || '52vh';
-      brain.style.overflowY = brain.style.overflowY || 'auto';
-    }
-    if (speed) {
-      speed.style.maxHeight = speed.style.maxHeight || '52vh';
-      speed.style.overflowY = speed.style.overflowY || 'auto';
-    }
-  }
-
-  function runStabilityPass() {
-    bindGlobalCloseSafely();
-    patchSpeedPopupDefaults();
-    patchRankingOpeners();
-    patchRankingLists();
-    syncGlobalCloseSafe();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', runStabilityPass, { once: true });
-  } else {
-    runStabilityPass();
-  }
-
-  const observer = new MutationObserver(() => {
-    window.clearTimeout(window.__globalSyncTimer);
-    window.__globalSyncTimer = window.setTimeout(runStabilityPass, 20);
-  });
-
-  if (document.body) {
-    observer.observe(document.body, {
-      attributes: true,
-      childList: true,
-      subtree: true,
-      attributeFilter: ['class', 'style']
-    });
-  } else {
-    window.addEventListener('DOMContentLoaded', () => {
-      observer.observe(document.body, {
-        attributes: true,
-        childList: true,
-        subtree: true,
-        attributeFilter: ['class', 'style']
-      });
-    }, { once: true });
-  }
-
-  window.syncGlobalCloseSafe = syncGlobalCloseSafe;
-})();
-</script>
 
 
 <script>

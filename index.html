@@ -3292,14 +3292,14 @@ body.popup-open {
 
 
 <style>
-/* === responsive grid fit patch === */
+/* === unified button size patch === */
 :root {
   --btn-grid-gap: 10px;
-  --btn-size-2: min(132px, 30vw);
-  --btn-size-3: min(118px, 25vw);
-  --btn-size-4: min(98px, 20vw);
-  --btn-size-5: min(86px, 17vw);
-  --btn-size-6: min(76px, 15vw);
+  --btn-size-2: min(112px, 24vw);
+  --btn-size-3: min(88px, 18vw);
+  --btn-size-4: min(88px, 18vw);
+  --btn-size-5: min(88px, 18vw);
+  --btn-size-6: min(82px, 16.5vw);
 }
 
 .grid {
@@ -3321,11 +3321,11 @@ body.popup-open {
 @media (max-width: 500px) {
   :root {
     --btn-grid-gap: 8px;
-    --btn-size-2: min(126px, 29vw);
-    --btn-size-3: min(108px, 24vw);
-    --btn-size-4: min(84px, 18vw);
-    --btn-size-5: min(72px, 15vw);
-    --btn-size-6: min(66px, 13.5vw);
+    --btn-size-2: min(108px, 25vw);
+    --btn-size-3: min(84px, 19vw);
+    --btn-size-4: min(84px, 19vw);
+    --btn-size-5: min(84px, 19vw);
+    --btn-size-6: min(78px, 17vw);
   }
 
   .container {
@@ -3379,9 +3379,10 @@ body.popup-open {
 @media (max-height: 760px) and (max-width: 520px) {
   :root {
     --btn-grid-gap: 6px;
-    --btn-size-4: min(76px, 16.5vw);
-    --btn-size-5: min(66px, 14vw);
-    --btn-size-6: min(60px, 12.4vw);
+    --btn-size-3: min(80px, 18vw);
+    --btn-size-4: min(80px, 18vw);
+    --btn-size-5: min(80px, 18vw);
+    --btn-size-6: min(74px, 16vw);
   }
 
   .container {
@@ -7786,218 +7787,6 @@ function renderMyRankSummary(rank, total) {
 
   window.addEventListener('resize', () => requestAnimationFrame(applyResponsiveGridClasses));
   window.applyResponsiveGridClasses = applyResponsiveGridClasses;
-})();
-</script>
-
-
-<style id="size-and-popup-fix-v1">
-/* === unified game button size patch === */
-:root{
-  --play-btn-size-mobile: 112px;
-  --play-btn-size-desktop: 124px;
-}
-
-/* Brain buttons: force all key counts to use the same visual size */
-#gameWrapper .grid{
-  width: min(380px, 92vw) !important;
-  display: grid !important;
-  justify-content: center !important;
-  align-content: start !important;
-  gap: 12px !important;
-}
-#gameWrapper .grid.grid-3{
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-#gameWrapper .grid.grid-4{
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-}
-#gameWrapper .grid.grid-5,
-#gameWrapper .grid.grid-6{
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-#gameWrapper .grid > .btn{
-  width: 100% !important;
-  max-width: var(--play-btn-size-desktop) !important;
-  aspect-ratio: 1 / 1 !important;
-  justify-self: center !important;
-}
-#gameWrapper .grid.grid-5 > .btn:nth-child(4){
-  grid-column: 1 / 2 !important;
-}
-#gameWrapper .grid.grid-5 > .btn:nth-child(5){
-  grid-column: 3 / 4 !important;
-}
-#gameWrapper .grid.grid-6 > .btn{
-  grid-column: auto !important;
-}
-
-/* Speed buttons: make all modes visually consistent */
-#speedGrid{
-  width: min(380px, 92vw) !important;
-  margin: 0 auto !important;
-  display: grid !important;
-  justify-content: center !important;
-  align-content: start !important;
-  gap: 12px !important;
-}
-#speedGrid.keys-3{
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-#speedGrid.keys-4{
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-}
-#speedGrid.keys-5,
-#speedGrid.keys-6{
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-}
-#speedGrid .speed-play-btn{
-  width: 100% !important;
-  max-width: var(--play-btn-size-desktop) !important;
-  aspect-ratio: 1 / 1 !important;
-  min-height: 0 !important;
-  justify-self: center !important;
-}
-#speedGrid.keys-5 .speed-play-btn:nth-child(4){
-  grid-column: 1 / 2 !important;
-}
-#speedGrid.keys-5 .speed-play-btn:nth-child(5){
-  grid-column: 3 / 4 !important;
-}
-
-/* popup internal close buttons only for requested 3 popups */
-.profile-popup .modal-x-btn,
-.badge-popup .modal-x-btn,
-.speed-badge-popup .modal-x-btn{
-  display: inline-flex !important;
-  position: absolute !important;
-  top: 12px !important;
-  right: 12px !important;
-  z-index: 20 !important;
-}
-.profile-card .modal-x-btn,
-.badge-card .modal-x-btn,
-.speed-sheet-card .modal-x-btn{
-  display: inline-flex !important;
-}
-
-@media (max-width: 560px){
-  :root{
-    --play-btn-size-mobile: 108px;
-    --play-btn-size-desktop: 112px;
-  }
-  #gameWrapper .grid,
-  #speedGrid{
-    width: min(360px, 92vw) !important;
-    gap: 10px !important;
-  }
-  #gameWrapper .grid > .btn,
-  #speedGrid .speed-play-btn{
-    max-width: var(--play-btn-size-mobile) !important;
-  }
-  #speedGrid.keys-5,
-  #speedGrid.keys-6,
-  #gameWrapper .grid.grid-5,
-  #gameWrapper .grid.grid-6{
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-</style>
-
-<script id="size-and-popup-fix-script-v1">
-(function(){
-  if (window.__sizeAndPopupFixApplied) return;
-  window.__sizeAndPopupFixApplied = true;
-
-  function ensurePopupCloseButton(popupId, cardSelector, handlerName) {
-    const popup = document.getElementById(popupId);
-    if (!popup) return;
-    const card = popup.querySelector(cardSelector) || popup.firstElementChild;
-    if (!card) return;
-    if (card.querySelector('.modal-x-btn[data-fix="' + popupId + '"]')) return;
-
-    if (getComputedStyle(card).position === 'static') {
-      card.style.position = 'relative';
-    }
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'modal-x-btn';
-    btn.dataset.fix = popupId;
-    btn.setAttribute('aria-label', 'Close');
-    btn.textContent = '✕';
-    btn.addEventListener('click', function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      const fn = window[handlerName];
-      if (typeof fn === 'function') fn();
-      else popup.classList.remove('visible');
-    }, true);
-    card.appendChild(btn);
-  }
-
-  function inferCountFromChildren(root, selector){
-    if (!root) return 0;
-    return root.querySelectorAll(selector).length;
-  }
-
-  function applyUnifiedButtonLayout() {
-    const brainGrid = document.querySelector('#gameWrapper .grid');
-    if (brainGrid) {
-      brainGrid.classList.remove('grid-3','grid-4','grid-5','grid-6');
-      const count = inferCountFromChildren(brainGrid, '.btn');
-      if (count >= 3 && count <= 6) brainGrid.classList.add('grid-' + count);
-    }
-
-    const speedGrid = document.getElementById('speedGrid');
-    if (speedGrid) {
-      speedGrid.classList.remove('keys-3','keys-4','keys-5','keys-6');
-      const count = inferCountFromChildren(speedGrid, '.speed-play-btn');
-      if (count >= 3 && count <= 6) speedGrid.classList.add('keys-' + count);
-    }
-  }
-
-  function install() {
-    ensurePopupCloseButton('profilePopup', '.profile-card, .profile-card-compact, .mission-card, .rank-card, .badge-card, .speed-sheet-card', 'closeProfilePopup');
-    ensurePopupCloseButton('badgePopup', '.badge-card, .rank-card, .mission-card, .speed-sheet-card', 'closeBadges');
-    ensurePopupCloseButton('speedBadgePopup', '.speed-sheet-card, .badge-card, .rank-card, .mission-card', 'closeSpeedBadgePopup');
-    applyUnifiedButtonLayout();
-  }
-
-  const wrapNames = [
-    'renderButtons',
-    'renderStageButtons',
-    'renderBrainButtons',
-    'renderSpeedButtons',
-    'startSpeedCore',
-    'updateSpeedHud',
-    'startGame',
-    'nextRound',
-    'openProfilePopup',
-    'openBadges',
-    'openSpeedBadgePopup'
-  ];
-
-  wrapNames.forEach(name => {
-    const original = window[name];
-    if (typeof original !== 'function' || original.__sizePopupWrapped) return;
-    const wrapped = function() {
-      const result = original.apply(this, arguments);
-      requestAnimationFrame(install);
-      return result;
-    };
-    wrapped.__sizePopupWrapped = true;
-    window[name] = wrapped;
-  });
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', install, { once: true });
-  } else {
-    install();
-  }
-
-  window.addEventListener('resize', () => requestAnimationFrame(applyUnifiedButtonLayout));
-  const observer = new MutationObserver(() => requestAnimationFrame(install));
-  observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
 })();
 </script>
 

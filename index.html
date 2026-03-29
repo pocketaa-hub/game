@@ -3127,9 +3127,289 @@ body.popup-open {
   }
 }
 
+
+/* === stabilization patch: global close + mobile popup layering === */
+.modal-x-btn,
+.start-close-btn,
+.mission-close-btn,
+.rank-close-btn,
+.badge-close-btn {
+  display: none !important;
+}
+
+#globalCloseBtn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 3px solid #c58a2c;
+  background: rgba(255,251,240,.98);
+  color: #8B2500;
+  font-size: 24px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,.24);
+  z-index: 2147483647 !important;
+  display: none;
+  cursor: pointer;
+  pointer-events: auto !important;
+  -webkit-tap-highlight-color: transparent;
+}
+#globalCloseBtn.show { display: flex; }
+#globalCloseBtn:active { transform: scale(.96); }
+
+.point-badge,
+.star-point,
+.combo-badge,
+#starPoint {
+  z-index: 2147483000 !important;
+}
+
+.mission-popup,
+.profile-popup,
+.start-popup,
+.mode-select-popup,
+.brain-mode-popup,
+.speed-start-popup,
+.speed-rank-popup,
+.speed-badge-popup,
+.rank-popup,
+.badge-popup {
+  z-index: 5000 !important;
+}
+
+@media (max-width: 500px) {
+  #globalCloseBtn {
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    right: calc(env(safe-area-inset-right, 0px) + 10px);
+    width: 46px;
+    height: 46px;
+    font-size: 22px;
+  }
+}
+
+
+/* === rank period / top100 patch === */
+.rank-meta-line {
+  margin: 8px 0 10px;
+  text-align: center;
+  font-size: 13px;
+  color: #9b6a20;
+}
+.rank-period-tabs,
+.speed-period-tabs {
+  margin-top: 10px;
+}
+.rank-list-scroll,
+#speedRankList.rank-list-scroll {
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.rank-list-scroll::-webkit-scrollbar,
+#speedRankList.rank-list-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.rank-list-scroll::-webkit-scrollbar-thumb,
+#speedRankList.rank-list-scroll::-webkit-scrollbar-thumb {
+  background: rgba(200,138,48,.45);
+  border-radius: 999px;
+}
+.rank-empty.small-note,
+.speed-empty.small-note {
+  line-height: 1.45;
+  font-size: 14px;
+}
+
+
+/* === my-rank summary patch === */
+.rank-my-summary,
+.speed-my-summary {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border: 2px solid #d8ba77;
+  border-radius: 14px;
+  background: rgba(255,248,228,.92);
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+}
+.rank-my-summary .label,
+.speed-my-summary .label {
+  font-size: 12px;
+  color: #9b6a20;
+}
+.rank-my-summary .value,
+.speed-my-summary .value {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 22px;
+  color: #8B2500;
+  line-height: 1;
+}
+.rank-my-summary .sub,
+.speed-my-summary .sub {
+  font-size: 12px;
+  color: #8b5a10;
+}
+
+
+/* === speed structure patch === */
+.speed-mode-tabs-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.speed-record-card {
+  cursor: pointer;
+}
+.speed-record-card:active {
+  transform: scale(.985);
+}
+
 </style>
+
+<style>
+.combo-popup {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  font-weight: bold;
+  color: #ff9800;
+  z-index: 99999;
+  pointer-events: none;
+  animation: comboPop 0.6s ease-out forwards;
+}
+@keyframes comboPop {
+  0% { opacity: 0; transform: translate(-50%, -20%) scale(0.5); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+}
+</style>
+
+
+<style>
+/* === responsive grid fit patch === */
+:root {
+  --btn-grid-gap: 10px;
+  --btn-size-2: min(132px, 30vw);
+  --btn-size-3: min(118px, 25vw);
+  --btn-size-4: min(98px, 20vw);
+  --btn-size-5: min(86px, 17vw);
+  --btn-size-6: min(76px, 15vw);
+}
+
+.grid {
+  gap: var(--btn-grid-gap) !important;
+  justify-content: center;
+  align-content: start;
+}
+
+.grid.grid-2 { grid-template-columns: repeat(2, var(--btn-size-2)) !important; }
+.grid.grid-3 { grid-template-columns: repeat(3, var(--btn-size-3)) !important; }
+.grid.grid-4 { grid-template-columns: repeat(4, var(--btn-size-4)) !important; }
+.grid.grid-5 { grid-template-columns: repeat(5, var(--btn-size-5)) !important; }
+.grid.grid-6 { grid-template-columns: repeat(3, var(--btn-size-6)) !important; }
+
+.grid.grid-6 .btn {
+  aspect-ratio: 1 / 1;
+}
+
+@media (max-width: 500px) {
+  :root {
+    --btn-grid-gap: 8px;
+    --btn-size-2: min(126px, 29vw);
+    --btn-size-3: min(108px, 24vw);
+    --btn-size-4: min(84px, 18vw);
+    --btn-size-5: min(72px, 15vw);
+    --btn-size-6: min(66px, 13.5vw);
+  }
+
+  .container {
+    gap: 10px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .stats-board {
+    gap: 22px !important;
+    padding: 7px 18px !important;
+  }
+
+  .status-bubble {
+    min-height: 30px !important;
+    padding: 4px 14px !important;
+    font-size: 14px !important;
+  }
+
+  .fruit-emoji {
+    font-size: clamp(28px, 8vw, 40px) !important;
+  }
+
+  .shape-icon {
+    width: clamp(34px, 8vw, 46px) !important;
+    height: clamp(34px, 8vw, 46px) !important;
+  }
+
+  .fruit-name,
+  .shape-label {
+    font-size: 13px !important;
+  }
+
+  .grid.grid-4 .fruit-name,
+  .grid.grid-4 .shape-label,
+  .grid.grid-5 .fruit-name,
+  .grid.grid-5 .shape-label,
+  .grid.grid-6 .fruit-name,
+  .grid.grid-6 .shape-label {
+    font-size: 11px !important;
+  }
+
+  .grid.grid-4 .fruit-emoji { font-size: clamp(24px, 6.6vw, 34px) !important; }
+  .grid.grid-5 .fruit-emoji { font-size: clamp(22px, 6vw, 30px) !important; }
+  .grid.grid-6 .fruit-emoji { font-size: clamp(20px, 5.5vw, 28px) !important; }
+
+  .grid.grid-4 .shape-icon { width: clamp(28px, 6.4vw, 36px) !important; height: clamp(28px, 6.4vw, 36px) !important; }
+  .grid.grid-5 .shape-icon { width: clamp(26px, 5.8vw, 34px) !important; height: clamp(26px, 5.8vw, 34px) !important; }
+  .grid.grid-6 .shape-icon { width: clamp(24px, 5.3vw, 32px) !important; height: clamp(24px, 5.3vw, 32px) !important; }
+}
+
+@media (max-height: 760px) and (max-width: 520px) {
+  :root {
+    --btn-grid-gap: 6px;
+    --btn-size-4: min(76px, 16.5vw);
+    --btn-size-5: min(66px, 14vw);
+    --btn-size-6: min(60px, 12.4vw);
+  }
+
+  .container {
+    gap: 8px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .signboard {
+    padding: 6px 18px 8px !important;
+  }
+
+  .stage-badge {
+    padding: 4px 16px !important;
+    font-size: 18px !important;
+  }
+
+  .stats-board {
+    padding: 6px 14px !important;
+    gap: 18px !important;
+  }
+}
+</style>
+
 </head>
 <body>
+<button id="globalCloseBtn" type="button" aria-label="Close">✕</button>
+
 
 <!-- ══ 타이틀 화면 ══ -->
 <div id="titleScreen">
@@ -3365,10 +3645,11 @@ body.popup-open {
       <div class="mode-select-title">⚡ Speed Training</div>
       <button class="modal-x-btn" onclick="closeSpeedStartPopup()" aria-label="Close">✕</button>
     </div>
-    <div class="mode-select-sub">Stage / Infinite</div>
+    <div class="mode-select-sub">Stage / Time Attack / Infinite</div>
 
-    <div class="speed-mode-tabs">
+    <div class="speed-mode-tabs speed-mode-tabs-3">
       <button class="speed-mode-tab" id="speedModeTabStage" onclick="setSpeedPopupMode('stage')">Stage</button>
+      <button class="speed-mode-tab inactive" id="speedModeTabTimeAttack" onclick="setSpeedPopupMode('time_attack')">Time Attack</button>
       <button class="speed-mode-tab inactive" id="speedModeTabInfinite" onclick="setSpeedPopupMode('infinite')">Infinite</button>
     </div>
 
@@ -3390,30 +3671,40 @@ body.popup-open {
       </div>
     </div>
 
-    <div class="speed-panel-body hidden" id="speedInfinitePanel">
+    <div class="speed-panel-body hidden" id="speedTimeAttackPanel">
       <div class="speed-panel-section">
-        <div class="speed-panel-label">Infinite</div>
-        <div class="speed-record-card" onclick="startSpeedInfinite('normal')">
+        <div class="speed-panel-label">Time Attack</div>
+        <div class="speed-record-card" onclick="startSpeedTimeAttack('normal')">
           <div class="speed-record-title">Normal</div>
-          <div class="speed-record-desc">60 sec run · Best <span id="speedInfiniteBestNormal">0</span>R</div>
-          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;"></div>
+          <div class="speed-record-desc">60 sec fixed · Best <span id="speedTimeAttackBestNormal">0</span>R</div>
+          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">Best for fair ranking and quick challenge</div>
           <div class="speed-record-dot normal"></div>
         </div>
-        <div class="speed-record-card" onclick="startSpeedInfinite('hard')">
+        <div class="speed-record-card" onclick="startSpeedTimeAttack('hard')">
           <div class="speed-record-title">Hard</div>
-          <div class="speed-record-desc">45 sec run · Best <span id="speedInfiniteBestHard">0</span>R</div>
-          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;"></div>
+          <div class="speed-record-desc">45 sec fixed · Best <span id="speedTimeAttackBestHard">0</span>R</div>
+          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">Faster pressure, same fair timer</div>
           <div class="speed-record-dot hard"></div>
-        </div>
-        <div class="speed-record-card" onclick="startSpeedInfinite('round')">
-          <div class="speed-record-title">Infinite</div>
-          <div class="speed-record-desc">20 → 18 → ... → 8 sec · Best <span id="speedInfiniteBestRound">0</span>R</div>
-          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">No total limit · time resets each round</div>
-          <div class="speed-record-dot normal"></div>
         </div>
         <div class="speed-start-actions">
           <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">Close</button>
           <button class="speed-primary-btn" onclick="setSpeedPopupMode('stage')">Back</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="speed-panel-body hidden" id="speedInfinitePanel">
+      <div class="speed-panel-section">
+        <div class="speed-panel-label">Infinite</div>
+        <div class="speed-record-card" onclick="startSpeedInfinite('round')">
+          <div class="speed-record-title">Infinite</div>
+          <div class="speed-record-desc">20 → 18 → ... → 8 sec · Best <span id="speedInfiniteBestRound">0</span>R</div>
+          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">Time resets each round, but gets shorter</div>
+          <div class="speed-record-dot normal"></div>
+        </div>
+        <div class="speed-start-actions">
+          <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">Close</button>
+          <button class="speed-primary-btn" onclick="setSpeedPopupMode('time_attack')">Back</button>
         </div>
       </div>
     </div>
@@ -3647,14 +3938,20 @@ body.popup-open {
 <div class="speed-result-popup" id="speedRankPopup" onclick="if(event.target===this) closeSpeedInfiniteRanking()">
   <div class="speed-result-card speed-sheet-card">
     <button class="modal-x-btn" onclick="closeSpeedInfiniteRanking()" aria-label="Close">✕</button>
-    <div class="speed-result-title">Infinite Rank</div>
-    <div class="speed-result-meta" id="speedRankMeta">Top 10 on this device</div>
+    <div class="speed-result-title">Speed Rank</div>
+    <div class="speed-result-meta" id="speedRankMeta">Top 100 · All-time · Time Attack</div>
     <div class="speed-rank-tabs">
       <button class="speed-rank-tab active" id="speedRankTabNormal" onclick="setSpeedRankTab('normal')">Normal</button>
       <button class="speed-rank-tab" id="speedRankTabHard" onclick="setSpeedRankTab('hard')">Hard</button>
       <button class="speed-rank-tab" id="speedRankTabRound" onclick="setSpeedRankTab('round')">Infinite</button>
     </div>
-    <div id="speedRankList" class="speed-sheet-list"></div>
+    <div class="speed-rank-tabs speed-period-tabs">
+      <button class="speed-rank-tab" id="speedPeriodTabWeekly" onclick="setSpeedRankPeriod('weekly')">Weekly</button>
+      <button class="speed-rank-tab" id="speedPeriodTabMonthly" onclick="setSpeedRankPeriod('monthly')">Monthly</button>
+      <button class="speed-rank-tab active" id="speedPeriodTabAll" onclick="setSpeedRankPeriod('all')">All-time</button>
+    </div>
+    <div id="speedMySummary" class="speed-my-summary" style="display:none;"></div>
+    <div id="speedRankList" class="speed-sheet-list rank-list-scroll"></div>
   </div>
 </div>
 
@@ -3753,9 +4050,15 @@ body.popup-open {
     <div class="rank-tabs">
       <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('normal')">Normal</button>
       <button class="rank-tab" id="rankTabToday" onclick="setRankTab('hard')">Hard</button>
-      <button class="rank-tab" id="rankTabMine" onclick="setRankTab('mine')">My Run</button>
     </div>
-    <div id="rankList"></div>
+    <div class="rank-tabs rank-period-tabs">
+      <button class="rank-tab" id="rankPeriodTabWeekly" onclick="setRankPeriod('weekly')">Weekly</button>
+      <button class="rank-tab" id="rankPeriodTabMonthly" onclick="setRankPeriod('monthly')">Monthly</button>
+      <button class="rank-tab active" id="rankPeriodTabAll" onclick="setRankPeriod('all')">All-time</button>
+    </div>
+    <div id="rankMeta" class="rank-meta-line">Top 100 · All-time · Time Attack</div>
+    <div id="rankMySummary" class="rank-my-summary" style="display:none;"></div>
+    <div id="rankList" class="rank-list-scroll"></div>
     <button class="rank-close-btn" onclick="closeRanking()">Close</button>
   </div>
 </div>
@@ -4111,7 +4414,9 @@ function renderBadges() {
 // ══ 랭킹 시스템 ══
 const RANK_KEY = STORAGE_KEYS.ranking;
 const PLAYER_NAME_KEY = STORAGE_KEYS.playerName;
-let currentRankTab = 'all';
+let currentRankTab = 'normal';
+let currentRankPeriod = 'all';
+let currentSpeedRankPeriod = 'all';
 
 function getRanking() {
   try { return JSON.parse(localStorage.getItem(RANK_KEY) || '[]'); }
@@ -4491,23 +4796,22 @@ const MONTHLY_MISSION_KEY = STORAGE_KEYS.monthlyMission;
 const PROFILE_STATS_KEY = STORAGE_KEYS.profileStats;
 const PROFILE_AVATAR_KEY = STORAGE_KEYS.profileAvatar;
 const PROFILE_AVATAR_OPTIONS = [
-  { emoji: "👨🏻", name: "Light Man" },
-  { emoji: "👩🏻", name: "Light Woman" },
-  { emoji: "👨", name: "Neutral Man" },
-  { emoji: "👩", name: "Neutral Woman" },
-  { emoji: "👨🏾", name: "Brown Man" },
-  { emoji: "👩🏾", name: "Brown Woman" },
-  { emoji: "👨🏿", name: "Dark Man" },
-  { emoji: "👩🏿", name: "Dark Woman" },
-
-  { emoji: "🐶", name: "Dog" },
-  { emoji: "🐱", name: "Cat" },
-  { emoji: "🐼", name: "Panda" },
-  { emoji: "🦊", name: "Fox" },
-  { emoji: "🌸", name: "Flower" },
-  { emoji: "🌳", name: "Tree" },
-  { emoji: "⭐", name: "Star" },
-  { emoji: "🔥", name: "Fire" }
+  { emoji:'👨🏻', name:'Light Man' },
+  { emoji:'👩🏻', name:'Light Woman' },
+  { emoji:'👨', name:'Neutral Man' },
+  { emoji:'👩', name:'Neutral Woman' },
+  { emoji:'👨🏾', name:'Brown Man' },
+  { emoji:'👩🏾', name:'Brown Woman' },
+  { emoji:'👨🏿', name:'Dark Man' },
+  { emoji:'👩🏿', name:'Dark Woman' },
+  { emoji:'🐶', name:'Dog' },
+  { emoji:'🐱', name:'Cat' },
+  { emoji:'🐼', name:'Panda' },
+  { emoji:'🦊', name:'Fox' },
+  { emoji:'🌸', name:'Flower' },
+  { emoji:'🌳', name:'Tree' },
+  { emoji:'⭐', name:'Star' },
+  { emoji:'🔥', name:'Fire' },
 ];
 
 const WEEKLY_MISSION_DEFS = [
@@ -5964,7 +6268,8 @@ function showComboToast(n) {
     pauseRemaining: 0,
     pauseStartedAt: 0,
     popupStep: 'key',
-    popupMode: 'stage'
+    popupMode: 'stage',
+    challengeLabel: ''
   };
 
   function getStageLevels() {
@@ -6141,12 +6446,16 @@ function showComboToast(n) {
     const keyGrid = document.getElementById('speedKeyGrid');
     const levelGrid = document.getElementById('speedLevelGrid');
     const stagePanel = document.getElementById('speedStagePanel');
+    const timeAttackPanel = document.getElementById('speedTimeAttackPanel');
     const infinitePanel = document.getElementById('speedInfinitePanel');
     const stageTab = document.getElementById('speedModeTabStage');
+    const timeAttackTab = document.getElementById('speedModeTabTimeAttack');
     const infiniteTab = document.getElementById('speedModeTabInfinite');
     if (stageTab) stageTab.classList.toggle('inactive', speedState.popupMode !== 'stage');
+    if (timeAttackTab) timeAttackTab.classList.toggle('inactive', speedState.popupMode !== 'time_attack');
     if (infiniteTab) infiniteTab.classList.toggle('inactive', speedState.popupMode !== 'infinite');
     if (stagePanel) stagePanel.classList.toggle('hidden', speedState.popupMode !== 'stage');
+    if (timeAttackPanel) timeAttackPanel.classList.toggle('hidden', speedState.popupMode !== 'time_attack');
     if (infinitePanel) infinitePanel.classList.toggle('hidden', speedState.popupMode !== 'infinite');
     if (keyTab) keyTab.classList.toggle('inactive', speedState.popupStep !== 'key');
     if (levelTab) levelTab.classList.toggle('inactive', speedState.popupStep !== 'level');
@@ -6155,7 +6464,7 @@ function showComboToast(n) {
     updateSpeedStartButtonState?.();
   }
   window.setSpeedPopupMode = function(mode) {
-    speedState.popupMode = mode === 'infinite' ? 'infinite' : 'stage';
+    speedState.popupMode = mode === 'infinite' ? 'infinite' : (mode === 'time_attack' ? 'time_attack' : 'stage');
     syncSpeedPopupStepUI();
   };
   window.setSpeedPopupStep = function(step) {
@@ -6173,9 +6482,13 @@ function showComboToast(n) {
     const n = document.getElementById('speedInfiniteBestNormal');
     const h = document.getElementById('speedInfiniteBestHard');
     const r = document.getElementById('speedInfiniteBestRound');
+    const tn = document.getElementById('speedTimeAttackBestNormal');
+    const th = document.getElementById('speedTimeAttackBestHard');
     if (n) n.textContent = String(getSpeedInfiniteBest('normal'));
     if (h) h.textContent = String(getSpeedInfiniteBest('hard'));
     if (r) r.textContent = String(getSpeedInfiniteBest('round'));
+    if (tn) tn.textContent = String(getSpeedInfiniteBest('normal'));
+    if (th) th.textContent = String(getSpeedInfiniteBest('hard'));
     closeModeSelectPopup();
     const el = document.getElementById('speedStartPopup');
     if (!el) return;
@@ -6429,10 +6742,13 @@ function showComboToast(n) {
     const round = document.getElementById('speedRound');
     const best = document.getElementById('speedBest');
     const sub = document.getElementById('speedScreenSub');
+    const isTimeAttack = speedState.type === 'infinite' && speedState.infiniteMode !== 'round' && String(speedState.challengeLabel || '').toLowerCase().includes('time attack');
     if (badge) {
       const left = speedState.type === 'stage'
         ? `${level.emoji || '🏁'} ${getLevelNameEn(level.name)} · ${speedState.selectedKeyCount} Keys`
-        : `${speedState.infiniteMode === 'hard' ? '🔴 Hard' : speedState.infiniteMode === 'round' ? '🟡 Infinite' : '🟠 Normal'} · Auto Keys`;
+        : (speedState.infiniteMode === 'round'
+            ? `🟡 Infinite · Auto Keys`
+            : `${speedState.infiniteMode === 'hard' ? '🔴 Time Attack Hard' : '🟠 Time Attack'} · Auto Keys`);
       badge.textContent = left;
     }
     if (round) round.textContent = String(speedState.round);
@@ -6447,7 +6763,7 @@ function showComboToast(n) {
         ? `${level.name} · ${speedState.currentDuration} sec`
         : (speedState.infiniteMode === 'round'
             ? `Round ${speedState.round} · ${speedState.currentDuration} sec`
-            : `${speedState.currentDuration} sec run`);
+            : `${speedState.currentDuration} sec fixed`);
     }
   }
   function updateSpeedStatus(msg) {
@@ -6544,14 +6860,24 @@ function showComboToast(n) {
   }
   window.startSpeedStageTraining = function() {
     speedState.type = 'stage';
+    speedState.challengeLabel = '';
     if (!isSpeedStageUnlocked(speedState.selectedKeyCount, speedState.selectedLevelIdx)) return;
     speedState.round = 1;
     speedState.currentDuration = SPEED_STAGE_DURATIONS[speedState.selectedLevelIdx] || 60;
     startSpeedCore();
   };
+  window.startSpeedTimeAttack = function(mode) {
+    speedState.challengeLabel = mode === 'hard' ? 'Time Attack Hard' : 'Time Attack';
+    window.startSpeedInfinite(mode === 'hard' ? 'hard' : 'normal');
+  };
   window.startSpeedInfinite = function(mode) {
     speedState.type = 'infinite';
     speedState.infiniteMode = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
+    if (speedState.infiniteMode === 'round') {
+      speedState.challengeLabel = 'Infinite';
+    } else if (!speedState.challengeLabel) {
+      speedState.challengeLabel = speedState.infiniteMode === 'hard' ? 'Hard' : 'Normal';
+    }
     speedState.round = 1;
     speedState.currentDuration = speedState.infiniteMode === 'round'
       ? getInfiniteRoundDuration(1, speedState.infiniteMode)
@@ -6640,14 +6966,19 @@ function showComboToast(n) {
     const meta = document.getElementById('speedResultMeta');
     const badgeInfo = document.getElementById('speedResultBadgeInfo');
     const nextBtn = document.getElementById('speedNextStageBtn');
+    const resultLabel = speedState.infiniteMode === 'round'
+      ? 'Infinite'
+      : (String(speedState.challengeLabel || '').toLowerCase().includes('time attack')
+          ? (speedState.infiniteMode === 'hard' ? 'Time Attack Hard' : 'Time Attack')
+          : infiniteLabel);
     if (title) title.textContent = speedState.type === 'stage'
       ? (success ? 'Clear!' : 'Fail')
-      : `${infiniteLabel} End`;
+      : `${resultLabel} End`;
     if (scoreEl) scoreEl.textContent = String(score);
     if (meta) {
       meta.textContent = speedState.type === 'stage'
         ? `${speedState.selectedKeyCount} Keys · ${getLevelNameEn((getStageLevels()[speedState.selectedLevelIdx] || {}).name || '')} · Best ${best}R`
-        : `${infiniteLabel} · Best ${best}R`;
+        : `${resultLabel} · Best ${best}R`;
     }
     if (badgeInfo) badgeInfo.textContent = `New Badge ${newBadges} · Total ${getSpeedBadges().length}`;
     if (nextBtn) nextBtn.style.display = (speedState.type === 'stage' && success && stageIndexFor(speedState.selectedKeyCount, speedState.selectedLevelIdx) < 27) ? '' : 'none';
@@ -6656,6 +6987,7 @@ function showComboToast(n) {
   window.restartSpeedCurrent = function() {
     document.getElementById('speedResultPopup')?.classList.remove('visible');
     if (speedState.type === 'stage') window.startSpeedStageTraining();
+    else if (String(speedState.challengeLabel || '').toLowerCase().includes('time attack')) window.startSpeedTimeAttack(speedState.infiniteMode);
     else window.startSpeedInfinite(speedState.infiniteMode);
   };
   window.goNextSpeedStage = function() {
@@ -6668,33 +7000,122 @@ function showComboToast(n) {
     window.startSpeedStageTraining();
   };
   
+  
+  
   let currentSpeedRankTab = 'normal';
-  window.setSpeedRankTab = function(tab) {
+  window.setSpeedRankPeriod = function(period, skipRender) {
+    currentSpeedRankPeriod = ['weekly','monthly','all'].includes(period) ? period : 'all';
+    document.getElementById('speedPeriodTabWeekly')?.classList.toggle('active', currentSpeedRankPeriod === 'weekly');
+    document.getElementById('speedPeriodTabMonthly')?.classList.toggle('active', currentSpeedRankPeriod === 'monthly');
+    document.getElementById('speedPeriodTabAll')?.classList.toggle('active', currentSpeedRankPeriod === 'all');
+    if (!skipRender) setSpeedRankTab(currentSpeedRankTab);
+  };
+  window.setSpeedRankTab = async function(tab) {
     currentSpeedRankTab = tab === 'hard' ? 'hard' : (tab === 'round' ? 'round' : 'normal');
     document.getElementById('speedRankTabNormal')?.classList.toggle('active', currentSpeedRankTab === 'normal');
     document.getElementById('speedRankTabHard')?.classList.toggle('active', currentSpeedRankTab === 'hard');
     document.getElementById('speedRankTabRound')?.classList.toggle('active', currentSpeedRankTab === 'round');
     const root = document.getElementById('speedRankList');
     const meta = document.getElementById('speedRankMeta');
+    const mySummary = document.getElementById('speedMySummary');
     const title = currentSpeedRankTab === 'hard' ? 'Hard' : (currentSpeedRankTab === 'round' ? 'Infinite' : 'Normal');
-    const list = getSpeedInfiniteRanking(currentSpeedRankTab);
-    if (meta) meta.textContent = `Top 10 on this device · ${title}`;
-    if (root) {
-      const renderRows = (arr) => {
-        if (!arr.length) return '<div class="speed-empty">No Record</div>';
-        return arr.map((r,i)=>`
-          <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
-            <div class="speed-rank-pos">#${i+1}</div>
-            <div class="speed-rank-label">${r.avatar || '🙂'} ${i===0 ? 'Best' : 'Run'}</div>
-            <div class="speed-rank-score">${r.score}R</div>
-          </div>
-        `).join('');
-      };
-      root.innerHTML = `<div class="speed-rank-section">${renderRows(list)}</div>`;
+    const periodLabel = currentSpeedRankPeriod === 'weekly' ? 'Weekly' : (currentSpeedRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
+    const myName = ((localStorage.getItem('limitgame_player_name') || localStorage.getItem('limitgame_last_player') || 'Guest').trim().slice(0,10)) || 'Guest';
+    const myAvatar = (() => {
+      try {
+        const raw = localStorage.getItem('limitgame_profile_avatar_v1') || localStorage.getItem('limitgame_avatar');
+        if (!raw) return '🙂';
+        const parsed = JSON.parse(raw);
+        return parsed?.emoji || raw || '🙂';
+      } catch { return '🙂'; }
+    })();
+
+    if (meta) meta.textContent = `Top 100 · ${periodLabel} · ${title}`;
+    if (mySummary) {
+      mySummary.style.display = 'none';
+      mySummary.innerHTML = '';
     }
+
+    const renderSummary = (rank, score, totalCount) => {
+      if (!mySummary) return;
+      mySummary.style.display = 'grid';
+      mySummary.innerHTML = `
+        <div>
+          <div class="label">My Rank</div>
+          <div class="sub">${myAvatar} ${myName}</div>
+        </div>
+        <div class="value">#${rank || '-'}</div>
+        <div>
+          <div class="value">${score ?? '-'}R</div>
+          <div class="sub">out of ${totalCount}</div>
+        </div>
+      `;
+    };
+
+    try {
+      if (window.gameConnect?.fetchRanking) {
+        const rows = await window.gameConnect.fetchRanking('speed_infinite', currentSpeedRankTab, {
+          period: currentSpeedRankPeriod,
+          limit: 100,
+          dedupe: true,
+          includeMine: true
+        });
+
+        const items = Array.isArray(rows?.items) ? rows.items : (Array.isArray(rows) ? rows : []);
+        const myEntry = rows?.myEntry || null;
+        const totalCount = Number(rows?.totalCount || items.length || 0);
+
+        if (items.length) {
+          root.innerHTML = `<div class="speed-rank-section">${
+            items.map((r,i)=>`
+              <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
+                <div class="speed-rank-pos">#${i+1}</div>
+                <div class="speed-rank-label">${r.avatar || '🙂'} ${String(r.nickname || 'Guest').slice(0,10)}</div>
+                <div class="speed-rank-score">${Number(r.score || r.round || 0)}R</div>
+              </div>
+            `).join('')
+          }</div>`;
+          if (myEntry) renderSummary(myEntry.rank, Number(myEntry.score || myEntry.round || 0), totalCount);
+          return;
+        }
+
+        if (currentSpeedRankPeriod !== 'all') {
+          root.innerHTML = '<div class="speed-empty small-note">No server record yet for this period.</div>';
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('speed rank server fallback', e);
+    }
+
+    const list = getSpeedInfiniteRanking(currentSpeedRankTab);
+    const deduped = [];
+    const seen = new Set();
+    for (const r of list) {
+      const key = String((r.name || 'Guest'));
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(r);
+    }
+    const top = deduped.slice(0,100);
+    const myIndex = top.findIndex(r => String(r.name || '') === myName);
+    if (myIndex >= 0) renderSummary(myIndex + 1, top[myIndex].score, top.length);
+
+    const renderRows = (arr) => {
+      if (!arr.length) return '<div class="speed-empty small-note">No local all-time record yet.</div>';
+      return arr.map((r,i)=>`
+        <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
+          <div class="speed-rank-pos">#${i+1}</div>
+          <div class="speed-rank-label">${myIndex===i ? myAvatar : '🙂'} ${r.name || (i===0 ? 'Best' : 'Run')}</div>
+          <div class="speed-rank-score">${r.score}R</div>
+        </div>
+      `).join('');
+    };
+    root.innerHTML = `<div class="speed-rank-section">${currentSpeedRankPeriod === 'all' ? renderRows(top) : '<div class="speed-empty small-note">No server record yet for this period.</div>'}</div>`;
   };
   window.openSpeedInfiniteRanking = function(mode) {
     currentSpeedRankTab = mode ? (mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal')) : speedState.infiniteMode;
+    window.setSpeedRankPeriod(currentSpeedRankPeriod || 'all', true);
     setSpeedRankTab(currentSpeedRankTab);
     document.getElementById('speedRankPopup')?.classList.add('visible');
   };
@@ -6919,6 +7340,448 @@ window.speedGoHome = window.speedGoHome || function(){
       if (fn) fn();
     }, true);
   });
+})();
+</script>
+
+
+<script>
+(function () {
+  const popupIds = [
+    'missionPopup',
+    'profilePopup',
+    'startPopup',
+    'modeSelectPopup',
+    'brainModePopup',
+    'speedStartPopup',
+    'speedRankPopup',
+    'speedBadgePopup',
+    'rankPopup',
+    'badgePopup'
+  ];
+
+  const closeMap = {
+    missionPopup: () => window.closeMissionPopup && window.closeMissionPopup(),
+    profilePopup: () => window.closeProfilePopup && window.closeProfilePopup(),
+    startPopup: () => window.closeStartPopup && window.closeStartPopup(),
+    modeSelectPopup: () => window.closeModeSelectPopup && window.closeModeSelectPopup(),
+    brainModePopup: () => window.closeBrainModePopup && window.closeBrainModePopup(),
+    speedStartPopup: () => window.closeSpeedStartPopup && window.closeSpeedStartPopup(),
+    speedRankPopup: () => window.closeSpeedInfiniteRanking && window.closeSpeedInfiniteRanking(),
+    speedBadgePopup: () => window.closeSpeedBadgePopup && window.closeSpeedBadgePopup(),
+    rankPopup: () => window.closeRanking && window.closeRanking(),
+    badgePopup: () => {
+      if (window.closeBadges) window.closeBadges();
+      else {
+        const el = document.getElementById('badgePopup');
+        if (el) el.classList.remove('visible');
+      }
+    }
+  };
+
+  function isShown(el) {
+    if (!el) return false;
+    const style = window.getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    return style.display !== 'none' &&
+      style.visibility !== 'hidden' &&
+      style.opacity !== '0' &&
+      rect.width > 0 &&
+      rect.height > 0 &&
+      (el.classList.contains('visible') || style.pointerEvents !== 'none');
+  }
+
+  function currentPopupId() {
+    for (const id of popupIds) {
+      const el = document.getElementById(id);
+      if (isShown(el)) return id;
+    }
+    return null;
+  }
+
+  function syncGlobalClose() {
+    const btn = document.getElementById('globalCloseBtn');
+    if (!btn) return;
+    const activeId = currentPopupId();
+
+    // Never show during in-game speed play or pause flow
+    const speedPause = document.getElementById('speedPausePopup');
+    const speedResult = document.getElementById('speedResultPopup');
+    if (isShown(speedPause) || isShown(speedResult)) {
+      btn.classList.remove('show');
+      btn.dataset.targetPopup = '';
+      return;
+    }
+
+    if (activeId) {
+      btn.classList.add('show');
+      btn.dataset.targetPopup = activeId;
+    } else {
+      btn.classList.remove('show');
+      btn.dataset.targetPopup = '';
+    }
+  }
+
+  function closeCurrentPopup(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const btn = document.getElementById('globalCloseBtn');
+    const targetId = (btn && btn.dataset && btn.dataset.targetPopup) || currentPopupId();
+    if (!targetId) return;
+
+    const fn = closeMap[targetId];
+    if (typeof fn === 'function') fn();
+    else {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.classList.remove('visible');
+        el.style.display = 'none';
+      }
+    }
+
+    window.setTimeout(syncGlobalClose, 30);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('globalCloseBtn');
+    if (btn) {
+      btn.addEventListener('click', closeCurrentPopup, true);
+      btn.addEventListener('touchend', closeCurrentPopup, { passive: false, capture: true });
+    }
+
+    syncGlobalClose();
+
+    const observer = new MutationObserver(syncGlobalClose);
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+
+    document.addEventListener('click', function () { window.setTimeout(syncGlobalClose, 20); }, true);
+    document.addEventListener('touchend', function () { window.setTimeout(syncGlobalClose, 20); }, true);
+    window.addEventListener('resize', syncGlobalClose);
+    window.addEventListener('orientationchange', syncGlobalClose);
+
+    window.syncGlobalClose = syncGlobalClose;
+  });
+})();
+</script>
+
+
+<script src="./js/config.js"></script>
+<script type="module" src="./js/game-connect.js"></script>
+
+
+<script>
+(function () {
+  if (window.__fullStabilityPatchApplied) return;
+  window.__fullStabilityPatchApplied = true;
+
+  const popupIds = [
+    'missionPopup',
+    'profilePopup',
+    'startPopup',
+    'modeSelectPopup',
+    'brainModePopup',
+    'speedStartPopup',
+    'rankPopup',
+    'badgePopup',
+    'speedRankPopup',
+    'speedBadgePopup'
+  ];
+
+  let globalCloseLockedUntil = 0;
+
+  function isVisible(el) {
+    if (!el) return false;
+    const s = window.getComputedStyle(el);
+    return s.display !== 'none' &&
+      s.visibility !== 'hidden' &&
+      s.opacity !== '0' &&
+      (el.classList.contains('visible') || s.pointerEvents !== 'none');
+  }
+
+  function activePopupId() {
+    for (const id of popupIds) {
+      const el = document.getElementById(id);
+      if (isVisible(el)) return id;
+    }
+    return '';
+  }
+
+  function hideGlobalCloseDuringGameplay() {
+    const speedScreen = document.getElementById('speedScreen');
+    if (!speedScreen) return false;
+    return !speedScreen.classList.contains('hidden');
+  }
+
+  function syncGlobalCloseSafe() {
+    const btn = document.getElementById('globalCloseBtn');
+    if (!btn) return;
+    const activeId = activePopupId();
+    if (activeId && !hideGlobalCloseDuringGameplay()) {
+      btn.classList.add('show');
+      btn.dataset.targetPopup = activeId;
+    } else {
+      btn.classList.remove('show');
+      btn.dataset.targetPopup = '';
+    }
+  }
+
+  function closePopupById(id) {
+    const map = {
+      missionPopup: () => window.closeMissionPopup && window.closeMissionPopup(),
+      profilePopup: () => window.closeProfilePopup && window.closeProfilePopup(),
+      startPopup: () => window.closeStartPopup && window.closeStartPopup(),
+      modeSelectPopup: () => window.closeModeSelectPopup && window.closeModeSelectPopup(),
+      brainModePopup: () => window.closeBrainModePopup && window.closeBrainModePopup(),
+      speedStartPopup: () => window.closeSpeedStartPopup && window.closeSpeedStartPopup(),
+      rankPopup: () => window.closeRanking && window.closeRanking(),
+      badgePopup: () => window.closeBadgePopup && window.closeBadgePopup(),
+      speedRankPopup: () => window.closeSpeedInfiniteRanking && window.closeSpeedInfiniteRanking(),
+      speedBadgePopup: () => window.closeSpeedBadgePopup && window.closeSpeedBadgePopup(),
+    };
+    if (map[id]) {
+      map[id]();
+      return;
+    }
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('visible');
+      el.style.display = 'none';
+    }
+  }
+
+  function closeActivePopupSafely(ev) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (typeof ev.stopImmediatePropagation === 'function') ev.stopImmediatePropagation();
+    }
+    const now = Date.now();
+    if (now < globalCloseLockedUntil) return;
+    globalCloseLockedUntil = now + 250;
+
+    const btn = document.getElementById('globalCloseBtn');
+    const targetId = btn?.dataset?.targetPopup || activePopupId();
+    if (!targetId) return;
+    closePopupById(targetId);
+    window.setTimeout(syncGlobalCloseSafe, 30);
+  }
+
+  function bindGlobalCloseSafely() {
+    const btn = document.getElementById('globalCloseBtn');
+    if (!btn || btn.dataset.boundClose === '1') return;
+    btn.dataset.boundClose = '1';
+    btn.addEventListener('click', closeActivePopupSafely, true);
+    btn.addEventListener('touchend', closeActivePopupSafely, { passive: false, capture: true });
+  }
+
+  function patchSpeedPopupDefaults() {
+    const openFn = window.openSpeedStartPopup;
+    if (typeof openFn === 'function' && !window.__openSpeedStartPopupPatched) {
+      window.__openSpeedStartPopupPatched = true;
+      window.openSpeedStartPopup = function patchedOpenSpeedStartPopup() {
+        const result = openFn.apply(this, arguments);
+        if (typeof window.setSpeedPopupMode === 'function') window.setSpeedPopupMode('stage');
+        if (typeof window.setSpeedPopupStep === 'function') window.setSpeedPopupStep('key');
+        window.setTimeout(syncGlobalCloseSafe, 30);
+        return result;
+      };
+    }
+  }
+
+  function patchRankingOpeners() {
+    const names = ['openRanking', 'openSpeedInfiniteRanking', 'openMissionPopup', 'openProfilePopup', 'openBadgePopup'];
+    names.forEach((name) => {
+      const fn = window[name];
+      if (typeof fn === 'function' && !fn.__stabilityWrapped) {
+        const wrapped = function () {
+          const result = fn.apply(this, arguments);
+          window.setTimeout(syncGlobalCloseSafe, 30);
+          return result;
+        };
+        wrapped.__stabilityWrapped = true;
+        window[name] = wrapped;
+      }
+    });
+  }
+
+  function patchRankingLists() {
+    const brain = document.getElementById('rankList');
+    const speed = document.getElementById('speedRankList');
+    if (brain) {
+      brain.style.maxHeight = brain.style.maxHeight || '52vh';
+      brain.style.overflowY = brain.style.overflowY || 'auto';
+    }
+    if (speed) {
+      speed.style.maxHeight = speed.style.maxHeight || '52vh';
+      speed.style.overflowY = speed.style.overflowY || 'auto';
+    }
+  }
+
+  function runStabilityPass() {
+    bindGlobalCloseSafely();
+    patchSpeedPopupDefaults();
+    patchRankingOpeners();
+    patchRankingLists();
+    syncGlobalCloseSafe();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runStabilityPass, { once: true });
+  } else {
+    runStabilityPass();
+  }
+
+  const observer = new MutationObserver(() => {
+    window.clearTimeout(window.__globalSyncTimer);
+    window.__globalSyncTimer = window.setTimeout(runStabilityPass, 20);
+  });
+
+  if (document.body) {
+    observer.observe(document.body, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      attributeFilter: ['class', 'style']
+    });
+  } else {
+    window.addEventListener('DOMContentLoaded', () => {
+      observer.observe(document.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+        attributeFilter: ['class', 'style']
+      });
+    }, { once: true });
+  }
+
+  window.syncGlobalCloseSafe = syncGlobalCloseSafe;
+})();
+</script>
+
+
+<script>
+// === Time Attack Balance Patch ===
+window.onSuccessClick = function() {
+  if (!window.speedState) return;
+  speedState.combo = (speedState.combo || 0) + 1;
+
+  let base = 1;
+  let comboBonus = Math.floor(speedState.combo / 5);
+  let difficulty = 1 + ((speedState.round || 1) * 0.1);
+
+  let gained = (base + comboBonus) * difficulty;
+  speedState.score = (speedState.score || 0) + Math.floor(gained);
+
+  if (window.updateScoreUI) updateScoreUI(speedState.score);
+
+  // combo effect
+  if (speedState.combo % 5 === 0 && window.showComboEffect) {
+    showComboEffect(speedState.combo);
+  }
+};
+
+window.onFail = function() {
+  if (!window.speedState) return;
+  speedState.combo = 0;
+};
+
+// speed acceleration
+window.getSpeedDelay = function() {
+  if (!window.speedState) return 800;
+  return Math.max(300, 800 - (speedState.score || 0) * 2);
+};
+</script>
+
+
+<script>
+function showComboEffect(combo) {
+  const el = document.createElement('div');
+  el.className = 'combo-popup';
+  el.innerText = combo + ' COMBO!';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 600);
+}
+
+const clickSound = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+function playClickSound() {
+  clickSound.currentTime = 0;
+  clickSound.volume = 0.5;
+  clickSound.play().catch(()=>{});
+}
+
+function renderMyRankSummary(rank, total) {
+  const percent = Math.max(1, Math.round((rank / total) * 100));
+  const el = document.getElementById('rankMySummary');
+  if (!el) return;
+  el.style.display = 'grid';
+  el.innerHTML = `
+    <div><div class="label">My Rank</div><div class="sub">#${rank}</div></div>
+    <div class="value">Top ${percent}%</div>
+    <div><div class="sub">/ ${total}</div></div>
+  `;
+}
+</script>
+
+
+<script>
+(function () {
+  function applyResponsiveGridClasses() {
+    const grid = document.querySelector('.grid');
+    if (!grid) return;
+    const buttons = grid.querySelectorAll('.btn');
+    if (!buttons.length) return;
+
+    grid.classList.remove('grid-2', 'grid-3', 'grid-4', 'grid-5', 'grid-6');
+
+    const count = buttons.length;
+    if (count <= 2) grid.classList.add('grid-2');
+    else if (count === 3) grid.classList.add('grid-3');
+    else if (count === 4) grid.classList.add('grid-4');
+    else if (count === 5) grid.classList.add('grid-5');
+    else grid.classList.add('grid-6');
+  }
+
+  function safePatch(fnName) {
+    const original = window[fnName];
+    if (typeof original !== 'function' || original.__responsiveGridWrapped) return;
+    const wrapped = function () {
+      const result = original.apply(this, arguments);
+      requestAnimationFrame(applyResponsiveGridClasses);
+      return result;
+    };
+    wrapped.__responsiveGridWrapped = true;
+    window[fnName] = wrapped;
+  }
+
+  function runResponsivePatch() {
+    [
+      'renderButtons',
+      'renderStageButtons',
+      'renderBrainButtons',
+      'renderSpeedButtons',
+      'startSpeedCore',
+      'updateSpeedHud',
+      'startGame',
+      'nextRound'
+    ].forEach(safePatch);
+
+    applyResponsiveGridClasses();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runResponsivePatch, { once: true });
+  } else {
+    runResponsivePatch();
+  }
+
+  window.addEventListener('resize', () => requestAnimationFrame(applyResponsiveGridClasses));
+  window.applyResponsiveGridClasses = applyResponsiveGridClasses;
 })();
 </script>
 

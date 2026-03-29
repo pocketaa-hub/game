@@ -7,10 +7,17 @@ const state = {
   error: null,
 };
 
+const STORAGE_KEYS = {
+  playerName: 'limitgame_player_name',
+  lastPlayer: 'limitgame_last_player',
+  profileAvatar: 'limitgame_profile_avatar_v1',
+  avatar: 'limitgame_avatar',
+};
+
 function getPlayerName() {
   return (
-    localStorage.getItem('limitgame_player_name') ||
-    localStorage.getItem('limitgame_last_player') ||
+    localStorage.getItem(STORAGE_KEYS.playerName) ||
+    localStorage.getItem(STORAGE_KEYS.lastPlayer) ||
     'Guest'
   ).trim().slice(0, 10) || 'Guest';
 }
@@ -18,8 +25,8 @@ function getPlayerName() {
 function getAvatar() {
   try {
     const raw =
-      localStorage.getItem('limitgame_profile_avatar_v1') ||
-      localStorage.getItem('limitgame_avatar');
+      localStorage.getItem(STORAGE_KEYS.profileAvatar) ||
+      localStorage.getItem(STORAGE_KEYS.avatar);
 
     if (!raw) return '🙂';
 
@@ -32,6 +39,16 @@ function getAvatar() {
   } catch {
     return '🙂';
   }
+}
+
+function getSpeedGameType(mode) {
+  if (mode === 'hard' || mode === 'normal') {
+    return 'speed_time_attack';
+  }
+  if (mode === 'round') {
+    return 'speed_infinite';
+  }
+  return 'speed_time_attack';
 }
 
 async function initGameConnect() {
@@ -123,9 +140,9 @@ function patchBrainLimitSubmit() {
 
 function patchSpeedSubmit() {
   const original = window.updateSpeedInfiniteRanking;
-  if (typeof original !== 'function' || window.__speedInfinitePatched) return;
+  if (typeof original !== 'function' || window.__speedSubmitPatched) return;
 
-  window.__speedInfinitePatched = true;
+  window.__speedSubmitPatched = true;
 
   window.updateSpeedInfiniteRanking = function patchedUpdateSpeedInfiniteRanking(mode, score) {
     const result = original.apply(this, arguments);
@@ -137,8 +154,10 @@ function patchSpeedSubmit() {
           ? 'round'
           : 'normal';
 
+    const gameType = getSpeedGameType(normalizedMode);
+
     window.gameConnect.submitScore({
-      gameType: 'speed_infinite',
+      gameType,
       mode: normalizedMode,
       nickname: getPlayerName(),
       avatar: getAvatar(),

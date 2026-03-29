@@ -1,4 +1,4 @@
-import { supabase } from './supabase-client.js?v=20260329b';
+import { supabase } from './supabase-client.js?v=20260329c';
 
 export async function ensureAnonymousAuth() {
   const { data: { session } } = await supabase.auth.getSession();

@@ -3268,6 +3268,131 @@ body.popup-open {
   transform: scale(.985);
 }
 
+
+
+/* === stable UI patch: keep gameplay flow, unify button size, show internal X on selected popups === */
+#globalCloseBtn { display: none !important; }
+
+#profilePopup .modal-x-btn,
+#badgePopup .modal-x-btn,
+#speedBadgePopup .modal-x-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 38px !important;
+  height: 38px !important;
+  z-index: 7000 !important;
+}
+
+#profilePopup .badge-close-btn,
+#badgePopup .badge-close-btn,
+#speedBadgePopup .badge-close-btn,
+#profilePopup .rank-close-btn,
+#badgePopup .rank-close-btn,
+#speedBadgePopup .rank-close-btn {
+  display: none !important;
+}
+
+/* brain buttons: close to 5-key feel across modes */
+.grid {
+  justify-content: center !important;
+}
+.grid.grid-3,
+.grid.grid-4,
+.grid.grid-5,
+.grid.grid-6 {
+  grid-template-columns: repeat(2, minmax(112px, 124px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 270px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.grid.grid-5 #btn-diamond {
+  width: 118px !important;
+  grid-column: auto !important;
+  justify-self: auto !important;
+}
+.btn {
+  min-height: 112px !important;
+}
+.shape-icon { width: 40px !important; height: 40px !important; }
+.shape-label, .fruit-name { font-size: 15px !important; }
+
+/* speed play buttons: use 5-key feel as baseline */
+.speed-grid {
+  justify-content: center !important;
+}
+.speed-grid.cols-3,
+.speed-grid.cols-4 {
+  grid-template-columns: repeat(2, minmax(118px, 132px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 280px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.speed-grid.cols-5,
+.speed-grid.cols-6 {
+  grid-template-columns: repeat(3, minmax(102px, 112px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 356px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.speed-play-btn {
+  min-height: 102px !important;
+}
+.speed-play-btn .speed-btn-shape {
+  width: 38px !important;
+  height: 38px !important;
+}
+.speed-play-btn .speed-btn-shape svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+.speed-play-btn .speed-btn-name {
+  font-size: 15px !important;
+}
+@media (max-width: 500px) {
+  #profilePopup .modal-x-btn,
+  #badgePopup .modal-x-btn,
+  #speedBadgePopup .modal-x-btn {
+    top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+    right: calc(env(safe-area-inset-right, 0px) + 8px) !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .grid.grid-3,
+  .grid.grid-4,
+  .grid.grid-5,
+  .grid.grid-6 {
+    grid-template-columns: repeat(2, minmax(104px, 116px)) !important;
+    gap: 9px !important;
+    max-width: 250px !important;
+  }
+  .btn {
+    min-height: 104px !important;
+  }
+  .speed-grid.cols-3,
+  .speed-grid.cols-4 {
+    grid-template-columns: repeat(2, minmax(110px, 124px)) !important;
+    max-width: 262px !important;
+  }
+  .speed-grid.cols-5,
+  .speed-grid.cols-6 {
+    grid-template-columns: repeat(3, minmax(94px, 104px)) !important;
+    max-width: 330px !important;
+  }
+  .speed-play-btn {
+    min-height: 94px !important;
+  }
+}
+
 </style>
 
 <style>
@@ -3288,6 +3413,131 @@ body.popup-open {
   50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
   100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
 }
+
+
+/* === stable UI patch: keep gameplay flow, unify button size, show internal X on selected popups === */
+#globalCloseBtn { display: none !important; }
+
+#profilePopup .modal-x-btn,
+#badgePopup .modal-x-btn,
+#speedBadgePopup .modal-x-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 38px !important;
+  height: 38px !important;
+  z-index: 7000 !important;
+}
+
+#profilePopup .badge-close-btn,
+#badgePopup .badge-close-btn,
+#speedBadgePopup .badge-close-btn,
+#profilePopup .rank-close-btn,
+#badgePopup .rank-close-btn,
+#speedBadgePopup .rank-close-btn {
+  display: none !important;
+}
+
+/* brain buttons: close to 5-key feel across modes */
+.grid {
+  justify-content: center !important;
+}
+.grid.grid-3,
+.grid.grid-4,
+.grid.grid-5,
+.grid.grid-6 {
+  grid-template-columns: repeat(2, minmax(112px, 124px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 270px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.grid.grid-5 #btn-diamond {
+  width: 118px !important;
+  grid-column: auto !important;
+  justify-self: auto !important;
+}
+.btn {
+  min-height: 112px !important;
+}
+.shape-icon { width: 40px !important; height: 40px !important; }
+.shape-label, .fruit-name { font-size: 15px !important; }
+
+/* speed play buttons: use 5-key feel as baseline */
+.speed-grid {
+  justify-content: center !important;
+}
+.speed-grid.cols-3,
+.speed-grid.cols-4 {
+  grid-template-columns: repeat(2, minmax(118px, 132px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 280px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.speed-grid.cols-5,
+.speed-grid.cols-6 {
+  grid-template-columns: repeat(3, minmax(102px, 112px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 356px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.speed-play-btn {
+  min-height: 102px !important;
+}
+.speed-play-btn .speed-btn-shape {
+  width: 38px !important;
+  height: 38px !important;
+}
+.speed-play-btn .speed-btn-shape svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+.speed-play-btn .speed-btn-name {
+  font-size: 15px !important;
+}
+@media (max-width: 500px) {
+  #profilePopup .modal-x-btn,
+  #badgePopup .modal-x-btn,
+  #speedBadgePopup .modal-x-btn {
+    top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+    right: calc(env(safe-area-inset-right, 0px) + 8px) !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .grid.grid-3,
+  .grid.grid-4,
+  .grid.grid-5,
+  .grid.grid-6 {
+    grid-template-columns: repeat(2, minmax(104px, 116px)) !important;
+    gap: 9px !important;
+    max-width: 250px !important;
+  }
+  .btn {
+    min-height: 104px !important;
+  }
+  .speed-grid.cols-3,
+  .speed-grid.cols-4 {
+    grid-template-columns: repeat(2, minmax(110px, 124px)) !important;
+    max-width: 262px !important;
+  }
+  .speed-grid.cols-5,
+  .speed-grid.cols-6 {
+    grid-template-columns: repeat(3, minmax(94px, 104px)) !important;
+    max-width: 330px !important;
+  }
+  .speed-play-btn {
+    min-height: 94px !important;
+  }
+}
+
 </style>
 
 
@@ -3404,6 +3654,131 @@ body.popup-open {
     gap: 18px !important;
   }
 }
+
+
+/* === stable UI patch: keep gameplay flow, unify button size, show internal X on selected popups === */
+#globalCloseBtn { display: none !important; }
+
+#profilePopup .modal-x-btn,
+#badgePopup .modal-x-btn,
+#speedBadgePopup .modal-x-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  width: 38px !important;
+  height: 38px !important;
+  z-index: 7000 !important;
+}
+
+#profilePopup .badge-close-btn,
+#badgePopup .badge-close-btn,
+#speedBadgePopup .badge-close-btn,
+#profilePopup .rank-close-btn,
+#badgePopup .rank-close-btn,
+#speedBadgePopup .rank-close-btn {
+  display: none !important;
+}
+
+/* brain buttons: close to 5-key feel across modes */
+.grid {
+  justify-content: center !important;
+}
+.grid.grid-3,
+.grid.grid-4,
+.grid.grid-5,
+.grid.grid-6 {
+  grid-template-columns: repeat(2, minmax(112px, 124px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 270px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.grid.grid-5 #btn-diamond {
+  width: 118px !important;
+  grid-column: auto !important;
+  justify-self: auto !important;
+}
+.btn {
+  min-height: 112px !important;
+}
+.shape-icon { width: 40px !important; height: 40px !important; }
+.shape-label, .fruit-name { font-size: 15px !important; }
+
+/* speed play buttons: use 5-key feel as baseline */
+.speed-grid {
+  justify-content: center !important;
+}
+.speed-grid.cols-3,
+.speed-grid.cols-4 {
+  grid-template-columns: repeat(2, minmax(118px, 132px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 280px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.speed-grid.cols-5,
+.speed-grid.cols-6 {
+  grid-template-columns: repeat(3, minmax(102px, 112px)) !important;
+  gap: 10px !important;
+  width: auto !important;
+  max-width: 356px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.speed-play-btn {
+  min-height: 102px !important;
+}
+.speed-play-btn .speed-btn-shape {
+  width: 38px !important;
+  height: 38px !important;
+}
+.speed-play-btn .speed-btn-shape svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+.speed-play-btn .speed-btn-name {
+  font-size: 15px !important;
+}
+@media (max-width: 500px) {
+  #profilePopup .modal-x-btn,
+  #badgePopup .modal-x-btn,
+  #speedBadgePopup .modal-x-btn {
+    top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+    right: calc(env(safe-area-inset-right, 0px) + 8px) !important;
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .grid.grid-3,
+  .grid.grid-4,
+  .grid.grid-5,
+  .grid.grid-6 {
+    grid-template-columns: repeat(2, minmax(104px, 116px)) !important;
+    gap: 9px !important;
+    max-width: 250px !important;
+  }
+  .btn {
+    min-height: 104px !important;
+  }
+  .speed-grid.cols-3,
+  .speed-grid.cols-4 {
+    grid-template-columns: repeat(2, minmax(110px, 124px)) !important;
+    max-width: 262px !important;
+  }
+  .speed-grid.cols-5,
+  .speed-grid.cols-6 {
+    grid-template-columns: repeat(3, minmax(94px, 104px)) !important;
+    max-width: 330px !important;
+  }
+  .speed-play-btn {
+    min-height: 94px !important;
+  }
+}
+
 </style>
 
 </head>
@@ -7348,135 +7723,12 @@ window.speedGoHome = window.speedGoHome || function(){
 </script>
 
 
-<script>
-(function () {
-  const popupIds = [
-    'missionPopup',
-    'profilePopup',
-    'startPopup',
-    'modeSelectPopup',
-    'brainModePopup',
-    'speedStartPopup',
-    'speedRankPopup',
-    'speedBadgePopup',
-    'rankPopup',
-    'badgePopup'
-  ];
 
-  const closeMap = {
-    missionPopup: () => window.closeMissionPopup && window.closeMissionPopup(),
-    profilePopup: () => window.closeProfilePopup && window.closeProfilePopup(),
-    startPopup: () => window.closeStartPopup && window.closeStartPopup(),
-    modeSelectPopup: () => window.closeModeSelectPopup && window.closeModeSelectPopup(),
-    brainModePopup: () => window.closeBrainModePopup && window.closeBrainModePopup(),
-    speedStartPopup: () => window.closeSpeedStartPopup && window.closeSpeedStartPopup(),
-    speedRankPopup: () => window.closeSpeedInfiniteRanking && window.closeSpeedInfiniteRanking(),
-    speedBadgePopup: () => window.closeSpeedBadgePopup && window.closeSpeedBadgePopup(),
-    rankPopup: () => window.closeRanking && window.closeRanking(),
-    badgePopup: () => {
-      if (window.closeBadges) window.closeBadges();
-      else {
-        const el = document.getElementById('badgePopup');
-        if (el) el.classList.remove('visible');
-      }
-    }
-  };
-
-  function isShown(el) {
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    const rect = el.getBoundingClientRect();
-    return style.display !== 'none' &&
-      style.visibility !== 'hidden' &&
-      style.opacity !== '0' &&
-      rect.width > 0 &&
-      rect.height > 0 &&
-      (el.classList.contains('visible') || style.pointerEvents !== 'none');
-  }
-
-  function currentPopupId() {
-    for (const id of popupIds) {
-      const el = document.getElementById(id);
-      if (isShown(el)) return id;
-    }
-    return null;
-  }
-
-  function syncGlobalClose() {
-    const btn = document.getElementById('globalCloseBtn');
-    if (!btn) return;
-    const activeId = currentPopupId();
-
-    // Never show during in-game speed play or pause flow
-    const speedPause = document.getElementById('speedPausePopup');
-    const speedResult = document.getElementById('speedResultPopup');
-    if (isShown(speedPause) || isShown(speedResult)) {
-      btn.classList.remove('show');
-      btn.dataset.targetPopup = '';
-      return;
-    }
-
-    if (activeId) {
-      btn.classList.add('show');
-      btn.dataset.targetPopup = activeId;
-    } else {
-      btn.classList.remove('show');
-      btn.dataset.targetPopup = '';
-    }
-  }
-
-  function closeCurrentPopup(e) {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    const btn = document.getElementById('globalCloseBtn');
-    const targetId = (btn && btn.dataset && btn.dataset.targetPopup) || currentPopupId();
-    if (!targetId) return;
-
-    const fn = closeMap[targetId];
-    if (typeof fn === 'function') fn();
-    else {
-      const el = document.getElementById(targetId);
-      if (el) {
-        el.classList.remove('visible');
-        el.style.display = 'none';
-      }
-    }
-
-    window.setTimeout(syncGlobalClose, 30);
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    const btn = document.getElementById('globalCloseBtn');
-    if (btn) {
-      btn.addEventListener('click', closeCurrentPopup, true);
-      btn.addEventListener('touchend', closeCurrentPopup, { passive: false, capture: true });
-    }
-
-    syncGlobalClose();
-
-    const observer = new MutationObserver(syncGlobalClose);
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
-    });
-
-    document.addEventListener('click', function () { window.setTimeout(syncGlobalClose, 20); }, true);
-    document.addEventListener('touchend', function () { window.setTimeout(syncGlobalClose, 20); }, true);
-    window.addEventListener('resize', syncGlobalClose);
-    window.addEventListener('orientationchange', syncGlobalClose);
-
-    window.syncGlobalClose = syncGlobalClose;
-  });
-})();
-</script>
 
 
 <script src="./js/config.js"></script>
 <script type="module" src="./js/game-connect.js"></script>
+
 
 
 
@@ -7598,207 +7850,6 @@ function renderMyRankSummary(rank, total) {
 
   window.addEventListener('resize', () => requestAnimationFrame(applyResponsiveGridClasses));
   window.applyResponsiveGridClasses = applyResponsiveGridClasses;
-})();
-</script>
-
-
-<style id="final-mobile-ui-patch">
-/* Final stability/UI patch */
-#globalCloseBtn {
-  display: none !important;
-  pointer-events: none !important;
-}
-
-/* Keep internal X only for the 3 requested popups */
-#profilePopup .modal-x-btn,
-#badgePopup .modal-x-btn,
-#speedBadgePopup .modal-x-btn {
-  display: inline-flex !important;
-  position: absolute !important;
-  top: 10px !important;
-  right: 10px !important;
-  left: auto !important;
-  transform: none !important;
-  z-index: 7001 !important;
-  width: 38px !important;
-  height: 38px !important;
-  pointer-events: auto !important;
-}
-#profilePopup .mission-card-header,
-#badgePopup .badge-card-header,
-#speedBadgePopup .speed-result-title {
-  padding-right: 42px !important;
-}
-
-/* Hide bottom close buttons for cleaner UI on the requested 3 popups */
-#profilePopup .mission-close-btn,
-#badgePopup .badge-close-btn,
-#speedBadgePopup .rank-close-btn,
-#speedBadgePopup .badge-close-btn {
-  display: none !important;
-}
-
-/* Brain buttons: unify to roughly the current 5-key Speed button size */
-.grid {
-  justify-content: center !important;
-}
-.grid.grid-3,
-.grid.grid-4,
-.grid.grid-5,
-.grid.grid-6 {
-  width: auto !important;
-  margin-inline: auto !important;
-  gap: 10px !important;
-  grid-template-columns: repeat(2, 104px) !important;
-}
-.grid .btn {
-  width: 104px !important;
-  min-width: 104px !important;
-  max-width: 104px !important;
-  aspect-ratio: 1 / 1 !important;
-  justify-self: center !important;
-}
-.grid.grid-5 #btn-diamond {
-  width: 104px !important;
-  grid-column: 1 / span 2 !important;
-  justify-self: center !important;
-}
-
-/* Speed buttons: match the current 5-key feel across all key counts */
-.speed-play-wrap {
-  width: min(360px, 100%) !important;
-}
-.speed-grid {
-  width: auto !important;
-  margin-inline: auto !important;
-  gap: 10px !important;
-  justify-content: center !important;
-}
-.speed-grid.cols-3,
-.speed-grid.cols-4 {
-  grid-template-columns: repeat(2, 104px) !important;
-}
-.speed-grid.cols-5,
-.speed-grid.cols-6 {
-  grid-template-columns: repeat(3, 104px) !important;
-}
-.speed-play-btn {
-  width: 104px !important;
-  min-width: 104px !important;
-  max-width: 104px !important;
-  min-height: 104px !important;
-  aspect-ratio: 1 / 1 !important;
-  justify-self: center !important;
-}
-.speed-play-btn .speed-btn-shape {
-  width: 36px !important;
-  height: 36px !important;
-  border-width: 3px !important;
-}
-.speed-play-btn .speed-btn-shape svg {
-  width: 24px !important;
-  height: 24px !important;
-}
-.speed-play-btn .speed-btn-name {
-  font-size: 12px !important;
-  line-height: 1.05 !important;
-}
-
-@media (max-width: 500px) {
-  #profilePopup .modal-x-btn,
-  #badgePopup .modal-x-btn,
-  #speedBadgePopup .modal-x-btn {
-    top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
-    right: calc(env(safe-area-inset-right, 0px) + 8px) !important;
-    width: 38px !important;
-    height: 38px !important;
-  }
-
-  .grid.grid-3,
-  .grid.grid-4,
-  .grid.grid-5,
-  .grid.grid-6 {
-    grid-template-columns: repeat(2, 94px) !important;
-    gap: 8px !important;
-  }
-  .grid .btn {
-    width: 94px !important;
-    min-width: 94px !important;
-    max-width: 94px !important;
-  }
-  .grid.grid-5 #btn-diamond {
-    width: 94px !important;
-  }
-
-  .speed-play-wrap {
-    width: min(332px, 100%) !important;
-  }
-  .speed-grid.cols-3,
-  .speed-grid.cols-4 {
-    grid-template-columns: repeat(2, 94px) !important;
-  }
-  .speed-grid.cols-5,
-  .speed-grid.cols-6 {
-    grid-template-columns: repeat(3, 94px) !important;
-  }
-  .speed-play-btn {
-    width: 94px !important;
-    min-width: 94px !important;
-    max-width: 94px !important;
-    min-height: 94px !important;
-  }
-}
-</style>
-
-<script id="final-mobile-ui-patch-script">
-(function () {
-  function reapplyUiPatch() {
-    var profileX = document.querySelector('#profilePopup .modal-x-btn');
-    var badgeX = document.querySelector('#badgePopup .modal-x-btn');
-    var speedBadgeX = document.querySelector('#speedBadgePopup .modal-x-btn');
-    [profileX, badgeX, speedBadgeX].forEach(function (btn) {
-      if (!btn) return;
-      btn.style.display = 'inline-flex';
-      btn.style.pointerEvents = 'auto';
-    });
-
-    var global = document.getElementById('globalCloseBtn');
-    if (global) {
-      global.classList.remove('show');
-      global.style.display = 'none';
-      global.style.pointerEvents = 'none';
-    }
-  }
-
-  var names = [
-    'openProfilePopup',
-    'openBadgePopup',
-    'openBadges',
-    'openSpeedBadgePopup',
-    'openMissionPopup',
-    'openStartPopup',
-    'openModeSelectPopup',
-    'openBrainModePopup',
-    'openSpeedStartPopup'
-  ];
-  names.forEach(function (name) {
-    var fn = window[name];
-    if (typeof fn !== 'function' || fn.__uiPatchWrapped) return;
-    var wrapped = function () {
-      var result = fn.apply(this, arguments);
-      setTimeout(reapplyUiPatch, 30);
-      return result;
-    };
-    wrapped.__uiPatchWrapped = true;
-    window[name] = wrapped;
-  });
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', reapplyUiPatch, { once: true });
-  } else {
-    reapplyUiPatch();
-  }
-  window.addEventListener('resize', function () { requestAnimationFrame(reapplyUiPatch); });
 })();
 </script>
 

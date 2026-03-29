@@ -2785,6 +2785,49 @@ body.haptic-flash::after {
   .mode-select-title { font-size: 30px; }
 }
 
+
+/* v3 popup close / layout fixes */
+.mission-popup .modal-x-btn,
+.badge-popup .modal-x-btn,
+.rank-popup .modal-x-btn,
+.mode-select-popup .modal-x-btn,
+.speed-start-popup .modal-x-btn,
+.speed-result-popup .modal-x-btn,
+.start-popup .modal-x-btn {
+  position: fixed !important;
+  top: calc(env(safe-area-inset-top, 0px) + 14px) !important;
+  right: calc(env(safe-area-inset-right, 0px) + 14px) !important;
+  z-index: 8000 !important;
+  pointer-events: auto;
+}
+.mission-popup .mission-card,
+.badge-popup .badge-card,
+.rank-popup .rank-card,
+.mode-select-popup .mode-select-card,
+.speed-start-popup .mode-select-card,
+.speed-result-popup .speed-result-card,
+.start-popup .start-card {
+  overflow: visible;
+}
+.grid.grid-6.brain-limit-hard {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.grid.grid-6.brain-limit-hard .btn {
+  min-width: 0;
+}
+@media (max-width: 500px) {
+  .mission-popup .modal-x-btn,
+  .badge-popup .modal-x-btn,
+  .rank-popup .modal-x-btn,
+  .mode-select-popup .modal-x-btn,
+  .speed-start-popup .modal-x-btn,
+  .speed-result-popup .modal-x-btn,
+  .start-popup .modal-x-btn {
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    right: calc(env(safe-area-inset-right, 0px) + 10px) !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4468,10 +4511,10 @@ const LEVELS = [
   { id:'grad',       name:'Grad',    emoji:'🔬', scene:6, speedMul:1.6, unlockScore:null, unlockText:'Final level' },
 ];
 const LEVEL_BUTTONS = {
-  3: ['circle','triangle','square'],
-  4: ['circle','square','triangle','star'],
-  5: ['circle','square','diamond','triangle','star'],
-  6: ['circle','square','diamond','triangle','star','hex'],
+  3: ['circle','square','diamond'],
+  4: ['circle','square','diamond','star'],
+  5: ['circle','square','diamond','star','triangle'],
+  6: ['circle','square','diamond','star','triangle','hex'],
 };
 const BASE_TIMING = { showDelay:400, lightOn:540, gap:180, afterSeq:300, nextRoundDelay:900 };
 let difficulty = localStorage.getItem(MODE_KEY) || 'easy';
@@ -5121,8 +5164,11 @@ function applyLevelLayout() {
   const activeFruits = LEVEL_BUTTONS[mode.buttons] || LEVEL_BUTTONS[4];
   const grid = document.getElementById('gameGrid');
   if (grid) {
-    grid.classList.remove('grid-3', 'grid-4', 'grid-5', 'grid-6');
+    grid.classList.remove('grid-3', 'grid-4', 'grid-5', 'grid-6', 'brain-limit-hard');
     grid.classList.add(`grid-${mode.buttons}`);
+    if (brainInfiniteActive && brainLimitMode === 'hard' && mode.buttons === 6) {
+      grid.classList.add('brain-limit-hard');
+    }
   }
   document.querySelectorAll('#gameGrid .btn').forEach(btn => {
     const fruit = btn.dataset.fruit;
@@ -5162,6 +5208,8 @@ function startGame() {
   // 모든 팝업 닫기
   const rankBtnHome = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
   if (rankBtnHome) rankBtnHome.style.display = brainInfiniteActive ? '' : 'none';
+  const nextBtnHome = document.querySelector('.result-action-row .result-next-btn');
+  if (nextBtnHome) nextBtnHome.style.display = brainInfiniteActive ? 'none' : '';
   const ov = document.getElementById('overlay');
   ov.style.display = '';
   ov.classList.remove('visible');
@@ -5412,7 +5460,7 @@ function gameOver() {
   const rankBtn = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
   if (rankBtn) rankBtn.style.display = brainInfiniteActive ? '' : 'none';
   const nextBtn = document.querySelector('.result-action-row .result-next-btn');
-  if (nextBtn && brainInfiniteActive) nextBtn.style.display = 'none';
+  if (nextBtn) nextBtn.style.display = brainInfiniteActive ? 'none' : '';
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
   const dailyTotalCount = missionUpdate.state.missions.length;
 
@@ -5585,7 +5633,7 @@ function showComboToast(n) {
   const SPEED_INFINITE_BEST_KEY = STORAGE_KEYS.speedInfiniteBest;
   const SPEED_STAGE_DURATIONS = [45, 42, 39, 36, 33, 30, 27];
   const SPEED_INFINITE_DURATIONS = { normal: 60, hard: 45, round: 20 };
-  const SHAPES = ['circle','square','triangle','star','diamond','hex'];
+  const SHAPES = ['circle','square','diamond','star','triangle','hex'];
   const SHAPE_META = {
     circle: { color:'#FF0000' },
     square: { color:'#1E90FF' },
@@ -6174,7 +6222,7 @@ function showComboToast(n) {
     }, 80);
   }
   function prepareSpeedRound() {
-    if (speedState.type === 'infinite') {
+    if (speedState.type === 'infinite' && speedState.infiniteMode === 'round') {
       speedState.currentDuration = getInfiniteRoundDuration(speedState.round, speedState.infiniteMode);
     }
     applySpeedLayout();
@@ -6209,7 +6257,9 @@ function showComboToast(n) {
     speedState.type = 'infinite';
     speedState.infiniteMode = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     speedState.round = 1;
-    speedState.currentDuration = getInfiniteRoundDuration(1, speedState.infiniteMode);
+    speedState.currentDuration = speedState.infiniteMode === 'round'
+      ? getInfiniteRoundDuration(1, speedState.infiniteMode)
+      : SPEED_INFINITE_DURATIONS[speedState.infiniteMode === 'hard' ? 'hard' : 'normal'];
     speedState.selectedLevelIdx = 0;
     startSpeedCore();
   };
@@ -6246,7 +6296,11 @@ function showComboToast(n) {
         speedState.round += 1;
         setSceneByRound();
         prepareSpeedRound();
-        startSpeedTimer();
+        if (speedState.type === 'infinite' && speedState.infiniteMode === 'round') {
+          startSpeedTimer();
+        } else {
+          updateSpeedTimerUI();
+        }
       } else {
         updateSpeedStatus('');
       }

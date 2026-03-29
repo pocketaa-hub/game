@@ -1,5 +1,5 @@
-import { ensureAnonymousAuth } from './auth.js';
-import { submitScore, fetchRanking } from './ranking-api.js';
+import { ensureAnonymousAuth } from './auth.js?v=20260329b';
+import { submitScore, fetchRanking } from './ranking-api.js?v=20260329b';
 
 const state = {
   ready: false,
@@ -23,21 +23,20 @@ function getPlayerName() {
 }
 
 function getAvatar() {
+  const raw =
+    localStorage.getItem(STORAGE_KEYS.profileAvatar) ||
+    localStorage.getItem(STORAGE_KEYS.avatar);
+
+  if (!raw) return '🙂';
+
   try {
-    const raw =
-      localStorage.getItem(STORAGE_KEYS.profileAvatar) ||
-      localStorage.getItem(STORAGE_KEYS.avatar);
-
-    if (!raw) return '🙂';
-
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === 'object' && parsed.emoji) {
       return parsed.emoji;
     }
-
-    return raw || '🙂';
+    return typeof parsed === 'string' ? parsed : (raw || '🙂');
   } catch {
-    return '🙂';
+    return raw || '🙂';
   }
 }
 
@@ -56,7 +55,11 @@ async function initGameConnect() {
 
   try {
     if (!window.SUPABASE_CONFIG?.url || !window.SUPABASE_CONFIG?.anonKey) {
-      throw new Error('SUPABASE_CONFIG is missing. Check js/config.js');
+      console.warn('[game-connect] Supabase config missing — offline mode');
+      state.ready = true;
+      state.user = null;
+      state.error = null;
+      return null;
     }
 
     const user = await ensureAnonymousAuth();
@@ -177,11 +180,15 @@ function installPatches() {
 if (document.readyState === 'loading') {
   document.addEventListener(
     'DOMContentLoaded',
-    () => {
-      initGameConnect().then(installPatches);
+    async () => {
+      await initGameConnect();
+      installPatches();
     },
     { once: true }
   );
 } else {
-  initGameConnect().then(installPatches);
+  (async () => {
+    await initGameConnect();
+    installPatches();
+  })();
 }

@@ -2828,6 +2828,100 @@ body.haptic-flash::after {
   }
 }
 
+
+
+/* v4 popup scroll + outside close fixes */
+body.popup-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: auto !important;
+}
+.mission-popup,
+.badge-popup,
+.rank-popup,
+.mode-select-popup,
+.speed-start-popup,
+.speed-result-popup,
+.start-popup {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding: calc(env(safe-area-inset-top, 0px) + 56px) 18px 18px !important;
+  overscroll-behavior: contain;
+}
+.mission-card,
+.badge-card,
+.rank-card,
+.mode-select-card,
+.speed-result-card,
+.start-card,
+.profile-card-compact,
+.speed-sheet-card,
+.speed-badge-card {
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 88px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  margin: 0 auto;
+}
+.mission-popup .modal-x-btn,
+.badge-popup .modal-x-btn,
+.rank-popup .modal-x-btn,
+.mode-select-popup .modal-x-btn,
+.speed-start-popup .modal-x-btn,
+.speed-result-popup .modal-x-btn,
+.start-popup .start-close-btn {
+  position: fixed !important;
+  top: calc(env(safe-area-inset-top, 0px) + 8px) !important;
+  left: calc(50% + min(150px, 36vw)) !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  z-index: 9001 !important;
+  pointer-events: auto !important;
+}
+.start-popup .start-close-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 2px solid #c88a30;
+  background: rgba(255,251,240,.96);
+  box-shadow: 0 2px 8px rgba(0,0,0,.14);
+}
+@media (max-width: 500px) {
+  .mission-popup,
+  .badge-popup,
+  .rank-popup,
+  .mode-select-popup,
+  .speed-start-popup,
+  .speed-result-popup,
+  .start-popup {
+    padding: calc(env(safe-area-inset-top, 0px) + 52px) 12px 12px !important;
+  }
+  .mission-popup .modal-x-btn,
+  .badge-popup .modal-x-btn,
+  .rank-popup .modal-x-btn,
+  .mode-select-popup .modal-x-btn,
+  .speed-start-popup .modal-x-btn,
+  .speed-result-popup .modal-x-btn,
+  .start-popup .start-close-btn {
+    left: calc(50% + min(132px, 34vw)) !important;
+  }
+  .mission-card,
+  .badge-card,
+  .rank-card,
+  .mode-select-card,
+  .speed-result-card,
+  .start-card,
+  .profile-card-compact,
+  .speed-sheet-card,
+  .speed-badge-card {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 76px) !important;
+  }
+}
+
 </style>
 </head>
 <body>

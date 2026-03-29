@@ -1,5 +1,5 @@
-import { supabase } from './supabase-client.js?v=20260329b';
-import { ensureAnonymousAuth } from './auth.js?v=20260329b';
+import { supabase } from './supabase-client.js?v=20260329c';
+import { ensureAnonymousAuth } from './auth.js?v=20260329c';
 
 function toKstDate(date = new Date()) {
   const utc = date.getTime() + (date.getTimezoneOffset() * 60000);

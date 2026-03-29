@@ -1,5 +1,5 @@
-import { supabase } from './supabase-client.js';
-import { ensureAnonymousAuth } from './auth.js';
+import { supabase } from './supabase-client.js?v=20260329b';
+import { ensureAnonymousAuth } from './auth.js?v=20260329b';
 
 function toKstDate(date = new Date()) {
   const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
@@ -10,7 +10,7 @@ function getPeriodStartIso(period) {
   const kstNow = toKstDate(new Date());
 
   if (period === 'weekly') {
-    const day = kstNow.getUTCDay(); // 0: Sun, 1: Mon
+    const day = kstNow.getUTCDay();
     const diffToMonday = day === 0 ? 6 : day - 1;
     const monday = new Date(kstNow);
     monday.setUTCDate(kstNow.getUTCDate() - diffToMonday);
@@ -62,7 +62,7 @@ export async function submitScore(data) {
   const user = await ensureAnonymousAuth();
 
   const payload = {
-    user_id: user.id,
+    user_id: user?.id || null,
     game_type: data.gameType,
     mode: data.mode,
     nickname: (data.nickname || 'Guest').trim().slice(0, 10),

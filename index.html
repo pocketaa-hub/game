@@ -7054,7 +7054,11 @@ function showComboToast(n) {
 
     try {
       if (window.gameConnect?.fetchRanking) {
-        const rows = await window.gameConnect.fetchRanking('speed_infinite', currentSpeedRankTab, {
+        const speedGameType = currentSpeedRankTab === 'round'
+          ? 'speed_infinite'
+          : 'speed_time_attack';
+
+        const rows = await window.gameConnect.fetchRanking(speedGameType, currentSpeedRankTab, {
           period: currentSpeedRankPeriod,
           limit: 100,
           dedupe: true,

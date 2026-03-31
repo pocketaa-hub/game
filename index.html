@@ -1474,7 +1474,7 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: aut
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   display:flex; align-items:center; gap:6px;
 }
-.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
+.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;object-position:center 18%;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
 .rank-avatar-emoji{font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px}
 .rank-name-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .rank-stage {
@@ -2808,28 +2808,31 @@ body.haptic-flash::after {
   font-size: 15px;
 }
 .speed-badge-card .speed-result-meta { margin-bottom: 6px; }
+.speed-badge-tabs { margin: 10px 0 14px; }
 .speed-badge-grid {
   display:grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 .speed-badge-item {
-  display:grid;
-  grid-template-columns: 58px 1fr 62px;
-  gap: 10px;
+  display:flex;
+  flex-direction:column;
   align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+  min-height: 126px;
   padding: 10px 8px;
   border: 2px solid #ead7b2;
   border-radius: 16px;
-  background: rgba(255,251,240,.72);
+  background: rgba(255,251,240,.78);
 }
 .speed-badge-item.locked {
-  opacity: .55;
-  filter: grayscale(.2);
+  opacity: .52;
+  filter: grayscale(.35);
 }
 .speed-badge-icon {
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   border-radius: 14px;
   display:flex;
   align-items:center;
@@ -2838,6 +2841,7 @@ body.haptic-flash::after {
   border: 2px solid #c88a30;
   background: linear-gradient(180deg,#fff7d1 0%, #f7d46c 100%);
   box-shadow: 0 3px 0 #d0a84e;
+  margin-bottom: 8px;
 }
 .speed-badge-item.locked .speed-badge-icon {
   background: linear-gradient(180deg,#efefef 0%, #d8d8d8 100%);
@@ -2845,20 +2849,28 @@ body.haptic-flash::after {
   box-shadow: 0 3px 0 #b8b8b8;
 }
 .speed-badge-name {
-  font-size: 16px;
+  font-size: 12px;
   color:#5c2a00;
-  line-height:1.3;
+  line-height:1.28;
+  min-height: 34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .speed-badge-state {
-  font-size: 14px;
+  margin-top: 6px;
+  font-size: 12px;
   color:#8B2500;
-  text-align:right;
+  text-align:center;
 }
 .speed-badge-item.locked .speed-badge-state { color:#777; }
 .speed-pause-card {
   width: min(320px, 90vw);
 }
 @media (max-width: 560px) {
+  .speed-badge-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .speed-badge-item { min-height: 118px; padding: 8px 6px; }
+  .speed-badge-name { font-size: 11px; min-height: 32px; }
   .speed-sheet-card {
     width: min(520px, 94vw);
     max-height: min(82vh, 700px);
@@ -4211,7 +4223,7 @@ body.popup-open {
       <button class="mode-choice-btn" onclick="selectTrainingMode('conveyor')">
         <div class="mode-choice-top">
           <div class="mode-choice-name">Conveyor Mode</div>
-          <div class="mode-choice-icon">🪜</div>
+          <div class="mode-choice-icon conveyor-infinity">∞</div>
         </div>
         <div class="mode-choice-desc">Head-to-head mode</div>
         <div class="mode-choice-meta">4 Keys · Taps rank</div>
@@ -4588,8 +4600,12 @@ body.popup-open {
 <div class="speed-result-popup" id="speedBadgePopup" onclick="if(event.target===this) closeSpeedBadgePopup()">
   <div class="speed-result-card speed-sheet-card speed-badge-card">
     <button class="modal-x-btn" onclick="closeSpeedBadgePopup()" aria-label="Close">✕</button>
-    <div class="speed-result-title">Speed Badge</div>
+    <div class="speed-result-title" id="speedBadgeTitle">Speed Badge</div>
     <div class="speed-result-meta" id="speedBadgeMeta">All Badge</div>
+    <div class="speed-rank-tabs speed-badge-tabs">
+      <button class="speed-rank-tab active" id="speedBadgeTabSpeed" onclick="setSpeedBadgeTab('speed')">Speed</button>
+      <button class="speed-rank-tab" id="speedBadgeTabConveyor" onclick="setSpeedBadgeTab('conveyor')">Conveyor</button>
+    </div>
     <div id="speedBadgeList" class="speed-sheet-list"></div>
   </div>
 </div>
@@ -7415,24 +7431,26 @@ function showComboToast(n) {
     return next > prev ? next : prev;
   }
   
-  function getAllSpeedBadges() {
+  function getAllSpeedBadges(kind = 'speed') {
     const defs = [];
     const levels = getStageLevels();
-    [3,4,5,6].forEach(key => {
-      levels.forEach((lv, idx) => {
-        defs.push({ id:`stage_${key}_${idx}`, label:`${key} Keys ${lv.name} Clear`, unlocked:false });
+    if (kind === 'speed') {
+      [3,4,5,6].forEach(key => {
+        levels.forEach((lv, idx) => {
+          defs.push({ id:`stage_${key}_${idx}`, label:`${key} Keys ${lv.name} Clear`, unlocked:false });
+        });
       });
-    });
-    defs.push({ id:'infinite_normal_10', label:'Infinite Normal 10R', unlocked:false });
-    defs.push({ id:'infinite_normal_20', label:'Infinite Normal 20R', unlocked:false });
-    defs.push({ id:'infinite_hard_10', label:'Infinite Hard 10R', unlocked:false });
-    defs.push({ id:'infinite_hard_20', label:'Infinite Hard 20R', unlocked:false });
-    defs.push({ id:'infinite_round_10', label:'Infinite Infinite 10R', unlocked:false });
-    defs.push({ id:'infinite_round_20', label:'Infinite Infinite 20R', unlocked:false });
-    defs.push({ id:'conveyor_10', label:'Conveyor 10T', unlocked:false });
-    defs.push({ id:'conveyor_25', label:'Conveyor 25T', unlocked:false });
-    defs.push({ id:'conveyor_50', label:'Conveyor 50T', unlocked:false });
-    defs.push({ id:'conveyor_100', label:'Conveyor 100T', unlocked:false });
+      defs.push({ id:'infinite_normal_10', label:'Infinite Normal 10R', unlocked:false });
+      defs.push({ id:'infinite_normal_20', label:'Infinite Normal 20R', unlocked:false });
+      defs.push({ id:'infinite_hard_10', label:'Infinite Hard 10R', unlocked:false });
+      defs.push({ id:'infinite_hard_20', label:'Infinite Hard 20R', unlocked:false });
+      defs.push({ id:'infinite_round_10', label:'Infinity 10R', unlocked:false });
+      defs.push({ id:'infinite_round_20', label:'Infinity 20R', unlocked:false });
+    } else {
+      [10,25,50,75,100,150,200].forEach(n => {
+        defs.push({ id:`conveyor_${n}`, label:`Conveyor ${n}T`, unlocked:false });
+      });
+    }
     const owned = getSpeedBadges();
     return defs.map(d => ({ ...d, unlocked: owned.some(x => x.id === d.id) }));
   }
@@ -8424,11 +8442,20 @@ function showComboToast(n) {
   };
 
   
-  window.openSpeedBadgePopup = function() {
-    const arr = getAllSpeedBadges();
+let currentSpeedBadgeTab = 'speed';
+  window.setSpeedBadgeTab = function(tab) {
+    currentSpeedBadgeTab = tab === 'conveyor' ? 'conveyor' : 'speed';
+    document.getElementById('speedBadgeTabSpeed')?.classList.toggle('active', currentSpeedBadgeTab === 'speed');
+    document.getElementById('speedBadgeTabConveyor')?.classList.toggle('active', currentSpeedBadgeTab === 'conveyor');
+    const title = document.getElementById('speedBadgeTitle');
+    if (title) title.textContent = currentSpeedBadgeTab === 'conveyor' ? 'Conveyor Badge' : 'Speed Badge';
+    renderCurrentSpeedBadgeTab();
+  };
+  function renderCurrentSpeedBadgeTab() {
+    const arr = getAllSpeedBadges(currentSpeedBadgeTab);
     const root = document.getElementById('speedBadgeList');
     const meta = document.getElementById('speedBadgeMeta');
-    if (meta) meta.textContent = `Owned ${arr.filter(x=>x.unlocked).length} / ${arr.length}`;
+    if (meta) meta.textContent = `${currentSpeedBadgeTab === 'conveyor' ? 'Conveyor' : 'Speed'} ${arr.filter(x=>x.unlocked).length} / ${arr.length}`;
     const iconForBadge = (id) => {
       if (id.startsWith('stage_3_')) return '🥉';
       if (id.startsWith('stage_4_')) return '🥈';
@@ -8437,7 +8464,7 @@ function showComboToast(n) {
       if (id.includes('normal')) return '⚡';
       if (id.includes('hard')) return '🔥';
       if (id.includes('round')) return '🌀';
-      if (id.includes('conveyor')) return '🛤️';
+      if (id.includes('conveyor')) return '∞';
       return '🏅';
     };
     if (root) {
@@ -8449,6 +8476,13 @@ function showComboToast(n) {
         </div>
       `).join('') + `</div>`;
     }
+  }
+
+  
+  window.openSpeedBadgePopup = function(tab) {
+    const inferred = tab || ((speedState && speedState.type === 'conveyor') ? 'conveyor' : 'speed');
+    currentSpeedBadgeTab = inferred === 'conveyor' ? 'conveyor' : 'speed';
+    window.setSpeedBadgeTab(currentSpeedBadgeTab);
     document.getElementById('speedBadgePopup')?.classList.add('visible');
   };
   window.closeSpeedBadgePopup = function() {

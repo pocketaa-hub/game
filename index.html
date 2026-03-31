@@ -926,14 +926,26 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: aut
   gap: 8px;
   min-height: 136px;
 }
+.profile-avatar-visual-wrap {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .profile-avatar-emoji {
   font-size: 52px;
   line-height: 1;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,.12));
 }
+.profile-avatar-img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.12));
+}
 .profile-avatar-name {
-  font-size: 13px;
-  color: #8a5a00;
+  display:none;
 }
 .profile-avatar-picker {
   grid-column: 1 / -1;
@@ -1028,6 +1040,56 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: aut
   width: 30px;
   height: 30px;
   font-size: 16px;
+}
+
+.avatar-popup-card {
+  width: min(420px, 92vw);
+}
+.avatar-popup-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.avatar-popup-option {
+  appearance: none;
+  border: 2px solid #d7b678;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffdf8 0%, #f8edd5 100%);
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #d4c4a9;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+}
+.avatar-popup-option:hover { transform: translateY(-1px); }
+.avatar-popup-option:active { transform: translateY(2px); box-shadow: 0 1px 0 #d4c4a9; }
+.avatar-popup-option.active {
+  background: linear-gradient(180deg, #fff1b7 0%, #ffd55c 100%);
+  border-color: #ff7f7f;
+  box-shadow: 0 4px 0 #c88a30, 0 8px 14px rgba(0,0,0,.12);
+}
+.avatar-popup-emoji {
+  font-size: 34px;
+  line-height: 1;
+}
+.avatar-image {
+  display:block;
+}
+.avatar-popup-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,.12));
+}
+@media (max-width: 480px) {
+  .avatar-popup-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .avatar-popup-option { min-height: 58px; }
+  .avatar-popup-thumb { width: 46px; height: 46px; }
+  .avatar-popup-emoji { font-size: 30px; }
 }
 .mission-card-header {
   padding-right: 42px;
@@ -3393,6 +3455,44 @@ body.popup-open {
   }
 }
 
+
+/* Conveyor mode */
+.conveyor-lane-wrap{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  margin:4px 0 10px;
+}
+.conveyor-lane-wrap.hidden{display:none!important}
+.conveyor-lane{
+  width:100%;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-start;
+  transition:transform .075s linear;
+  will-change:transform;
+}
+.conveyor-lane.slide-left{transform:none}
+.conveyor-slot{
+  flex:0 0 calc((100% - 48px) / 7);
+  height:58px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  color:#fff;
+  box-shadow:0 6px 0 rgba(0,0,0,.18);
+  transition:filter .05s linear,opacity .05s linear,transform .05s linear;
+}
+.conveyor-slot.preview{opacity:.6}
+.conveyor-slot.target{filter:brightness(1.06);position:relative;box-shadow:0 0 0 4px #ff7b7b inset, 0 0 0 2px rgba(255,255,255,.85), 0 6px 0 rgba(0,0,0,.18)}
+.conveyor-slot.empty-slot{background:transparent!important;box-shadow:none!important;opacity:0;transform:none}
+.speed-screen.conveyor-mode #speedSequenceWrap{display:none!important}
+.speed-screen.conveyor-mode #speedGrid .speed-play-btn:nth-child(n+5){display:none!important}
+.speed-screen.conveyor-mode #speedStatus{min-width:112px;text-align:center}
+
 </style>
 
 <style>
@@ -3537,6 +3637,44 @@ body.popup-open {
     min-height: 94px !important;
   }
 }
+
+
+/* Conveyor mode */
+.conveyor-lane-wrap{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  margin:4px 0 10px;
+}
+.conveyor-lane-wrap.hidden{display:none!important}
+.conveyor-lane{
+  width:100%;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-start;
+  transition:transform .075s linear;
+  will-change:transform;
+}
+.conveyor-lane.slide-left{transform:none}
+.conveyor-slot{
+  flex:0 0 calc((100% - 48px) / 7);
+  height:58px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  color:#fff;
+  box-shadow:0 6px 0 rgba(0,0,0,.18);
+  transition:filter .05s linear,opacity .05s linear,transform .05s linear;
+}
+.conveyor-slot.preview{opacity:.6}
+.conveyor-slot.target{filter:brightness(1.06);position:relative;box-shadow:0 0 0 4px #ff7b7b inset, 0 0 0 2px rgba(255,255,255,.85), 0 6px 0 rgba(0,0,0,.18)}
+.conveyor-slot.empty-slot{background:transparent!important;box-shadow:none!important;opacity:0;transform:none}
+.speed-screen.conveyor-mode #speedSequenceWrap{display:none!important}
+.speed-screen.conveyor-mode #speedGrid .speed-play-btn:nth-child(n+5){display:none!important}
+.speed-screen.conveyor-mode #speedStatus{min-width:112px;text-align:center}
 
 </style>
 
@@ -3779,6 +3917,44 @@ body.popup-open {
   }
 }
 
+
+/* Conveyor mode */
+.conveyor-lane-wrap{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  margin:4px 0 10px;
+}
+.conveyor-lane-wrap.hidden{display:none!important}
+.conveyor-lane{
+  width:100%;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-start;
+  transition:transform .075s linear;
+  will-change:transform;
+}
+.conveyor-lane.slide-left{transform:none}
+.conveyor-slot{
+  flex:0 0 calc((100% - 48px) / 7);
+  height:58px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  color:#fff;
+  box-shadow:0 6px 0 rgba(0,0,0,.18);
+  transition:filter .05s linear,opacity .05s linear,transform .05s linear;
+}
+.conveyor-slot.preview{opacity:.6}
+.conveyor-slot.target{filter:brightness(1.06);position:relative;box-shadow:0 0 0 4px #ff7b7b inset, 0 0 0 2px rgba(255,255,255,.85), 0 6px 0 rgba(0,0,0,.18)}
+.conveyor-slot.empty-slot{background:transparent!important;box-shadow:none!important;opacity:0;transform:none}
+.speed-screen.conveyor-mode #speedSequenceWrap{display:none!important}
+.speed-screen.conveyor-mode #speedGrid .speed-play-btn:nth-child(n+5){display:none!important}
+.speed-screen.conveyor-mode #speedStatus{min-width:112px;text-align:center}
+
 </style>
 
 </head>
@@ -3896,6 +4072,17 @@ body.popup-open {
     <div class="profile-grid compact" id="profileStatGrid"></div>
     <div class="daily-panel-foot" id="profileFoot"></div>
     <button class="mission-close-btn" onclick="closeProfilePopup()">Close</button>
+  </div>
+</div>
+
+<div class="mission-popup" id="avatarPickerPopup">
+  <div class="mission-card avatar-popup-card">
+    <button class="modal-x-btn" onclick="closeAvatarPickerPopup()" aria-label="Close">✕</button>
+    <div class="mission-card-header">
+      <div class="mission-card-title">🙂 Pick Avatar</div>
+    </div>
+    
+    <div class="avatar-popup-grid" id="avatarPickerGrid"></div>
   </div>
 </div>
 
@@ -4020,7 +4207,7 @@ body.popup-open {
       <div class="mode-select-title">⚡ Speed Training</div>
       <button class="modal-x-btn" onclick="closeSpeedStartPopup()" aria-label="Close">✕</button>
     </div>
-    <div class="mode-select-sub">Stage / Time Attack / Infinite</div>
+    <div class="mode-select-sub">Stage / Time Attack / Infinite / Conveyor</div>
 
     <div class="speed-mode-tabs speed-mode-tabs-3">
       <button class="speed-mode-tab" id="speedModeTabStage" onclick="setSpeedPopupMode('stage')">Stage</button>
@@ -4076,6 +4263,12 @@ body.popup-open {
           <div class="speed-record-desc">20 → 18 → ... → 8 sec · Best <span id="speedInfiniteBestRound">0</span>R</div>
           <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">Time resets each round, but gets shorter</div>
           <div class="speed-record-dot normal"></div>
+        </div>
+        <div class="speed-record-card" onclick="startSpeedConveyor()">
+          <div class="speed-record-title">Conveyor</div>
+          <div class="speed-record-desc">7-lane belt · 3.0 sec start · Best <span id="speedConveyorBest">0</span>T</div>
+          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">Hit the center belt symbol before time runs out</div>
+          <div class="speed-record-dot hard"></div>
         </div>
         <div class="speed-start-actions">
           <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">Close</button>
@@ -4230,6 +4423,7 @@ body.popup-open {
         <div class="sign-sub" id="speedScreenSub"></div>
       </div>
       <div class="speed-stage-badge" id="speedStageBadge">🍼 Baby · 3 Keys</div>
+      <div class="conveyor-lane-wrap hidden" id="conveyorLaneWrap"><div class="conveyor-lane" id="conveyorLane"></div></div>
       <div class="speed-sequence-wrap" id="speedSequenceWrap">
         <div class="speed-sequence-row" id="speedSequenceRow"></div>
       </div>
@@ -4303,8 +4497,8 @@ body.popup-open {
       <button class="speed-ghost-btn" onclick="speedGoHome()">Home</button>
       <button class="speed-primary-btn" id="speedNextStageBtn" onclick="goNextSpeedStage()" style="display:none;">Next</button>
       <button class="speed-ghost-btn" onclick="restartSpeedCurrent()">Retry</button>
-      <button class="speed-ghost-btn" onclick="openSpeedInfiniteRanking()">Rank</button>
-      <button class="speed-ghost-btn" onclick="openSpeedBadgePopup()">Badge</button>
+      <button class="speed-ghost-btn" id="speedResultRankBtn" onclick="openSpeedInfiniteRanking()">Rank</button>
+      <button class="speed-ghost-btn" id="speedResultBadgeBtn" onclick="openSpeedBadgePopup()">Badge</button>
     </div>
   </div>
 </div>
@@ -4502,7 +4696,8 @@ const STORAGE_KEYS = Object.freeze({
   speedStageUnlock: 'limitgame_speed_stage_unlock_v1',
   speedBadges: 'limitgame_speed_badges_v1',
   speedInfiniteRank: 'limitgame_speed_infinite_rank_v1',
-  speedInfiniteBest: 'limitgame_speed_infinite_best_v1'
+  speedInfiniteBest: 'limitgame_speed_infinite_best_v1',
+  speedConveyorBest: 'limitgame_speed_conveyor_best_v1'
 });
 
 const STAGE_BEST_KEY = STORAGE_KEYS.stageBest;
@@ -5171,22 +5366,29 @@ const MONTHLY_MISSION_KEY = STORAGE_KEYS.monthlyMission;
 const PROFILE_STATS_KEY = STORAGE_KEYS.profileStats;
 const PROFILE_AVATAR_KEY = STORAGE_KEYS.profileAvatar;
 const PROFILE_AVATAR_OPTIONS = [
-  { emoji:'👨🏻', name:'Light Man' },
-  { emoji:'👩🏻', name:'Light Woman' },
-  { emoji:'👨', name:'Neutral Man' },
-  { emoji:'👩', name:'Neutral Woman' },
-  { emoji:'👨🏾', name:'Brown Man' },
-  { emoji:'👩🏾', name:'Brown Woman' },
-  { emoji:'👨🏿', name:'Dark Man' },
-  { emoji:'👩🏿', name:'Dark Woman' },
-  { emoji:'🐶', name:'Dog' },
-  { emoji:'🐱', name:'Cat' },
-  { emoji:'🐼', name:'Panda' },
-  { emoji:'🦊', name:'Fox' },
-  { emoji:'🌸', name:'Flower' },
-  { emoji:'🌳', name:'Tree' },
-  { emoji:'⭐', name:'Star' },
-  { emoji:'🔥', name:'Fire' },
+  { id:'emoji_1', type:'emoji', value:'👨🏻', name:'Light Man', rankSymbol:'👨🏻' },
+  { id:'emoji_2', type:'emoji', value:'👩🏻', name:'Light Woman', rankSymbol:'👩🏻' },
+  { id:'emoji_3', type:'emoji', value:'👨', name:'Neutral Man', rankSymbol:'👨' },
+  { id:'emoji_4', type:'emoji', value:'👩', name:'Neutral Woman', rankSymbol:'👩' },
+  { id:'emoji_5', type:'emoji', value:'👨🏾', name:'Brown Man', rankSymbol:'👨🏾' },
+  { id:'emoji_6', type:'emoji', value:'👩🏾', name:'Brown Woman', rankSymbol:'👩🏾' },
+  { id:'emoji_7', type:'emoji', value:'👨🏿', name:'Dark Man', rankSymbol:'👨🏿' },
+  { id:'emoji_8', type:'emoji', value:'👩🏿', name:'Dark Woman', rankSymbol:'👩🏿' },
+  { id:'emoji_9', type:'emoji', value:'🧑', name:'Person', rankSymbol:'🧑' },
+  { id:'emoji_10', type:'emoji', value:'👦', name:'Boy', rankSymbol:'👦' },
+  { id:'emoji_11', type:'emoji', value:'👧', name:'Girl', rankSymbol:'👧' },
+  { id:'img_f0', type:'image', value:'female_0.png', name:'Game Woman', rankSymbol:'👩' },
+  { id:'img_m0', type:'image', value:'male_0.png', name:'Game Man', rankSymbol:'👨' },
+  { id:'img_f3', type:'image', value:'female_3.png', name:'Game Woman 2', rankSymbol:'👩' },
+  { id:'img_m3', type:'image', value:'male_3.png', name:'Game Man 2', rankSymbol:'👨' },
+  { id:'emoji_12', type:'emoji', value:'🐶', name:'Dog', rankSymbol:'🐶' },
+  { id:'emoji_13', type:'emoji', value:'🐱', name:'Cat', rankSymbol:'🐱' },
+  { id:'emoji_14', type:'emoji', value:'🐼', name:'Panda', rankSymbol:'🐼' },
+  { id:'emoji_15', type:'emoji', value:'🦊', name:'Fox', rankSymbol:'🦊' },
+  { id:'emoji_16', type:'emoji', value:'🌸', name:'Flower', rankSymbol:'🌸' },
+  { id:'emoji_17', type:'emoji', value:'🌳', name:'Tree', rankSymbol:'🌳' },
+  { id:'emoji_18', type:'emoji', value:'⭐', name:'Star', rankSymbol:'⭐' },
+  { id:'emoji_19', type:'emoji', value:'🔥', name:'Fire', rankSymbol:'🔥' },
 ];
 
 const WEEKLY_MISSION_DEFS = [
@@ -5320,19 +5522,54 @@ function getProfileStats() {
   try { return JSON.parse(localStorage.getItem(PROFILE_STATS_KEY) || '{}'); } catch(e) { return {}; }
 }
 function saveProfileStats(stats) { localStorage.setItem(PROFILE_STATS_KEY, JSON.stringify(stats)); }
-function getProfileAvatar() {
-  const saved = localStorage.getItem(PROFILE_AVATAR_KEY) || '🙂';
-  return PROFILE_AVATAR_OPTIONS.find(item => item.emoji === saved)?.emoji || '🙂';
+function getProfileAvatarId() {
+  const saved = localStorage.getItem(PROFILE_AVATAR_KEY) || '';
+  const byId = PROFILE_AVATAR_OPTIONS.find(item => item.id === saved);
+  if (byId) return byId.id;
+  const legacyByValue = PROFILE_AVATAR_OPTIONS.find(item => item.value === saved);
+  if (legacyByValue) return legacyByValue.id;
+  return PROFILE_AVATAR_OPTIONS[0].id;
 }
 function getProfileAvatarMeta() {
-  const emoji = getProfileAvatar();
-  return PROFILE_AVATAR_OPTIONS.find(item => item.emoji === emoji) || PROFILE_AVATAR_OPTIONS[0];
+  const id = getProfileAvatarId();
+  return PROFILE_AVATAR_OPTIONS.find(item => item.id === id) || PROFILE_AVATAR_OPTIONS[0];
 }
-function setProfileAvatar(emoji) {
-  const found = PROFILE_AVATAR_OPTIONS.find(item => item.emoji === emoji);
+function getProfileAvatarRankSymbol() {
+  return getProfileAvatarMeta()?.rankSymbol || '🙂';
+}
+function renderAvatarVisual(item, className='') {
+  if (!item) return '<div class="'+className+'">🙂</div>';
+  if (item.type === 'image') return `<img src="${item.value}" alt="" class="${className} avatar-image">`;
+  return `<div class="${className}">${item.value}</div>`;
+}
+function setProfileAvatar(id) {
+  const found = PROFILE_AVATAR_OPTIONS.find(item => item.id === id);
   if (!found) return;
-  localStorage.setItem(PROFILE_AVATAR_KEY, found.emoji);
+  localStorage.setItem(PROFILE_AVATAR_KEY, found.id);
   renderProfilePopup();
+  renderAvatarPickerPopup();
+}
+function renderAvatarPickerPopup() {
+  const root = document.getElementById('avatarPickerGrid');
+  if (!root) return;
+  const avatarMeta = getProfileAvatarMeta();
+  root.innerHTML = PROFILE_AVATAR_OPTIONS.map(item => `
+    <button type="button" class="avatar-popup-option ${item.id === avatarMeta.id ? 'active' : ''}" onclick="setProfileAvatar('${item.id}')" aria-label="${item.name}" title="${item.name}">
+      ${renderAvatarVisual(item, item.type === 'image' ? 'avatar-popup-thumb' : 'avatar-popup-emoji')}
+    </button>`).join('');
+}
+function openAvatarPickerPopup() {
+  renderAvatarPickerPopup();
+  const popup = document.getElementById('avatarPickerPopup');
+  if (popup) popup.classList.add('visible');
+  document.body.classList.add('popup-open');
+}
+function closeAvatarPickerPopup() {
+  const popup = document.getElementById('avatarPickerPopup');
+  if (popup) popup.classList.remove('visible');
+  if (!document.getElementById('profilePopup')?.classList.contains('visible')) {
+    document.body.classList.remove('popup-open');
+  }
 }
 function updateProfileStatsAfterGame(score, maxCombo) {
   const prev = getProfileStats();
@@ -5369,6 +5606,7 @@ function openProfilePopup() {
 function closeProfilePopup() {
   const popup = document.getElementById('profilePopup');
   if (popup) popup.classList.remove('visible');
+  closeAvatarPickerPopup();
   document.body.classList.remove('popup-open');
 }
 function renderProfilePopup() {
@@ -5393,11 +5631,11 @@ function renderProfilePopup() {
 
   if (hero) {
     hero.innerHTML = `
-      <div class="profile-hero-card profile-avatar-card">
+      <button type="button" class="profile-hero-card profile-avatar-card is-clickable" onclick="openAvatarPickerPopup()" aria-label="Pick Avatar">
         <div class="profile-hero-label">Avatar</div>
-        <div class="profile-avatar-emoji">${avatarMeta.emoji}</div>
-        <div class="profile-avatar-name">${avatarMeta.name}</div>
-      </div>
+        <div class="profile-avatar-visual-wrap">${renderAvatarVisual(avatarMeta, avatarMeta.type === 'image' ? 'profile-avatar-img' : 'profile-avatar-emoji')}</div>
+        <div class="profile-avatar-hint">Tap to change</div>
+      </button>
       <div class="profile-hero-card">
         <div class="profile-hero-label">Best</div>
         <div class="profile-hero-value">${bestScore}R</div>
@@ -5420,16 +5658,7 @@ function renderProfilePopup() {
     ['Status', bestScore >= 20 ? 'On Fire' : bestScore >= 10 ? 'Rising' : 'Warm Up', bestScore >= 20 ? 'High zone' : bestScore >= 10 ? 'Almost there' : 'Building'],
   ].map(([label, value, sub]) =>
     `<div class="profile-stat"><div class="profile-stat-label">${label}</div><div class="profile-stat-value">${value}</div><div class="profile-stat-sub">${sub}</div></div>`
-  ).join('') + `
-    <div class="profile-avatar-picker">
-      <div class="profile-avatar-picker-head">
-        <div class="profile-avatar-picker-title">Pick Emoji</div>
-        <div class="profile-avatar-picker-note">Saved now</div>
-      </div>
-      <div class="profile-avatar-grid">
-        ${PROFILE_AVATAR_OPTIONS.map(item => `<button type="button" class="profile-avatar-option ${item.emoji === avatarMeta.emoji ? 'active' : ''}" onclick="setProfileAvatar('${item.emoji}')" aria-label="${item.name}" title="${item.name}">${item.emoji}</button>`).join('')}
-      </div>
-    </div>`;
+  ).join('');
 }
 
 function showMissionToast(missions, startDelay = 0) {
@@ -5956,6 +6185,8 @@ document.addEventListener('click', (e) => {
   if (popup && e.target === popup) closeMissionPopup();
   const profilePopup = document.getElementById('profilePopup');
   if (profilePopup && e.target === profilePopup) closeProfilePopup();
+  const avatarPickerPopup = document.getElementById('avatarPickerPopup');
+  if (avatarPickerPopup && e.target === avatarPickerPopup) closeAvatarPickerPopup();
   const startPopup = document.getElementById('startPopup');
   if (startPopup && e.target === startPopup) closeStartPopup();
 });
@@ -6606,6 +6837,7 @@ function showComboToast(n) {
   const SPEED_BADGE_KEY = STORAGE_KEYS.speedBadges;
   const SPEED_INFINITE_RANK_KEY = STORAGE_KEYS.speedInfiniteRank;
   const SPEED_INFINITE_BEST_KEY = STORAGE_KEYS.speedInfiniteBest;
+  const SPEED_CONVEYOR_BEST_KEY = STORAGE_KEYS.speedConveyorBest;
   const SPEED_STAGE_DURATIONS = [45, 42, 39, 36, 33, 30, 27];
   const SPEED_INFINITE_DURATIONS = { normal: 60, hard: 45, round: 20 };
   const SHAPES = ['circle','square','diamond','star','triangle','hex'];
@@ -6617,6 +6849,16 @@ function showComboToast(n) {
     diamond: { color:'#FF8C00' },
     hex: { color:'#FF69B4' }
   };
+  const CONVEYOR_SHAPES = ['circle','square','triangle','star'];
+  function getConveyorStepByTaps(taps) {
+    return Math.min(9, Math.floor(Math.max(0, Number(taps || 0)) / 10));
+  }
+  function getConveyorMaxTime(taps) {
+    return Math.max(1.0, Number((5.5 - (getConveyorStepByTaps(taps) * 0.5)).toFixed(1)));
+  }
+  function getConveyorBonusTime(taps) {
+    return Math.max(0.5, Number((1.5 - (getConveyorStepByTaps(taps) * 0.1)).toFixed(1)));
+  }
   const LAYOUT_PATTERNS = {
     3: [[0,1,2], [1,0,2], [2,0,1]],
     4: [[0,1,2,3], [1,0,3,2], [2,3,0,1]],
@@ -6644,7 +6886,11 @@ function showComboToast(n) {
     pauseStartedAt: 0,
     popupStep: 'key',
     popupMode: 'stage',
-    challengeLabel: ''
+    challengeLabel: '',
+    conveyorQueue: [],
+    conveyorBonus: 1.5,
+    conveyorTapCount: 0,
+    conveyorAnimating: false
   };
 
   function getStageLevels() {
@@ -6765,7 +7011,7 @@ function showComboToast(n) {
     const map = getSpeedInfiniteRankMap();
     const key = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     const list = Array.isArray(map[key]) ? map[key] : [];
-    list.push({ score: Number(score || 0), ts: Date.now(), avatar: getProfileAvatar?.() || '🙂' });
+    list.push({ score: Number(score || 0), ts: Date.now(), avatar: getProfileAvatarRankSymbol?.() || '🙂' });
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
     map[key] = list.slice(0, 10);
     saveSpeedInfiniteRankMap(map);
@@ -6790,6 +7036,15 @@ function showComboToast(n) {
     const next = Math.max(prev, Number(score || 0));
     map[mode] = next;
     localStorage.setItem(SPEED_INFINITE_BEST_KEY, JSON.stringify(map));
+    return next;
+  }
+  function getSpeedConveyorBest() {
+    return Math.max(0, Number(localStorage.getItem(SPEED_CONVEYOR_BEST_KEY) || 0));
+  }
+  function updateSpeedConveyorBest(score) {
+    const prev = getSpeedConveyorBest();
+    const next = Math.max(prev, Math.max(0, Number(score || 0)));
+    localStorage.setItem(SPEED_CONVEYOR_BEST_KEY, String(next));
     return next;
   }
   function closeModeSelectPopup() {
@@ -6859,11 +7114,13 @@ function showComboToast(n) {
     const r = document.getElementById('speedInfiniteBestRound');
     const tn = document.getElementById('speedTimeAttackBestNormal');
     const th = document.getElementById('speedTimeAttackBestHard');
+    const c = document.getElementById('speedConveyorBest');
     if (n) n.textContent = String(getSpeedInfiniteBest('normal'));
     if (h) h.textContent = String(getSpeedInfiniteBest('hard'));
     if (r) r.textContent = String(getSpeedInfiniteBest('round'));
     if (tn) tn.textContent = String(getSpeedInfiniteBest('normal'));
     if (th) th.textContent = String(getSpeedInfiniteBest('hard'));
+    if (c) c.textContent = String(getSpeedConveyorBest());
     closeModeSelectPopup();
     const el = document.getElementById('speedStartPopup');
     if (!el) return;
@@ -7015,7 +7272,7 @@ function showComboToast(n) {
   function hideSpeedScreen() {
     const screen = document.getElementById('speedScreen');
     if (!screen) return;
-    screen.classList.remove('visible');
+    screen.classList.remove('visible','conveyor-mode');
     setTimeout(() => { screen.style.display = 'none'; }, 250);
   }
   function getInfiniteRoundDuration(round, mode) {
@@ -7067,6 +7324,7 @@ function showComboToast(n) {
     return Math.min(10, base + Math.floor((round - 1) / 2));
   }
   function getActiveShapes() {
+    if (speedState.type === 'conveyor') return CONVEYOR_SHAPES.slice();
     const count = speedState.type === 'stage'
       ? speedState.selectedKeyCount
       : getInfiniteButtonCount(speedState.round, speedState.infiniteMode);
@@ -7103,7 +7361,10 @@ function showComboToast(n) {
   }
   function renderSpeedSequence() {
     const row = document.getElementById('speedSequenceRow');
+    const wrap = document.getElementById('speedSequenceWrap');
+    if (wrap) wrap.classList.toggle('hidden', speedState.type === 'conveyor');
     if (!row) return;
+    if (speedState.type === 'conveyor') { row.innerHTML = ''; return; }
     row.innerHTML = speedState.sequence.map((shape, idx) => {
       const meta = SHAPE_META[shape] || { color:'#999' };
       const cls = idx < speedState.progress ? 'done' : (idx === speedState.progress ? 'current' : '');
@@ -7117,29 +7378,38 @@ function showComboToast(n) {
     const round = document.getElementById('speedRound');
     const best = document.getElementById('speedBest');
     const sub = document.getElementById('speedScreenSub');
-    const isTimeAttack = speedState.type === 'infinite' && speedState.infiniteMode !== 'round' && String(speedState.challengeLabel || '').toLowerCase().includes('time attack');
+    const screen = document.getElementById('speedScreen');
+    const laneWrap = document.getElementById('conveyorLaneWrap');
+    if (screen) screen.classList.toggle('conveyor-mode', speedState.type === 'conveyor');
+    if (laneWrap) laneWrap.classList.toggle('hidden', speedState.type !== 'conveyor');
     if (badge) {
       const left = speedState.type === 'stage'
         ? `${level.emoji || '🏁'} ${getLevelNameEn(level.name)} · ${speedState.selectedKeyCount} Keys`
-        : (speedState.infiniteMode === 'round'
-            ? `🟡 Infinite · Auto Keys`
-            : `${speedState.infiniteMode === 'hard' ? '🔴 Time Attack Hard' : '🟠 Time Attack'} · Auto Keys`);
+        : (speedState.type === 'conveyor'
+            ? `🟣 Conveyor · 4 Keys`
+            : (speedState.infiniteMode === 'round'
+                ? `🟡 Infinite · Auto Keys`
+                : `${speedState.infiniteMode === 'hard' ? '🔴 Time Attack Hard' : '🟠 Time Attack'} · Auto Keys`));
       badge.textContent = left;
     }
-    if (round) round.textContent = String(speedState.round);
+    if (round) round.textContent = String(speedState.type === 'conveyor' ? speedState.conveyorTapCount : speedState.round);
     if (best) {
       const val = speedState.type === 'stage'
         ? getSpeedStageBest(speedState.selectedKeyCount, speedState.selectedLevelIdx)
-        : getSpeedInfiniteBest(speedState.infiniteMode);
+        : (speedState.type === 'conveyor' ? getSpeedConveyorBest() : getSpeedInfiniteBest(speedState.infiniteMode));
       best.textContent = String(val);
     }
     if (sub) {
       sub.textContent = speedState.type === 'stage'
         ? `${level.name} · ${speedState.currentDuration} sec`
-        : (speedState.infiniteMode === 'round'
-            ? `Round ${speedState.round} · ${speedState.currentDuration} sec`
-            : `${speedState.currentDuration} sec fixed`);
+        : (speedState.type === 'conveyor'
+            ? `Center belt hit · +${getConveyorBonusTime(speedState.conveyorTapCount).toFixed(1)} sec · Max ${getConveyorMaxTime(speedState.conveyorTapCount).toFixed(1)} sec`
+            : (speedState.infiniteMode === 'round'
+                ? `Round ${speedState.round} · ${speedState.currentDuration} sec`
+                : `${speedState.currentDuration} sec fixed`));
     }
+    const roundLabel = document.querySelector('#speedScreen .speed-stat-card:first-child .speed-stat-label');
+    if (roundLabel) roundLabel.textContent = speedState.type === 'conveyor' ? 'Taps' : 'Round';
   }
   function updateSpeedStatus(msg) {
     const el = document.getElementById('speedStatus');
@@ -7147,19 +7417,20 @@ function showComboToast(n) {
   }
   function updateSpeedTimerUI() {
     const left = Math.max(0, speedState.remaining);
-    const percent = Math.max(0, Math.min(100, (left / speedState.currentDuration) * 100));
+    const baseDuration = speedState.type === 'conveyor' ? getConveyorMaxTime(speedState.conveyorTapCount) : speedState.currentDuration;
+    const percent = Math.max(0, Math.min(100, (left / baseDuration) * 100));
     const fill = document.getElementById('speedTimerFill');
     const readout = document.getElementById('speedTimeReadout');
     const label = document.getElementById('speedTimerLabel');
     if (fill) {
       fill.style.width = `${percent}%`;
-      fill.classList.toggle('danger', left <= 10);
-      fill.classList.toggle('critical', left <= 5);
+      fill.classList.toggle('danger', left <= (speedState.type === 'conveyor' ? 1.2 : 10));
+      fill.classList.toggle('critical', left <= (speedState.type === 'conveyor' ? 0.6 : 5));
     }
     if (readout) {
-      readout.textContent = String(Math.max(0, Math.ceil(left)));
-      readout.classList.toggle('danger', left <= 10);
-      readout.classList.toggle('critical', left <= 3);
+      readout.textContent = speedState.type === 'conveyor' ? left.toFixed(1) : String(Math.max(0, Math.ceil(left)));
+      readout.classList.toggle('danger', left <= (speedState.type === 'conveyor' ? 1.2 : 10));
+      readout.classList.toggle('critical', left <= (speedState.type === 'conveyor' ? 0.6 : 3));
     }
     if (label) label.textContent = 'Time';
   }
@@ -7177,8 +7448,23 @@ function showComboToast(n) {
   }
   function startSpeedTimer() {
     stopSpeedTimer();
-    speedState.remaining = speedState.currentDuration;
     speedState.tickSecond = null;
+    if (speedState.type === 'conveyor') {
+      speedState.remaining = Math.max(0, Number(speedState.remaining || 3));
+      updateSpeedTimerUI();
+      speedState.timer = setInterval(() => {
+        if (speedState.finished || speedState.paused) return;
+        speedState.remaining = Math.max(0, Number((speedState.remaining - 0.1).toFixed(1)));
+        updateSpeedTimerUI();
+        maybePlayCountdown();
+        if (speedState.remaining <= 0) {
+          stopSpeedTimer();
+          speedFinish(false);
+        }
+      }, 100);
+      return;
+    }
+    speedState.remaining = speedState.currentDuration;
     const endAt = Date.now() + (speedState.currentDuration * 1000);
     updateSpeedTimerUI();
     speedState.timer = setInterval(() => {
@@ -7195,6 +7481,20 @@ function showComboToast(n) {
   function resumeSpeedTimer() {
     stopSpeedTimer();
     speedState.tickSecond = null;
+    if (speedState.type === 'conveyor') {
+      updateSpeedTimerUI();
+      speedState.timer = setInterval(() => {
+        if (speedState.finished || speedState.paused) return;
+        speedState.remaining = Math.max(0, Number((speedState.remaining - 0.1).toFixed(1)));
+        updateSpeedTimerUI();
+        maybePlayCountdown();
+        if (speedState.remaining <= 0) {
+          stopSpeedTimer();
+          speedFinish(false);
+        }
+      }, 100);
+      return;
+    }
     const endAt = Date.now() + (speedState.remaining * 1000);
     updateSpeedTimerUI();
     speedState.timer = setInterval(() => {
@@ -7209,6 +7509,14 @@ function showComboToast(n) {
     }, 80);
   }
   function prepareSpeedRound() {
+    if (speedState.type === 'conveyor') {
+      speedState.progress = 0;
+      speedState.sequence = [];
+      renderSpeedSequence();
+      updateSpeedHud();
+      updateSpeedStatus('');
+      return;
+    }
     if (speedState.type === 'infinite' && speedState.infiniteMode === 'round') {
       speedState.currentDuration = getInfiniteRoundDuration(speedState.round, speedState.infiniteMode);
     }
@@ -7232,6 +7540,56 @@ function showComboToast(n) {
       startSpeedTimer();
       updateSpeedStatus('');
     }, 180);
+  }
+  function renderConveyor() {
+    const lane = document.getElementById('conveyorLane');
+    if (!lane) return;
+    lane.innerHTML = speedState.conveyorQueue.map((shape, idx) => {
+      if (!shape) return '<div class="conveyor-slot empty-slot"></div>';
+      const meta = SHAPE_META[shape] || { color:'#999' };
+      const cls = idx === 3 ? ' target' : (idx > 3 ? ' preview' : '');
+      return `<div class="conveyor-slot${cls}" style="background:${meta.color}"></div>`;
+    }).join('');
+  }
+  function onConveyorPress(shape) {
+    if (speedState.type !== 'conveyor' || speedState.finished || speedState.paused || speedState.conveyorAnimating) return;
+    const btn = document.querySelector(`#speedGrid .speed-play-btn[data-shape="${shape}"]`);
+    if (btn) {
+      btn.classList.remove('tap','wrong','correct');
+      void btn.offsetWidth;
+      btn.classList.add('tap');
+      setTimeout(() => btn.classList.remove('tap'), 120);
+    }
+    const target = speedState.conveyorQueue[3];
+    if (shape !== target) {
+      if (btn) {
+        btn.classList.add('wrong');
+        setTimeout(() => btn.classList.remove('wrong'), 260);
+      }
+      playUiSound?.('wrong');
+      updateSpeedStatus('Miss');
+      setTimeout(() => speedFinish(false), 120);
+      return;
+    }
+    speedState.conveyorAnimating = true;
+    speedState.conveyorTapCount += 1;
+    const conveyorMax = getConveyorMaxTime(speedState.conveyorTapCount);
+    const conveyorBonus = getConveyorBonusTime(speedState.conveyorTapCount);
+    speedState.conveyorBonus = conveyorBonus;
+    speedState.currentDuration = conveyorMax;
+    speedState.remaining = Math.min(conveyorMax, Number((speedState.remaining + conveyorBonus).toFixed(1)));
+    updateSpeedHud();
+    updateSpeedTimerUI();
+    updateSpeedStatus('');
+    playUiSound?.('correct');
+    if (btn) {
+      btn.classList.add('correct');
+      setTimeout(() => btn.classList.remove('correct'), 180);
+    }
+    speedState.conveyorQueue.shift();
+    speedState.conveyorQueue.push(speedState.activeShapes[Math.floor(Math.random() * speedState.activeShapes.length)]);
+    renderConveyor();
+    speedState.conveyorAnimating = false;
   }
   window.startSpeedStageTraining = function() {
     speedState.type = 'stage';
@@ -7260,6 +7618,36 @@ function showComboToast(n) {
     speedState.selectedLevelIdx = 0;
     startSpeedCore();
   };
+  window.startSpeedConveyor = function() {
+    speedState.type = 'conveyor';
+    speedState.infiniteMode = 'conveyor';
+    speedState.challengeLabel = 'Conveyor';
+    speedState.selectedLevelIdx = 0;
+    speedState.round = 0;
+    speedState.selectedKeyCount = 4;
+    speedState.currentDuration = 5.5;
+    speedState.remaining = 3.0;
+    speedState.sequence = [];
+    speedState.progress = 0;
+    speedState.conveyorTapCount = 0;
+    speedState.conveyorBonus = 1.5;
+    speedState.conveyorAnimating = false;
+    speedState.activeShapes = CONVEYOR_SHAPES.slice();
+    speedState.conveyorQueue = [null, null, null];
+    for (let i = 0; i < 4; i++) speedState.conveyorQueue.push(speedState.activeShapes[Math.floor(Math.random() * speedState.activeShapes.length)]);
+    speedState.finished = false;
+    speedState.paused = false;
+    showSpeedScreen();
+    applyLevelLayout?.();
+    applySpeedLayout();
+    updateSpeedHud();
+    renderSpeedSequence();
+    renderConveyor();
+    updateSpeedTimerUI();
+    updateSpeedStatus('');
+    setStageScene(0);
+    setTimeout(() => startSpeedTimer(), 120);
+  };
   function setSceneByRound() {
     const idx = speedState.type === 'stage'
       ? speedState.selectedLevelIdx
@@ -7268,6 +7656,7 @@ function showComboToast(n) {
   }
   function handleSpeedPress(shape) {
     if (!document.getElementById('speedScreen')?.classList.contains('visible')) return;
+    if (speedState.type === 'conveyor') { onConveyorPress(shape); return; }
     if (!speedState.sequence.length || speedState.remaining <= 0) return;
     const btn = document.querySelector(`#speedGrid .speed-play-btn[data-shape="${shape}"]`);
     if (btn) {
@@ -7319,10 +7708,10 @@ function showComboToast(n) {
     stopSpeedTimer();
     const score = speedState.type === 'stage'
       ? (success ? 10 : Math.max(0, Number(speedState.round || 1) - 1))
-      : Math.max(0, Number(speedState.round || 1) - 1);
+      : (speedState.type === 'conveyor' ? Math.max(0, Number(speedState.conveyorTapCount || 0)) : Math.max(0, Number(speedState.round || 1) - 1));
     const best = speedState.type === 'stage'
       ? updateSpeedStageBest(speedState.selectedKeyCount, speedState.selectedLevelIdx, score)
-      : updateSpeedInfiniteBest(speedState.infiniteMode, score);
+      : (speedState.type === 'conveyor' ? updateSpeedConveyorBest(score) : updateSpeedInfiniteBest(speedState.infiniteMode, score));
     if (speedState.type === 'infinite') updateSpeedInfiniteRanking(speedState.infiniteMode, score);
 
     let newBadges = 0;
@@ -7341,27 +7730,38 @@ function showComboToast(n) {
     const meta = document.getElementById('speedResultMeta');
     const badgeInfo = document.getElementById('speedResultBadgeInfo');
     const nextBtn = document.getElementById('speedNextStageBtn');
-    const resultLabel = speedState.infiniteMode === 'round'
-      ? 'Infinite'
-      : (String(speedState.challengeLabel || '').toLowerCase().includes('time attack')
-          ? (speedState.infiniteMode === 'hard' ? 'Time Attack Hard' : 'Time Attack')
-          : infiniteLabel);
+    const rankBtn = document.getElementById('speedResultRankBtn');
+    const badgeBtn = document.getElementById('speedResultBadgeBtn');
+    const resultLabel = speedState.type === 'conveyor'
+      ? 'Conveyor'
+      : (speedState.infiniteMode === 'round'
+          ? 'Infinite'
+          : (String(speedState.challengeLabel || '').toLowerCase().includes('time attack')
+              ? (speedState.infiniteMode === 'hard' ? 'Time Attack Hard' : 'Time Attack')
+              : infiniteLabel));
     if (title) title.textContent = speedState.type === 'stage'
       ? (success ? 'Clear!' : 'Fail')
-      : `${resultLabel} End`;
+      : (speedState.type === 'conveyor' ? (score > 0 ? 'Conveyor End' : 'Conveyor End') : `${resultLabel} End`);
     if (scoreEl) scoreEl.textContent = String(score);
     if (meta) {
       meta.textContent = speedState.type === 'stage'
         ? `${speedState.selectedKeyCount} Keys · ${getLevelNameEn((getStageLevels()[speedState.selectedLevelIdx] || {}).name || '')} · Best ${best}R`
-        : `${resultLabel} · Best ${best}R`;
+        : (speedState.type === 'conveyor'
+            ? `${resultLabel} · Best ${best}T`
+            : `${resultLabel} · Best ${best}R`);
     }
-    if (badgeInfo) badgeInfo.textContent = `New Badge ${newBadges} · Total ${getSpeedBadges().length}`;
+    if (badgeInfo) badgeInfo.textContent = speedState.type === 'conveyor'
+      ? (speedState.remaining <= 0 ? 'Time up' : 'Miss')
+      : `New Badge ${newBadges} · Total ${getSpeedBadges().length}`;
     if (nextBtn) nextBtn.style.display = (speedState.type === 'stage' && success && stageIndexFor(speedState.selectedKeyCount, speedState.selectedLevelIdx) < 27) ? '' : 'none';
+    if (rankBtn) rankBtn.style.display = speedState.type === 'conveyor' ? 'none' : '';
+    if (badgeBtn) badgeBtn.style.display = speedState.type === 'conveyor' ? 'none' : '';
     document.getElementById('speedResultPopup')?.classList.add('visible');
   }
   window.restartSpeedCurrent = function() {
     document.getElementById('speedResultPopup')?.classList.remove('visible');
     if (speedState.type === 'stage') window.startSpeedStageTraining();
+    else if (speedState.type === 'conveyor') window.startSpeedConveyor();
     else if (String(speedState.challengeLabel || '').toLowerCase().includes('time attack')) window.startSpeedTimeAttack(speedState.infiniteMode);
     else window.startSpeedInfinite(speedState.infiniteMode);
   };
@@ -7577,7 +7977,6 @@ function showComboToast(n) {
     if (e.target === document.getElementById('modeSelectPopup')) closeModeSelectPopup();
     if (e.target === document.getElementById('brainModePopup')) closeBrainModePopup();
     if (e.target === document.getElementById('speedStartPopup')) closeSpeedStartPopup();
-    if (e.target === document.getElementById('speedResultPopup')) document.getElementById('speedResultPopup').classList.remove('visible');
     if (e.target === document.getElementById('speedPausePopup')) resumeSpeedGame();
   });
 
@@ -7722,9 +8121,22 @@ window.speedGoHome = window.speedGoHome || function(){
 })();
 </script>
 
-
-
-
+<script>
+(function(){
+  const safeBackdropIds = ['overlay','secondChancePopup','speedResultPopup'];
+  ['pointerdown','click','touchend'].forEach(type => {
+    document.addEventListener(type, function(e){
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+      if (!safeBackdropIds.includes(target.id)) return;
+      if (type !== 'pointerdown') {
+        e.preventDefault();
+      }
+      e.stopPropagation();
+    }, true);
+  });
+})();
+</script>
 
 <script src="./js/config.js"></script>
 <script type="module" src="./js/game-connect.js"></script>

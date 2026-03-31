@@ -3254,6 +3254,13 @@ body.popup-open {
 }
 
 
+.rank-hof-note{font-size:12px;color:#8b6a36;text-align:center;margin:-4px 0 8px}
+.rank-subline{font-size:12px;color:#8b6a36;text-align:center;margin:-6px 0 8px}
+.hall-card .rank-tabs{justify-content:center;flex-wrap:wrap}
+.rank-mode-grid,.rank-sub-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;}
+.rank-sub-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:240px;margin:0 auto 10px;}
+.rank-mode-grid .rank-tab,.rank-sub-grid .rank-tab{text-align:center;justify-content:center;}
+
 /* === rank period / top100 patch === */
 .rank-meta-line {
   margin: 8px 0 10px;
@@ -4013,6 +4020,7 @@ body.popup-open {
       <div class="mission-open-wrap multi-tools-row">
         <button class="mission-open-btn" onclick="openMissionPopup()">📅 Mission <span class="mission-open-meta" id="dailyStampCountMini">Daily 0 / 3 · Weekly 0 / 3</span></button>
         <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 Profile</button>
+        <button class="mission-open-btn profile-open-btn" onclick="openRanking()">🏆 Hall of Fame</button>
       </div>
     </div>
 
@@ -4149,7 +4157,7 @@ body.popup-open {
           <div class="mode-choice-icon">🧠</div>
         </div>
         <div class="mode-choice-desc">Memory mode</div>
-        <div class="mode-choice-meta">Stage / Limit</div>
+        <div class="mode-choice-meta">Stage / Infinite</div>
       </button>
       <button class="mode-choice-btn" onclick="selectTrainingMode('speed')">
         <div class="mode-choice-top">
@@ -4157,45 +4165,55 @@ body.popup-open {
           <div class="mode-choice-icon">⚡</div>
         </div>
         <div class="mode-choice-desc">Speed mode</div>
-        <div class="mode-choice-meta">Stage / Limit</div>
+        <div class="mode-choice-meta">Stage / Infinite</div>
       </button>
     </div>
   </div>
 </div>
 
 
-<div class="mode-select-popup" id="brainModePopup">
+<div class="speed-start-popup" id="brainModePopup" onclick="if(event.target===this) closeBrainModePopup()">
   <div class="mode-select-card">
     <div class="mode-select-header">
       <div class="mode-select-title">🧠 Brain Training</div>
       <button class="modal-x-btn" onclick="closeBrainModePopup()" aria-label="Close">✕</button>
     </div>
-    <div class="mode-select-sub">Stage / Limit</div>
-    <div class="mode-choice-grid">
-      <button class="mode-choice-btn" onclick="openBrainStage()">
-        <div class="mode-choice-top">
-          <div class="mode-choice-name">Stage</div>
-          <div class="mode-choice-icon">🎯</div>
+    <div class="mode-select-sub">Stage / Infinite</div>
+
+    <div class="speed-mode-tabs">
+      <button class="speed-mode-tab" id="brainModeTabStage" onclick="setBrainPopupMode('stage')">Stage</button>
+      <button class="speed-mode-tab inactive" id="brainModeTabInfinite" onclick="setBrainPopupMode('infinite')">Infinite</button>
+    </div>
+
+    <div class="speed-panel-body" id="brainStagePanel">
+      <div class="speed-panel-section">
+        <div class="speed-panel-label">Stage</div>
+        <button class="mode-choice-btn" style="width:100%;" onclick="openBrainStageFromPopup()">
+          <div class="mode-choice-top">
+            <div class="mode-choice-name">Stage Mode</div>
+            <div class="mode-choice-icon">🎯</div>
+          </div>
+          <div class="mode-choice-desc">Mode + Level</div>
+          <div class="mode-choice-meta">Clear route</div>
+        </button>
+        <div class="speed-stage-note" id="brainStageNote">Baby ~ Grad · Progress route</div>
+        <div class="speed-start-actions">
+          <button class="speed-ghost-btn" onclick="closeBrainModePopup()">Close</button>
+          <button class="speed-primary-btn" onclick="openBrainStageFromPopup()">Open Stage</button>
         </div>
-        <div class="mode-choice-desc">Mode + Level</div>
-        <div class="mode-choice-meta">Clear route</div>
-      </button>
-      <button class="mode-choice-btn" onclick="startBrainLimitMode('normal')">
-        <div class="mode-choice-top">
-          <div class="mode-choice-name">Limit Normal</div>
-          <div class="mode-choice-icon">🟠</div>
+      </div>
+    </div>
+
+    <div class="speed-panel-body hidden" id="brainInfinitePanel">
+      <div class="speed-panel-section">
+        <div class="speed-panel-label">Infinite</div>
+        <div class="speed-key-grid" id="brainInfiniteGrid"></div>
+        <div class="speed-stage-note" id="brainInfiniteNote">Normal · 4 Keys · Round rank</div>
+        <div class="speed-start-actions">
+          <button class="speed-ghost-btn" onclick="closeBrainModePopup()">Close</button>
+          <button class="speed-primary-btn" id="brainInfiniteStartBtn" onclick="startBrainInfiniteFromPopup()">Start</button>
         </div>
-        <div class="mode-choice-desc">4 Keys</div>
-        <div class="mode-choice-meta">Rank on</div>
-      </button>
-      <button class="mode-choice-btn" onclick="startBrainLimitMode('hard')">
-        <div class="mode-choice-top">
-          <div class="mode-choice-name">Limit Hard</div>
-          <div class="mode-choice-icon">🔴</div>
-        </div>
-        <div class="mode-choice-desc">6 Keys</div>
-        <div class="mode-choice-meta">Rank on</div>
-      </button>
+      </div>
     </div>
   </div>
 </div>
@@ -4612,21 +4630,23 @@ body.popup-open {
 </div>
 
 <!-- ══ 랭킹 팝업 ══ -->
-<div class="rank-popup" id="rankPopup">
-  <div class="rank-card">
+<div class="rank-popup" id="rankPopup" onclick="if(event.target===this) closeRanking()">
+  <div class="rank-card hall-card">
     <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
-    <div class="rank-header">🏆 Rank</div>
-    <div class="rank-tabs">
-      <button class="rank-tab active" id="rankTabAll" onclick="setRankTab('normal')">Normal</button>
-      <button class="rank-tab" id="rankTabToday" onclick="setRankTab('hard')">Hard</button>
+    <div class="rank-header">🏆 Hall of Fame</div>
+    <div class="rank-subline">Stage mode is excluded from ranking.</div>
+    <div class="rank-tabs rank-mode-grid">
+      <button class="rank-tab active" id="rankModeBrain" onclick="setRankMode('brain')">BRAIN</button>
+      <button class="rank-tab" id="rankModeSpeed" onclick="setRankMode('speed')">SPEED</button>
+      <button class="rank-tab" id="rankModeInfinity" onclick="setRankMode('infinity')">INFINITY</button>
     </div>
+    <div class="rank-tabs rank-sub-grid" id="rankSubTabs"></div>
     <div class="rank-tabs rank-period-tabs">
       <button class="rank-tab" id="rankPeriodTabWeekly" onclick="setRankPeriod('weekly')">Weekly</button>
       <button class="rank-tab" id="rankPeriodTabMonthly" onclick="setRankPeriod('monthly')">Monthly</button>
       <button class="rank-tab active" id="rankPeriodTabAll" onclick="setRankPeriod('all')">All-time</button>
     </div>
-    <div id="rankMeta" class="rank-meta-line">Top 100 · All-time · Time Attack</div>
-    <div id="rankMySummary" class="rank-my-summary" style="display:none;"></div>
+    <div id="rankMeta" class="rank-meta-line">Top 5 · All-time · Brain Normal</div>
     <div id="rankList" class="rank-list-scroll"></div>
     <button class="rank-close-btn" onclick="closeRanking()">Close</button>
   </div>
@@ -4697,7 +4717,8 @@ const STORAGE_KEYS = Object.freeze({
   speedBadges: 'limitgame_speed_badges_v1',
   speedInfiniteRank: 'limitgame_speed_infinite_rank_v1',
   speedInfiniteBest: 'limitgame_speed_infinite_best_v1',
-  speedConveyorBest: 'limitgame_speed_conveyor_best_v1'
+  speedConveyorBest: 'limitgame_speed_conveyor_best_v1',
+  speedConveyorRank: 'limitgame_speed_conveyor_rank_v1'
 });
 
 const STAGE_BEST_KEY = STORAGE_KEYS.stageBest;
@@ -4986,6 +5007,8 @@ const RANK_KEY = STORAGE_KEYS.ranking;
 const PLAYER_NAME_KEY = STORAGE_KEYS.playerName;
 let currentRankTab = 'normal';
 let currentRankPeriod = 'all';
+let currentRankMode = 'brain';
+let currentRankSubTab = 'brain_normal';
 let currentSpeedRankPeriod = 'all';
 
 function getRanking() {
@@ -4997,12 +5020,29 @@ function saveRanking(records) {
   localStorage.setItem(RANK_KEY, JSON.stringify(records));
 }
 
+function getPlayerRankProfile() {
+  const name = ((localStorage.getItem(PLAYER_NAME_KEY) || localStorage.getItem(STORAGE_KEYS.playerName) || 'Guest').trim().slice(0,10)) || 'Guest';
+  let avatar = '🙂';
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.profileAvatar) || localStorage.getItem('limitgame_avatar');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      avatar = parsed?.emoji || raw || '🙂';
+    }
+  } catch (e) {
+    avatar = localStorage.getItem(STORAGE_KEYS.profileAvatar) || '🙂';
+  }
+  return { name, avatar };
+}
+
 function addRankRecord(name, score, stageName) {
   const records = getRanking();
-  const cleanName = (name || 'Guest').trim().slice(0, 10) || 'Guest';
+  const profile = getPlayerRankProfile();
+  const cleanName = (name || profile.name || 'Guest').trim().slice(0, 10) || 'Guest';
   const now = new Date();
   records.push({
     name: cleanName,
+    avatar: profile.avatar || '🙂',
     score,
     stage: stageName,
     mode: difficulty,
@@ -5012,7 +5052,7 @@ function addRankRecord(name, score, stageName) {
     ts: now.getTime()
   });
   records.sort((a, b) => (b.score - a.score) || (a.ts - b.ts));
-  saveRanking(records.slice(0, 50));
+  saveRanking(records.slice(0, 100));
   localStorage.setItem(PLAYER_NAME_KEY, cleanName);
 }
 
@@ -5046,11 +5086,37 @@ function skipName() {
   renderProfilePopup();
 }
 
+function getSpeedConveyorRankList() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(STORAGE_KEYS.speedConveyorRank) || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+function saveSpeedConveyorRankList(arr) {
+  localStorage.setItem(STORAGE_KEYS.speedConveyorRank, JSON.stringify(Array.isArray(arr) ? arr : []));
+}
+function updateSpeedConveyorRanking(score) {
+  const profile = getPlayerRankProfile();
+  const list = getSpeedConveyorRankList();
+  list.push({
+    name: profile.name,
+    avatar: profile.avatar || '🙂',
+    score: Math.max(0, Number(score || 0)),
+    ts: Date.now(),
+    dateKey: new Date().toLocaleDateString('sv-SE')
+  });
+  list.sort((a,b)=>(Number(b.score||0)-Number(a.score||0)) || (Number(a.ts||0)-Number(b.ts||0)));
+  saveSpeedConveyorRankList(list.slice(0, 100));
+}
+
 function openRanking() {
   closeMissionPopup();
   closeStartPopup();
-  currentRankTab = currentRankTab || 'normal';
-  setRankTab(currentRankTab);
+  currentRankMode = currentRankMode || 'brain';
+  currentRankSubTab = currentRankSubTab || 'brain_normal';
+  currentRankPeriod = currentRankPeriod || 'all';
+  setRankMode(currentRankMode, true);
+  setRankPeriod(currentRankPeriod, true);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
 }
@@ -5059,51 +5125,146 @@ function closeRanking() {
   document.getElementById('rankPopup').classList.remove('visible');
 }
 
-function setRankTab(tab) {
-  currentRankTab = tab;
-  document.querySelectorAll('.rank-tab').forEach(btn => btn.classList.remove('active'));
-  const map = { normal:'rankTabAll', hard:'rankTabToday', mine:'rankTabMine' };
-  const active = document.getElementById(map[tab]);
-  if (active) active.classList.add('active');
+function getRankSubOptions(mode) {
+  if (mode === 'brain') return [
+    { id:'rankSubBrainNormal', key:'brain_normal', label:'Normal' },
+    { id:'rankSubBrainHard', key:'brain_hard', label:'Hard' }
+  ];
+  if (mode === 'speed') return [
+    { id:'rankSubSpeedNormal', key:'speed_normal', label:'Normal' },
+    { id:'rankSubSpeedHard', key:'speed_hard', label:'Hard' }
+  ];
+  return [
+    { id:'rankSubInfinityInfinite', key:'infinity_infinite', label:'Infinity' },
+    { id:'rankSubInfinityConveyor', key:'infinity_conveyor', label:'Conveyor' }
+  ];
+}
+
+function setRankMode(mode, skipRender) {
+  currentRankMode = mode;
+  document.getElementById('rankModeBrain')?.classList.toggle('active', mode === 'brain');
+  document.getElementById('rankModeSpeed')?.classList.toggle('active', mode === 'speed');
+  document.getElementById('rankModeInfinity')?.classList.toggle('active', mode === 'infinity');
+
+  if (mode === 'brain' && !String(currentRankSubTab).startsWith('brain_')) currentRankSubTab = 'brain_normal';
+  if (mode === 'speed' && !String(currentRankSubTab).startsWith('speed_')) currentRankSubTab = 'speed_normal';
+  if (mode === 'infinity' && !String(currentRankSubTab).startsWith('infinity_')) currentRankSubTab = 'infinity_infinite';
+
+  refreshRankSubTabs();
+  if (!skipRender) renderRanking();
+}
+
+function setRankSubTab(tab) {
+  currentRankSubTab = tab;
+  refreshRankSubTabs();
   renderRanking();
 }
 
-function getFilteredRecords() {
-  const records = getRanking();
-  const todayKey = new Date().toLocaleDateString('sv-SE');
-  const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
-
-  if (currentRankTab === 'mine') return myName ? records.filter(r => r.name === myName) : [];
-  if (currentRankTab === 'hard') return records.filter(r => /Brain Limit · Hard/.test(String(r.stage || '')));
-  return records.filter(r => /Brain Limit · Normal/.test(String(r.stage || '')));
-}
-
-function renderRanking() {
-  const records = getFilteredRecords().slice(0, 5);
-  const list = document.getElementById('rankList');
-  const myName = localStorage.getItem(PLAYER_NAME_KEY) || '';
-  if (records.length === 0) {
-    const emptyMsg = currentRankTab === 'mine'
-      ? 'No saved record for your name yet.'
-      : currentRankTab === 'hard'
-      ? 'No hard record yet.<br>Be the first!'
-      : 'No normal record yet.<br>Be the first!';
-    list.innerHTML = `<div class="rank-empty">${emptyMsg}</div>`;
-    return;
-  }
-  const medals = ['🥇','🥈','🥉'];
-  list.innerHTML = records.map((r, i) => `
-    <div class="rank-row ${myName && r.name === myName ? 'rank-me' : ''}">
-      <div class="rank-pos">${i < 3 ? medals[i] : (i+1)}</div>
-      <div class="rank-name">${r.name}</div>
-      <div class="rank-stage">${r.stage} · ${r.modeLabel || 'Easy'}</div>
-      <div class="rank-score">${r.score}</div>
-      <div class="rank-date">${r.date}</div>
-    </div>
+function refreshRankSubTabs() {
+  const wrap = document.getElementById('rankSubTabs');
+  if (!wrap) return;
+  const options = getRankSubOptions(currentRankMode);
+  wrap.innerHTML = options.map(opt => `
+    <button class="rank-tab ${currentRankSubTab === opt.key ? 'active' : ''}" id="${opt.id}" onclick="setRankSubTab('${opt.key}')">${opt.label}</button>
   `).join('');
 }
 
+function setRankPeriod(period, skipRender) {
+  currentRankPeriod = period;
+  document.getElementById('rankPeriodTabWeekly')?.classList.toggle('active', period === 'weekly');
+  document.getElementById('rankPeriodTabMonthly')?.classList.toggle('active', period === 'monthly');
+  document.getElementById('rankPeriodTabAll')?.classList.toggle('active', period === 'all');
+  if (!skipRender) renderRanking();
+}
 
+function filterByPeriod(items, period) {
+  if (period === 'all') return items.slice();
+  const now = Date.now();
+  const cutoff = period === 'weekly' ? now - (7 * 24 * 60 * 60 * 1000) : now - (30 * 24 * 60 * 60 * 1000);
+  return items.filter(r => Number(r.ts || 0) >= cutoff);
+}
+
+function getHallRankingRecords() {
+  if (currentRankMode === 'brain') {
+    const hard = currentRankSubTab === 'brain_hard';
+    return getRanking()
+      .filter(r => /Brain Infinite · (Normal|Hard)/.test(String(r.stage || '')))
+      .filter(r => hard ? /Brain Infinite · Hard/.test(String(r.stage || '')) : /Brain Infinite · Normal/.test(String(r.stage || '')))
+      .map(r => ({
+        name: r.name || 'Guest',
+        avatar: r.avatar || '🙂',
+        score: Number(r.score || 0),
+        label: hard ? 'Hard' : 'Normal',
+        unit: 'R',
+        ts: Number(r.ts || 0),
+        date: r.date || '',
+      }));
+  }
+  if (currentRankMode === 'speed') {
+    const key = currentRankSubTab === 'speed_hard' ? 'hard' : 'normal';
+    const label = key === 'hard' ? 'Hard' : 'Normal';
+    return getSpeedInfiniteRanking(key).map(r => ({
+      name: r.name || 'Guest',
+      avatar: r.avatar || '🙂',
+      score: Number(r.score || 0),
+      label,
+      unit: 'R',
+      ts: Number(r.ts || 0),
+      date: r.dateKey || '',
+    }));
+  }
+  if (currentRankSubTab === 'infinity_infinite') {
+    return getSpeedInfiniteRanking('round').map(r => ({
+      name: r.name || 'Guest',
+      avatar: r.avatar || '🙂',
+      score: Number(r.score || 0),
+      label: 'Infinity',
+      unit: 'R',
+      ts: Number(r.ts || 0),
+      date: r.dateKey || '',
+    }));
+  }
+  return getSpeedConveyorRankList().map(r => ({
+    name: r.name || 'Guest',
+    avatar: r.avatar || '🙂',
+    score: Number(r.score || 0),
+    label: 'Conveyor',
+    unit: 'T',
+    ts: Number(r.ts || 0),
+    date: r.dateKey || '',
+  }));
+}
+
+function getRankMetaLabel() {
+  const periodLabel = currentRankPeriod === 'weekly' ? 'Weekly' : (currentRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
+  if (currentRankMode === 'brain') return `Top 5 · ${periodLabel} · Brain ${currentRankSubTab === 'brain_hard' ? 'Hard' : 'Normal'}`;
+  if (currentRankMode === 'speed') return `Top 5 · ${periodLabel} · Speed ${currentRankSubTab === 'speed_hard' ? 'Hard' : 'Normal'}`;
+  if (currentRankMode === 'infinity') return `Top 5 · ${periodLabel} · ${currentRankSubTab === 'infinity_conveyor' ? 'Conveyor' : 'Infinity'}`;
+  return `Top 5 · ${periodLabel}`;
+}
+
+function renderRanking() {
+  const list = document.getElementById('rankList');
+  const meta = document.getElementById('rankMeta');
+  if (meta) meta.textContent = getRankMetaLabel();
+  let records = filterByPeriod(getHallRankingRecords(), currentRankPeriod);
+  records.sort((a,b)=>(Number(b.score||0)-Number(a.score||0)) || (Number(a.ts||0)-Number(b.ts||0)));
+  records = records.slice(0, 5);
+  if (!records.length) {
+    const label = currentRankMode === 'infinity' ? (currentRankSubTab === 'infinity_conveyor' ? 'conveyor' : 'infinity') : (currentRankMode === 'speed' ? 'speed' : 'brain');
+    list.innerHTML = `<div class="rank-empty">No ${label} ranking yet.</div>`;
+    return;
+  }
+  list.innerHTML = records.map((r, i) => `
+    <div class="rank-row">
+      <div class="rank-pos">#${i+1}</div>
+      <div class="rank-name">${r.avatar || '🙂'} ${String(r.name || 'Guest').slice(0,10)}</div>
+      <div class="rank-stage">${r.label}</div>
+      <div class="rank-score">${Number(r.score || 0)}${r.unit || 'R'}</div>
+      <div class="rank-date">${r.date || ''}</div>
+    </div>
+  `).join('');
+}
 
 // ══ 일일 미션 시스템 ══
 const DAILY_MISSION_KEY = STORAGE_KEYS.dailyMission;
@@ -5377,23 +5538,10 @@ const PROFILE_AVATAR_OPTIONS = [
   { id:'emoji_9', type:'emoji', value:'🧑', name:'Person', rankSymbol:'🧑' },
   { id:'emoji_10', type:'emoji', value:'👦', name:'Boy', rankSymbol:'👦' },
   { id:'emoji_11', type:'emoji', value:'👧', name:'Girl', rankSymbol:'👧' },
-
-  { id:'img_f0', type:'image', value:'female_0.png', name:'Game Woman 1', rankSymbol:'👩' },
-  { id:'img_f1', type:'image', value:'female_1.png', name:'Game Woman 2', rankSymbol:'👩' },
-  { id:'img_f2', type:'image', value:'female_2.png', name:'Game Woman 3', rankSymbol:'👩' },
-  { id:'img_f3', type:'image', value:'female_3.png', name:'Game Woman 4', rankSymbol:'👩' },
-  { id:'img_f4', type:'image', value:'female_4.png', name:'Game Woman 5', rankSymbol:'👩' },
-  { id:'img_f5', type:'image', value:'female_5.png', name:'Game Woman 6', rankSymbol:'👩' },
-  { id:'img_f6', type:'image', value:'female_6.png', name:'Game Woman 7', rankSymbol:'👩' },
-
-  { id:'img_m0', type:'image', value:'male_0.png', name:'Game Man 1', rankSymbol:'👨' },
-  { id:'img_m1', type:'image', value:'male_1.png', name:'Game Man 2', rankSymbol:'👨' },
-  { id:'img_m2', type:'image', value:'male_2.png', name:'Game Man 3', rankSymbol:'👨' },
-  { id:'img_m3', type:'image', value:'male_3.png', name:'Game Man 4', rankSymbol:'👨' },
-  { id:'img_m4', type:'image', value:'male_4.png', name:'Game Man 5', rankSymbol:'👨' },
-  { id:'img_m5', type:'image', value:'male_5.png', name:'Game Man 6', rankSymbol:'👨' },
-  { id:'img_m6', type:'image', value:'male_6.png', name:'Game Man 7', rankSymbol:'👨' },
-
+  { id:'img_f0', type:'image', value:'female_0.png', name:'Game Woman', rankSymbol:'👩' },
+  { id:'img_m0', type:'image', value:'male_0.png', name:'Game Man', rankSymbol:'👨' },
+  { id:'img_f3', type:'image', value:'female_3.png', name:'Game Woman 2', rankSymbol:'👩' },
+  { id:'img_m3', type:'image', value:'male_3.png', name:'Game Man 2', rankSymbol:'👨' },
   { id:'emoji_12', type:'emoji', value:'🐶', name:'Dog', rankSymbol:'🐶' },
   { id:'emoji_13', type:'emoji', value:'🐱', name:'Cat', rankSymbol:'🐱' },
   { id:'emoji_14', type:'emoji', value:'🐼', name:'Panda', rankSymbol:'🐼' },
@@ -6621,7 +6769,7 @@ function gameOver() {
 
   const finalScore = round;
   const stage = getSelectedLevel();
-  const finalStage = brainInfiniteActive ? `Limit ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'}` : stage.name;
+  const finalStage = brainInfiniteActive ? `Infinite ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'}` : stage.name;
   const modeLabel = getDifficultyConfig().label;
   const unlockedRewards = brainInfiniteActive ? [] : tryUnlockNextLevel(finalScore);
 
@@ -6649,7 +6797,7 @@ function gameOver() {
 
   document.getElementById('resultStageEmoji').textContent = brainInfiniteActive ? '♾️' : stage.emoji;
   document.getElementById('resultStageName').textContent = brainInfiniteActive ? finalStage : (finalStage + ' Level');
-  document.getElementById('resultLine').textContent = brainInfiniteActive ? `Mode ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Limit · ${getModeConfig().buttons} Keys` : `Now ${modeLabel} · ${finalStage} · ${getModeConfig().buttons} Keys`;
+  document.getElementById('resultLine').textContent = brainInfiniteActive ? `Mode ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Infinite · ${getModeConfig().buttons} Keys` : `Now ${modeLabel} · ${finalStage} · ${getModeConfig().buttons} Keys`;
   document.getElementById('resultRound').textContent = finalScore;
   document.getElementById('resultBest').innerHTML = `Best Record <span>${brainInfiniteActive ? getBrainLimitBest() : best}</span> Rounds${newBest ? ' 🎉' : ''}`;
   document.getElementById('resultSeq').textContent = sequence.map(f => EMOJI[f]).join(' ');
@@ -6659,7 +6807,7 @@ function gameOver() {
         : `🎉 ${entry.item.name} unlocked!`).join(' ')
     : '';
   document.getElementById('resultMsg').textContent = unlockMsg || msg;
-  document.getElementById('resultSummaryMode').textContent = brainInfiniteActive ? `${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Limit` : `${modeLabel} · ${getModeConfig().buttons} Keys`;
+  document.getElementById('resultSummaryMode').textContent = brainInfiniteActive ? `${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Infinite` : `${modeLabel} · ${getModeConfig().buttons} Keys`;
   document.getElementById('resultSummaryCombo').textContent = combo;
 
   document.getElementById('resultCharLeft').src = `female_${stage.scene}.png`;
@@ -6700,7 +6848,7 @@ function gameOver() {
   }
 
   window._finalScore = finalScore;
-  window._finalStage = brainInfiniteActive ? `Brain Limit · ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'}` : finalStage;
+  window._finalStage = brainInfiniteActive ? `Brain Infinite · ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'}` : finalStage;
 
   const overlay = document.getElementById('overlay');
   const popup = document.getElementById('namePopup');
@@ -7024,7 +7172,8 @@ function showComboToast(n) {
     const map = getSpeedInfiniteRankMap();
     const key = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     const list = Array.isArray(map[key]) ? map[key] : [];
-    list.push({ score: Number(score || 0), ts: Date.now(), avatar: getProfileAvatarRankSymbol?.() || '🙂' });
+    const profile = getPlayerRankProfile();
+    list.push({ score: Number(score || 0), ts: Date.now(), avatar: profile.avatar || getProfileAvatarRankSymbol?.() || '🙂', name: profile.name || 'Guest', dateKey: new Date().toLocaleDateString('sv-SE') });
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
     map[key] = list.slice(0, 10);
     saveSpeedInfiniteRankMap(map);
@@ -7152,14 +7301,58 @@ function showComboToast(n) {
     closeModeSelectPopup();
     const el = document.getElementById('brainModePopup');
     if (!el) return;
+    brainPopupMode = 'stage';
+    brainPopupInfiniteType = 'normal';
+    renderBrainInfiniteOptions();
+    setBrainPopupMode('stage');
     el.classList.add('visible');
     document.body.classList.add('popup-open');
   }
   window.closeBrainModePopup = closeBrainModePopup;
+
+  let brainPopupMode = 'stage';
+  let brainPopupInfiniteType = 'normal';
+
+  function renderBrainInfiniteOptions() {
+    const root = document.getElementById('brainInfiniteGrid');
+    if (!root) return;
+    const items = [
+      { key:'normal', title:'Normal', sub:'4 Keys · Round rank' },
+      { key:'hard', title:'Hard', sub:'6 Keys · Round rank' }
+    ];
+    root.innerHTML = items.map(item => `
+      <button class="speed-key-btn ${brainPopupInfiniteType === item.key ? 'active' : ''}" onclick="setBrainInfiniteType('${item.key}')">
+        <div class="speed-key-title">${item.title}</div>
+        <div class="speed-key-sub">${item.sub}</div>
+      </button>
+    `).join('');
+    const note = document.getElementById('brainInfiniteNote');
+    if (note) note.textContent = brainPopupInfiniteType === 'hard' ? 'Hard · 6 Keys · Round rank' : 'Normal · 4 Keys · Round rank';
+  }
+
+  function setBrainPopupMode(mode) {
+    brainPopupMode = mode === 'infinite' ? 'infinite' : 'stage';
+    document.getElementById('brainModeTabStage')?.classList.toggle('inactive', brainPopupMode !== 'stage');
+    document.getElementById('brainModeTabInfinite')?.classList.toggle('inactive', brainPopupMode !== 'infinite');
+    document.getElementById('brainStagePanel')?.classList.toggle('hidden', brainPopupMode !== 'stage');
+    document.getElementById('brainInfinitePanel')?.classList.toggle('hidden', brainPopupMode !== 'infinite');
+  }
+
+  function setBrainInfiniteType(mode) {
+    brainPopupInfiniteType = mode === 'hard' ? 'hard' : 'normal';
+    renderBrainInfiniteOptions();
+  }
+
+  window.setBrainPopupMode = setBrainPopupMode;
+  window.setBrainInfiniteType = setBrainInfiniteType;
   window.openBrainStage = function() {
     brainInfiniteActive = false;
     closeBrainModePopup();
     openStartPopup();
+  };
+  window.openBrainStageFromPopup = window.openBrainStage;
+  window.startBrainInfiniteFromPopup = function() {
+    startBrainLimitMode(brainPopupInfiniteType);
   };
   window.startBrainLimitMode = function(mode) {
     brainInfiniteActive = true;
@@ -7726,6 +7919,7 @@ function showComboToast(n) {
       ? updateSpeedStageBest(speedState.selectedKeyCount, speedState.selectedLevelIdx, score)
       : (speedState.type === 'conveyor' ? updateSpeedConveyorBest(score) : updateSpeedInfiniteBest(speedState.infiniteMode, score));
     if (speedState.type === 'infinite') updateSpeedInfiniteRanking(speedState.infiniteMode, score);
+    if (speedState.type === 'conveyor') updateSpeedConveyorRanking(score);
 
     let newBadges = 0;
     if (speedState.type === 'stage' && success) {
@@ -8276,6 +8470,90 @@ function renderMyRankSummary(rank, total) {
   window.addEventListener('resize', () => requestAnimationFrame(applyResponsiveGridClasses));
   window.applyResponsiveGridClasses = applyResponsiveGridClasses;
 })();
+
+
+(function(){
+  function bindHallOfFameControls(){
+    const rankPopup = document.getElementById('rankPopup');
+    const rankCard = rankPopup && rankPopup.querySelector('.rank-card');
+    if (!rankPopup || !rankCard || rankPopup.__hallRankBound) return;
+
+    rankPopup.addEventListener('click', function(e){
+      const modeBtn = e.target.closest('#rankModeBrain, #rankModeSpeed, #rankModeInfinity');
+      if (modeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (modeBtn.id === 'rankModeBrain') setRankMode('brain');
+        else if (modeBtn.id === 'rankModeSpeed') setRankMode('speed');
+        else setRankMode('infinity');
+        return;
+      }
+
+      const periodBtn = e.target.closest('#rankPeriodTabWeekly, #rankPeriodTabMonthly, #rankPeriodTabAll');
+      if (periodBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (periodBtn.id === 'rankPeriodTabWeekly') setRankPeriod('weekly');
+        else if (periodBtn.id === 'rankPeriodTabMonthly') setRankPeriod('monthly');
+        else setRankPeriod('all');
+        return;
+      }
+
+      const subBtn = e.target.closest('#rankSubTabs .rank-tab');
+      if (subBtn && subBtn.dataset && subBtn.dataset.rankKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        setRankSubTab(subBtn.dataset.rankKey);
+        return;
+      }
+    }, true);
+
+    rankCard.addEventListener('click', function(e){
+      e.stopPropagation();
+    }, true);
+
+    rankPopup.__hallRankBound = true;
+  }
+
+  const _refreshRankSubTabs = window.refreshRankSubTabs;
+  window.refreshRankSubTabs = function(){
+    if (typeof _refreshRankSubTabs === 'function') _refreshRankSubTabs.apply(this, arguments);
+    const wrap = document.getElementById('rankSubTabs');
+    if (!wrap) return;
+    Array.from(wrap.querySelectorAll('.rank-tab')).forEach(function(btn){
+      const onclickText = btn.getAttribute('onclick') || '';
+      const match = onclickText.match(/setRankSubTab\('([^']+)'\)/);
+      if (match) btn.dataset.rankKey = match[1];
+      btn.setAttribute('type', 'button');
+    });
+  };
+
+  const _openRanking = window.openRanking;
+  window.openRanking = function(){
+    const result = typeof _openRanking === 'function' ? _openRanking.apply(this, arguments) : undefined;
+    bindHallOfFameControls();
+    window.refreshRankSubTabs && window.refreshRankSubTabs();
+    return result;
+  };
+
+  function initHallRankFix(){
+    bindHallOfFameControls();
+    window.refreshRankSubTabs && window.refreshRankSubTabs();
+
+    ['rankPeriodTabWeekly','rankPeriodTabMonthly','rankPeriodTabAll',
+     'rankModeBrain','rankModeSpeed','rankModeInfinity'].forEach(function(id){
+      const btn = document.getElementById(id);
+      if (btn) btn.setAttribute('type', 'button');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHallRankFix, { once:true });
+  } else {
+    initHallRankFix();
+  }
+})();
+
 </script>
 
 </body>

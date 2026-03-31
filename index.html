@@ -1487,6 +1487,24 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: aut
   flex-shrink: 0; min-width: 44px; text-align: right;
 }
 .rank-date { font-size: 11px; color: #bbb; flex-shrink: 0; }
+.rank-row.rank-highlight { animation: conveyorRankGlow 1.15s ease 2; box-shadow: 0 0 0 2px rgba(255,229,102,.65), 0 0 18px rgba(255,229,102,.35); }
+.rank-row.rank-rival { background: rgba(255,229,102,.14); border: 1px dashed rgba(200,138,48,.55); }
+.rank-context-wrap { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 12px; }
+.rank-context-card { background:linear-gradient(180deg,#fff8ec,#f8ead0); border:2px solid rgba(200,138,48,.55); border-radius:16px; padding:10px 12px; box-shadow:inset 0 1px 0 rgba(255,255,255,.7); }
+.rank-context-card.full { grid-column:1 / -1; }
+.rank-context-label { font-size:11px; color:#9b6a20; margin-bottom:3px; }
+.rank-context-value { font-family:'Nanum Pen Script', cursive; font-size:24px; color:#8B2500; line-height:1.05; }
+.rank-context-sub { font-size:12px; color:#7a4a10; margin-top:4px; line-height:1.35; }
+.rank-update-toast { display:none; margin:8px 0 12px; padding:10px 12px; border-radius:14px; background:linear-gradient(180deg,rgba(255,229,102,.96),rgba(255,202,64,.94)); color:#6a2b00; border:2px solid rgba(139,37,0,.22); box-shadow:0 6px 16px rgba(0,0,0,.12); text-align:center; font-weight:700; }
+.rank-update-toast.show { display:block; animation: conveyorToastPop .55s cubic-bezier(.34,1.56,.64,1); }
+@keyframes conveyorToastPop {
+  0% { opacity:0; transform:translateY(10px) scale(.94); }
+  100% { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes conveyorRankGlow {
+  0%,100% { box-shadow:0 0 0 0 rgba(255,229,102,0); }
+  50% { box-shadow:0 0 0 3px rgba(255,229,102,.8), 0 0 20px rgba(255,229,102,.45); }
+}
 
 .rank-empty {
   text-align: center; color: #b8860b;
@@ -4188,7 +4206,15 @@ body.popup-open {
           <div class="mode-choice-icon">⚡</div>
         </div>
         <div class="mode-choice-desc">Speed mode</div>
-        <div class="mode-choice-meta">Stage / Infinite</div>
+        <div class="mode-choice-meta">Stage / Time Attack / Infinite</div>
+      </button>
+      <button class="mode-choice-btn" onclick="selectTrainingMode('conveyor')">
+        <div class="mode-choice-top">
+          <div class="mode-choice-name">Conveyor Mode</div>
+          <div class="mode-choice-icon">🪜</div>
+        </div>
+        <div class="mode-choice-desc">Head-to-head mode</div>
+        <div class="mode-choice-meta">4 Keys · Taps rank</div>
       </button>
     </div>
   </div>
@@ -4248,7 +4274,7 @@ body.popup-open {
       <div class="mode-select-title">⚡ Speed Training</div>
       <button class="modal-x-btn" onclick="closeSpeedStartPopup()" aria-label="Close">✕</button>
     </div>
-    <div class="mode-select-sub">Stage / Time Attack / Infinite / Conveyor</div>
+    <div class="mode-select-sub">Stage / Time Attack / Infinite</div>
 
     <div class="speed-mode-tabs speed-mode-tabs-3">
       <button class="speed-mode-tab" id="speedModeTabStage" onclick="setSpeedPopupMode('stage')">Stage</button>
@@ -4304,12 +4330,6 @@ body.popup-open {
           <div class="speed-record-desc">20 → 18 → ... → 8 sec · Best <span id="speedInfiniteBestRound">0</span>R</div>
           <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">Time resets each round, but gets shorter</div>
           <div class="speed-record-dot normal"></div>
-        </div>
-        <div class="speed-record-card" onclick="startSpeedConveyor()">
-          <div class="speed-record-title">Conveyor</div>
-          <div class="speed-record-desc">7-lane belt · 3.0 sec start · Best <span id="speedConveyorBest">0</span>T</div>
-          <div class="speed-record-desc" style="margin-top:8px;color:#a56b18;">Hit the center belt symbol before time runs out</div>
-          <div class="speed-record-dot hard"></div>
         </div>
         <div class="speed-start-actions">
           <button class="speed-ghost-btn" onclick="closeSpeedStartPopup()">Close</button>
@@ -4656,20 +4676,17 @@ body.popup-open {
 <div class="rank-popup" id="rankPopup" onclick="if(event.target===this) closeRanking()">
   <div class="rank-card hall-card">
     <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
-    <div class="rank-header">🏆 Rank</div>
-    <div class="rank-subline">Stage mode is excluded from ranking.</div>
-    <div class="rank-tabs rank-mode-grid">
-      <button class="rank-tab active" id="rankModeBrain" onclick="setRankMode('brain')">BRAIN</button>
-      <button class="rank-tab" id="rankModeSpeed" onclick="setRankMode('speed')">SPEED</button>
-      <button class="rank-tab" id="rankModeInfinity" onclick="setRankMode('infinity')">INFINITY</button>
-    </div>
-    <div class="rank-tabs rank-sub-grid" id="rankSubTabs"></div>
+    <div class="rank-header">🏆 Conveyor Rank</div>
+    <div class="rank-subline">Conveyor only · Taps ranking.</div>
+    <div class="rank-tabs rank-sub-grid" id="rankSubTabs" style="display:none;"></div>
     <div class="rank-tabs rank-period-tabs">
       <button class="rank-tab" id="rankPeriodTabWeekly" onclick="setRankPeriod('weekly')">Weekly</button>
       <button class="rank-tab" id="rankPeriodTabMonthly" onclick="setRankPeriod('monthly')">Monthly</button>
       <button class="rank-tab active" id="rankPeriodTabAll" onclick="setRankPeriod('all')">All-time</button>
     </div>
-    <div id="rankMeta" class="rank-meta-line">Top 5 · All-time · Brain Normal</div>
+    <div id="rankMeta" class="rank-meta-line">Top 5 · All-time · Conveyor</div>
+    <div id="rankUpdateToast" class="rank-update-toast"></div>
+    <div id="rankContext" class="rank-context-wrap"></div>
     <div id="rankList" class="rank-list-scroll"></div>
     <button class="rank-close-btn" onclick="closeRanking()">Close</button>
   </div>
@@ -4741,7 +4758,9 @@ const STORAGE_KEYS = Object.freeze({
   speedInfiniteRank: 'limitgame_speed_infinite_rank_v1',
   speedInfiniteBest: 'limitgame_speed_infinite_best_v1',
   speedConveyorBest: 'limitgame_speed_conveyor_best_v1',
-  speedConveyorRank: 'limitgame_speed_conveyor_rank_v1'
+  speedConveyorRank: 'limitgame_speed_conveyor_rank_v1',
+  conveyorRankPulse: 'limitgame_conveyor_rank_pulse_v1',
+  conveyorRankBestRank: 'limitgame_conveyor_rank_best_rank_v1'
 });
 
 const STAGE_BEST_KEY = STORAGE_KEYS.stageBest;
@@ -5181,9 +5200,62 @@ function getSpeedConveyorRankList() {
 function saveSpeedConveyorRankList(arr) {
   localStorage.setItem(STORAGE_KEYS.speedConveyorRank, JSON.stringify(Array.isArray(arr) ? arr : []));
 }
+function getConveyorRankingRecordsRaw() {
+  return getSpeedConveyorRankList().map(r => ({
+    name: r.name || 'Guest',
+    avatar: r.avatar || '🙂',
+    avatarId: r.avatarId || '',
+    avatarType: r.avatarType || 'emoji',
+    avatarValue: r.avatarValue || r.avatar || '🙂',
+    score: Number(r.score || 0),
+    label: 'Conveyor',
+    unit: 'T',
+    ts: Number(r.ts || 0),
+    date: r.dateKey || ''
+  }));
+}
+function computeConveyorRankContext(options = {}) {
+  const period = options.period || 'all';
+  const targetTs = Number(options.targetTs || 0);
+  const profile = getPlayerRankProfile();
+  let records = filterByPeriod(getConveyorRankingRecordsRaw(), period);
+  records.sort((a,b)=>(Number(b.score||0)-Number(a.score||0)) || (Number(a.ts||0)-Number(b.ts||0)));
+  const playerRows = records.filter(r => String(r.name||'') === String(profile.name||''));
+  const bestPlayerRow = playerRows.length ? playerRows[0] : null;
+  let currentIndex = -1;
+  if (targetTs) currentIndex = records.findIndex(r => Number(r.ts||0) === targetTs);
+  if (currentIndex < 0 && bestPlayerRow) currentIndex = records.findIndex(r => Number(r.ts||0) === Number(bestPlayerRow.ts||0));
+  const currentRow = currentIndex >= 0 ? records[currentIndex] : null;
+  const aboveRow = currentIndex > 0 ? records[currentIndex - 1] : null;
+  const bestRank = bestPlayerRow ? (records.findIndex(r => Number(r.ts||0) === Number(bestPlayerRow.ts||0)) + 1) : null;
+  return {
+    records,
+    currentIndex,
+    currentRow,
+    aboveRow,
+    bestPlayerRow,
+    bestRank,
+    profile
+  };
+}
+function persistConveyorRankPulse(payload) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.conveyorRankPulse, JSON.stringify(payload || {}));
+    if (payload && payload.bestRank) localStorage.setItem(STORAGE_KEYS.conveyorRankBestRank, String(payload.bestRank));
+  } catch(e) {}
+}
+function readConveyorRankPulse() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.conveyorRankPulse) || 'null'); } catch(e) { return null; }
+}
+function consumeConveyorRankPulse() {
+  const pulse = readConveyorRankPulse();
+  try { localStorage.removeItem(STORAGE_KEYS.conveyorRankPulse); } catch(e) {}
+  return pulse;
+}
 function updateSpeedConveyorRanking(score) {
   const profile = getPlayerRankProfile();
   const list = getSpeedConveyorRankList();
+  const entryTs = Date.now();
   list.push({
     name: profile.name,
     avatar: profile.avatar || '🙂',
@@ -5191,21 +5263,31 @@ function updateSpeedConveyorRanking(score) {
     avatarType: profile.avatarType || 'emoji',
     avatarValue: profile.avatarValue || profile.avatar || '🙂',
     score: Math.max(0, Number(score || 0)),
-    ts: Date.now(),
+    ts: entryTs,
     dateKey: new Date().toLocaleDateString('sv-SE')
   });
   list.sort((a,b)=>(Number(b.score||0)-Number(a.score||0)) || (Number(a.ts||0)-Number(b.ts||0)));
   saveSpeedConveyorRankList(list.slice(0, 100));
+  const context = computeConveyorRankContext({ period:'all', targetTs: entryTs });
+  const prevBestRank = Number(localStorage.getItem(STORAGE_KEYS.conveyorRankBestRank) || 0) || null;
+  const improved = !!context.bestRank && (!!prevBestRank ? context.bestRank < prevBestRank : true);
+  persistConveyorRankPulse({
+    ts: entryTs,
+    score: Math.max(0, Number(score || 0)),
+    rank: context.currentIndex >= 0 ? context.currentIndex + 1 : null,
+    bestRank: context.bestRank || null,
+    improved,
+    name: profile.name || 'Guest'
+  });
 }
 
 function openRanking(options = {}) {
   if (options && options.fromSpeedResult) reopenSpeedResultAfterHallRank = true;
   closeMissionPopup();
   closeStartPopup();
-  currentRankMode = currentRankMode || 'brain';
-  currentRankSubTab = currentRankSubTab || 'brain_normal';
+  currentRankMode = 'infinity';
+  currentRankSubTab = 'infinity_conveyor';
   currentRankPeriod = currentRankPeriod || 'all';
-  setRankMode(currentRankMode, true);
   setRankPeriod(currentRankPeriod, true);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
@@ -5332,10 +5414,7 @@ function getHallRankingRecords() {
 
 function getRankMetaLabel() {
   const periodLabel = currentRankPeriod === 'weekly' ? 'Weekly' : (currentRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
-  if (currentRankMode === 'brain') return `Top 5 · ${periodLabel} · Brain ${currentRankSubTab === 'brain_hard' ? 'Hard' : 'Normal'}`;
-  if (currentRankMode === 'speed') return `Top 5 · ${periodLabel} · Speed ${currentRankSubTab === 'speed_hard' ? 'Hard' : 'Normal'}`;
-  if (currentRankMode === 'infinity') return `Top 5 · ${periodLabel} · ${currentRankSubTab === 'infinity_conveyor' ? 'Conveyor' : 'Infinity'}`;
-  return `Top 5 · ${periodLabel}`;
+  return `Top 100 · ${periodLabel} · Conveyor`;
 }
 
 function renderRankAvatarMarkup(record) {
@@ -5363,27 +5442,86 @@ function renderRankAvatarMarkup(record) {
 function renderRanking() {
   const list = document.getElementById('rankList');
   const meta = document.getElementById('rankMeta');
+  const contextWrap = document.getElementById('rankContext');
+  const toast = document.getElementById('rankUpdateToast');
   if (meta) meta.textContent = getRankMetaLabel();
+
   let records = filterByPeriod(getHallRankingRecords(), currentRankPeriod);
   records.sort((a,b)=>(Number(b.score||0)-Number(a.score||0)) || (Number(a.ts||0)-Number(b.ts||0)));
-  records = records.slice(0, 5);
+
+  const pulse = currentRankSubTab === 'infinity_conveyor' ? consumeConveyorRankPulse() : null;
+  const context = currentRankSubTab === 'infinity_conveyor'
+    ? computeConveyorRankContext({ period: currentRankPeriod, targetTs: pulse?.ts || 0 })
+    : null;
+
+  if (toast) {
+    toast.className = 'rank-update-toast';
+    if (pulse && currentRankSubTab === 'infinity_conveyor') {
+      const parts = [];
+      if (pulse.rank) parts.push(`Now #${pulse.rank}`);
+      if (pulse.improved && pulse.bestRank) parts.push(`Best updated #${pulse.bestRank}`);
+      else if (pulse.score != null) parts.push(`${pulse.score}T saved`);
+      toast.textContent = `✨ Rank Updated · ${parts.join(' · ')}`;
+      toast.classList.add('show');
+    } else {
+      toast.textContent = '';
+    }
+  }
+
+  if (contextWrap) {
+    if (currentRankSubTab === 'infinity_conveyor') {
+      const bestRankLabel = context?.bestRank ? `#${context.bestRank}` : '—';
+      const aboveGap = (context?.aboveRow && context?.currentRow) ? Math.max(1, Number(context.aboveRow.score || 0) - Number(context.currentRow.score || 0)) : null;
+      const rivalName = context?.aboveRow ? String(context.aboveRow.name || 'Guest').slice(0, 10) : 'Top spot';
+      const rivalLine = context?.aboveRow
+        ? `${rivalName} · ${Number(context.aboveRow.score || 0)}T`
+        : 'You are at the top.';
+      const chaseLine = context?.aboveRow && aboveGap !== null
+        ? `${aboveGap}T more to pass`
+        : (context?.currentRow ? 'Keep defending your spot.' : 'Play one run to enter the board.');
+      contextWrap.innerHTML = `
+        <div class="rank-context-card">
+          <div class="rank-context-label">My Best Rank</div>
+          <div class="rank-context-value">${bestRankLabel}</div>
+          <div class="rank-context-sub">${context?.bestPlayerRow ? `${Number(context.bestPlayerRow.score || 0)}T best` : 'No saved conveyor record yet.'}</div>
+        </div>
+        <div class="rank-context-card">
+          <div class="rank-context-label">Above Me</div>
+          <div class="rank-context-value">${context?.aboveRow ? `#${context.currentIndex}` : 'TOP'}</div>
+          <div class="rank-context-sub">${rivalLine}<br>${chaseLine}</div>
+        </div>
+        ${pulse ? `<div class="rank-context-card full"><div class="rank-context-label">Just Updated</div><div class="rank-context-value">#${pulse.rank || '—'}</div><div class="rank-context-sub">${pulse.improved ? 'New personal best rank.' : 'Latest conveyor run saved.'}</div></div>` : ''}
+      `;
+    } else {
+      contextWrap.innerHTML = '';
+    }
+  }
+
+  records = records.slice(0, 100);
   if (!records.length) {
-    const label = currentRankMode === 'infinity' ? (currentRankSubTab === 'infinity_conveyor' ? 'conveyor' : 'infinity') : (currentRankMode === 'speed' ? 'speed' : 'brain');
-    list.innerHTML = `<div class="rank-empty">No ${label} ranking yet.</div>`;
+    list.innerHTML = `<div class="rank-empty">No conveyor ranking yet.</div>`;
     return;
   }
-  list.innerHTML = records.map((r, i) => `
-    <div class="rank-row">
-      <div class="rank-pos">#${i+1}</div>
-      <div class="rank-name">${renderRankAvatarMarkup(r)}<span class="rank-name-text">${String(r.name || 'Guest').slice(0,10)}</span></div>
-      <div class="rank-stage">${r.label}</div>
-      <div class="rank-score">${Number(r.score || 0)}${r.unit || 'R'}</div>
-      <div class="rank-date">${r.date || ''}</div>
-    </div>
-  `).join('');
+  const highlightTs = pulse?.ts || 0;
+  const playerName = context?.profile?.name || getPlayerRankProfile().name || 'Guest';
+  list.innerHTML = records.map((r, i) => {
+    const isMe = String(r.name || '') === String(playerName);
+    const isHighlight = highlightTs && Number(r.ts || 0) === Number(highlightTs);
+    const isRival = currentRankSubTab === 'infinity_conveyor' && context?.aboveRow && Number(context.aboveRow.ts || 0) === Number(r.ts || 0);
+    return `
+      <div class="rank-row ${isMe ? 'rank-me' : ''} ${isHighlight ? 'rank-highlight' : ''} ${isRival ? 'rank-rival' : ''}">
+        <div class="rank-pos">#${i+1}</div>
+        <div class="rank-name">${renderRankAvatarMarkup(r)}<span class="rank-name-text">${String(r.name || 'Guest').slice(0,10)}</span></div>
+        <div class="rank-stage">${r.label}</div>
+        <div class="rank-score">${Number(r.score || 0)}${r.unit || 'R'}</div>
+        <div class="rank-date">${r.date || ''}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ══ 일일 미션 시스템 ══
+
 const DAILY_MISSION_KEY = STORAGE_KEYS.dailyMission;
 const DAILY_MISSION_DEFS = [
   { id:'play3', icon:'🎮', name:'3 More Games', desc:'Play 3 games today', target:3,
@@ -7540,8 +7678,16 @@ function showComboToast(n) {
     setTimeout(startGame, 400);
   };
   window.selectTrainingMode = function(mode) {
-    if (mode === 'speed') openSpeedStartPopup();
-    else openBrainModePopup();
+    if (mode === 'speed') {
+      openSpeedStartPopup();
+      return;
+    }
+    if (mode === 'conveyor') {
+      closeModeSelectPopup();
+      startSpeedConveyor();
+      return;
+    }
+    openBrainModePopup();
   };
 
   window.enterGame = function() {

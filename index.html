@@ -1090,6 +1090,25 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: aut
   .avatar-popup-option { min-height: 58px; }
   .avatar-popup-thumb { width: 46px; height: 46px; }
   .avatar-popup-emoji { font-size: 30px; }
+
+.profile-name-card.is-clickable,
+.profile-hero-card.is-clickable{cursor:pointer}
+.profile-name-edit{
+  margin-top:6px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:28px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:2px solid #d7b06b;
+  background:rgba(255,250,238,.92);
+  color:#8B2500;
+  font-size:13px;
+  font-weight:700;
+  box-shadow:0 2px 0 #caa35f;
+}
+
 }
 .mission-card-header {
   padding-right: 42px;
@@ -1343,7 +1362,7 @@ body.popup-open { overflow: hidden; overscroll-behavior: none; touch-action: aut
 
 /* ══ 이름 입력 팝업 ══ */
 .name-popup {
-  position: fixed; inset: 0; z-index: 300;
+  position: fixed; inset: 0; z-index: 9000;
   background: rgba(0,0,0,.75);
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
@@ -4018,7 +4037,7 @@ body.popup-open {
       </div>
       
       <div class="mission-open-wrap multi-tools-row">
-        <button class="mission-open-btn" onclick="openMissionPopup()">📅 Mission <span class="mission-open-meta" id="dailyStampCountMini">Daily 0 / 3 · Weekly 0 / 3</span></button>
+        <button class="mission-open-btn" onclick="openMissionPopup()">📅 Mission</button>
         <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 Profile</button>
         <button class="mission-open-btn profile-open-btn" onclick="openRanking()">🏆 Rank</button>
       </div>
@@ -4616,15 +4635,15 @@ body.popup-open {
 <!-- ══ 이름 입력 팝업 ══ -->
 <div class="name-popup" id="namePopup">
   <div class="name-card">
-    <div class="name-title">Save score</div>
+    <div class="name-title" id="nameTitle">Your Name</div>
     <div class="name-score" id="nameScore">0</div>
-    <div class="name-score-label">Round</div>
+    <div class="name-score-label" id="nameScoreLabel">Round</div>
     <input class="name-input" id="nameInput" type="text"
       placeholder="Name" maxlength="10"
       onkeydown="if(event.key==='Enter') confirmName()">
     <div class="name-btns">
-      <button class="name-confirm-btn" onclick="confirmName()">Save</button>
-      <button class="name-skip-btn" onclick="skipName()">Skip</button>
+      <button class="name-confirm-btn" id="nameConfirmBtn" onclick="confirmName()">Save</button>
+      <button class="name-skip-btn" id="nameSkipBtn" onclick="skipName()">Skip</button>
     </div>
   </div>
 </div>
@@ -5010,6 +5029,7 @@ let currentRankPeriod = 'all';
 let currentRankMode = 'brain';
 let currentRankSubTab = 'brain_normal';
 let currentSpeedRankPeriod = 'all';
+let reopenSpeedResultAfterHallRank = false;
 
 function getRanking() {
   try { return JSON.parse(localStorage.getItem(RANK_KEY) || '[]'); }
@@ -5035,6 +5055,14 @@ function getPlayerRankProfile() {
   return { name, avatar };
 }
 
+function ensurePlayerIdentity(force=false) {
+  if (!force && hasSavedPlayerName()) return true;
+  openNamePopup(0, '', { mode: force ? 'edit' : 'setup', showOverlayAfterSave:false, scoreUnit:'' });
+  return false;
+}
+window.openProfileNameEditor = function() {
+  openNamePopup(0, '', { mode:'edit', showOverlayAfterSave:false, scoreUnit:'' });
+};
 function addRankRecord(name, score, stageName) {
   const records = getRanking();
   const profile = getPlayerRankProfile();
@@ -5056,33 +5084,83 @@ function addRankRecord(name, score, stageName) {
   localStorage.setItem(PLAYER_NAME_KEY, cleanName);
 }
 
-function openNamePopup(score, stageName) {
-  window._finalScore = score;
-  window._finalStage = stageName;
-  document.getElementById('nameScore').textContent = score;
-  document.getElementById('nameInput').value = localStorage.getItem(PLAYER_NAME_KEY) || '';
+let namePopupMode = 'score';
+let pendingNameOverlay = false;
+
+function hasSavedPlayerName() {
+  return !!String(localStorage.getItem(PLAYER_NAME_KEY) || '').trim();
+}
+function sanitizePlayerName(value) {
+  return String(value || '').trim().slice(0, 10);
+}
+function openNamePopup(score, stageName, options = {}) {
+  const mode = options.mode || 'score';
+  namePopupMode = mode;
+  window._finalScore = Number(score || 0);
+  window._finalStage = stageName || window._finalStage || '';
+  pendingNameOverlay = !!options.showOverlayAfterSave;
+  const titleEl = document.getElementById('nameTitle');
+  const scoreEl = document.getElementById('nameScore');
+  const scoreLabelEl = document.getElementById('nameScoreLabel');
+  const confirmBtn = document.getElementById('nameConfirmBtn');
+  const skipBtn = document.getElementById('nameSkipBtn');
+  const input = document.getElementById('nameInput');
+  if (titleEl) titleEl.textContent = mode === 'setup' ? 'Choose Name' : (mode === 'edit' ? 'Edit Name' : 'Save score');
+  if (scoreEl) {
+    scoreEl.textContent = String(mode === 'score' ? Number(score || 0) : '');
+    scoreEl.style.display = mode === 'score' ? '' : 'none';
+  }
+  if (scoreLabelEl) {
+    scoreLabelEl.textContent = mode === 'score' ? (options.scoreUnit || 'Round') : 'This name will be used for ranking.';
+    scoreLabelEl.style.marginBottom = mode === 'score' ? '16px' : '8px';
+  }
+  if (confirmBtn) confirmBtn.textContent = mode === 'setup' ? 'Start' : 'Save';
+  if (skipBtn) skipBtn.style.display = mode === 'setup' ? 'none' : '';
+  if (input) {
+    input.value = localStorage.getItem(PLAYER_NAME_KEY) || '';
+    input.placeholder = mode === 'setup' ? 'Enter your name' : 'Name';
+  }
   document.getElementById('namePopup').classList.add('visible');
+  document.body.classList.add('popup-open');
   setTimeout(function() {
     var inp = document.getElementById('nameInput');
     if (inp) inp.focus();
   }, 50);
 }
 
-function confirmName() {
-  const name = document.getElementById('nameInput').value.trim() || 'Guest';
-  addRankRecord(name, window._finalScore, window._finalStage);
+function finishNamePopupFlow() {
   document.getElementById('namePopup').classList.remove('visible');
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = '';
-  overlay.classList.add('visible');
+  if (pendingNameOverlay) {
+    const overlay = document.getElementById('overlay');
+    overlay.style.display = '';
+    overlay.classList.add('visible');
+  }
+  if (!document.getElementById('profilePopup')?.classList.contains('visible')) {
+    document.body.classList.remove('popup-open');
+  }
   renderProfilePopup();
 }
 
+function confirmName() {
+  const name = sanitizePlayerName(document.getElementById('nameInput').value) || 'Guest';
+  localStorage.setItem(PLAYER_NAME_KEY, name);
+  if (namePopupMode === 'score') {
+    addRankRecord(name, window._finalScore, window._finalStage);
+  }
+  finishNamePopupFlow();
+}
+
 function skipName() {
+  if (namePopupMode === 'setup') return;
   document.getElementById('namePopup').classList.remove('visible');
-  const overlay = document.getElementById('overlay');
-  overlay.style.display = '';
-  overlay.classList.add('visible');
+  if (pendingNameOverlay) {
+    const overlay = document.getElementById('overlay');
+    overlay.style.display = '';
+    overlay.classList.add('visible');
+  }
+  if (!document.getElementById('profilePopup')?.classList.contains('visible')) {
+    document.body.classList.remove('popup-open');
+  }
   renderProfilePopup();
 }
 
@@ -5109,7 +5187,8 @@ function updateSpeedConveyorRanking(score) {
   saveSpeedConveyorRankList(list.slice(0, 100));
 }
 
-function openRanking() {
+function openRanking(options = {}) {
+  if (options && options.fromSpeedResult) reopenSpeedResultAfterHallRank = true;
   closeMissionPopup();
   closeStartPopup();
   currentRankMode = currentRankMode || 'brain';
@@ -5123,6 +5202,11 @@ function openRanking() {
 
 function closeRanking() {
   document.getElementById('rankPopup').classList.remove('visible');
+  if (reopenSpeedResultAfterHallRank) {
+    const resultPopup = document.getElementById('speedResultPopup');
+    if (resultPopup) resultPopup.classList.add('visible');
+    reopenSpeedResultAfterHallRank = false;
+  }
 }
 
 function getRankSubOptions(mode) {
@@ -5440,17 +5524,20 @@ function closeMissionPopup() {
 }
 
 function renderDailyMissions() {
-  const state = getDailyMissionState();
+  const rawState = getDailyMissionState();
+  const state = rawState && Array.isArray(rawState.missions) && rawState.missions.length === 3
+    ? rawState
+    : normalizeDailyState({});
   const completed = state.missions.filter(m => m.completed).length;
   const stamp = document.getElementById('dailyStampCount');
   const mini = document.getElementById('dailyStampCountMini');
   const list = document.getElementById('dailyMissionList');
   const foot = document.getElementById('dailyMissionFoot');
-  if (!stamp || !mini || !list || !foot) return;
+  if (!stamp || !list || !foot) return;
 
-  stamp.textContent = `Daily ${completed} / ${state.missions.length} done · Total ${state.clearedDays} days`;
-  mini.textContent = `Daily ${completed} / ${state.missions.length} · Weekly ${getWeeklyMissionState().missions.filter(m => m.completed).length}/3`;
-  list.innerHTML = state.missions.map(m => {
+  stamp.textContent = `Daily ${completed}/3`;
+  if (mini) mini.textContent = `Daily ${completed}/3`;
+  const itemsHtml = state.missions.map(m => {
     const def = getDailyMissionDef(m.id);
     if (!def) return '';
     return `
@@ -5462,7 +5549,8 @@ function renderDailyMissions() {
         </div>
         <div class="daily-item-progress">${m.completed ? 'Done' : missionProgressText(def, state.progress)}</div>
       </div>`;
-  }).join('');
+  }).filter(Boolean).join('');
+  list.innerHTML = itemsHtml || '<div class="daily-item"><div class="daily-item-main"><div class="daily-item-name">Daily missions are loading.</div><div class="daily-item-desc">Open the popup once more if this stays empty.</div></div><div class="daily-item-progress">-</div></div>';
 
   foot.textContent = state.dayCleared
     ? `All 3 daily missions cleared. ⭐ ${DAILY_POINT_REWARD}P done · Total ${state.clearedDays} days`
@@ -5527,6 +5615,20 @@ const MONTHLY_MISSION_KEY = STORAGE_KEYS.monthlyMission;
 const PROFILE_STATS_KEY = STORAGE_KEYS.profileStats;
 const PROFILE_AVATAR_KEY = STORAGE_KEYS.profileAvatar;
 const PROFILE_AVATAR_OPTIONS = [
+  { id:'img_f0', type:'image', value:'female_0.png', name:'Girl 1', rankSymbol:'👩' },
+  { id:'img_m0', type:'image', value:'male_0.png', name:'Boy 1', rankSymbol:'👨' },
+  { id:'img_f1', type:'image', value:'female_1.png', name:'Girl 2', rankSymbol:'👩' },
+  { id:'img_m1', type:'image', value:'male_1.png', name:'Boy 2', rankSymbol:'👨' },
+  { id:'img_f2', type:'image', value:'female_2.png', name:'Girl 3', rankSymbol:'👩' },
+  { id:'img_m2', type:'image', value:'male_2.png', name:'Boy 3', rankSymbol:'👨' },
+  { id:'img_f3', type:'image', value:'female_3.png', name:'Girl 4', rankSymbol:'👩' },
+  { id:'img_m3', type:'image', value:'male_3.png', name:'Boy 4', rankSymbol:'👨' },
+  { id:'img_f4', type:'image', value:'female_4.png', name:'Girl 5', rankSymbol:'👩' },
+  { id:'img_m4', type:'image', value:'male_4.png', name:'Boy 5', rankSymbol:'👨' },
+  { id:'img_f5', type:'image', value:'female_5.png', name:'Girl 6', rankSymbol:'👩' },
+  { id:'img_m5', type:'image', value:'male_5.png', name:'Boy 6', rankSymbol:'👨' },
+  { id:'img_f6', type:'image', value:'female_6.png', name:'Girl 7', rankSymbol:'👩' },
+  { id:'img_m6', type:'image', value:'male_6.png', name:'Boy 7', rankSymbol:'👨' },
   { id:'emoji_1', type:'emoji', value:'👨🏻', name:'Light Man', rankSymbol:'👨🏻' },
   { id:'emoji_2', type:'emoji', value:'👩🏻', name:'Light Woman', rankSymbol:'👩🏻' },
   { id:'emoji_3', type:'emoji', value:'👨', name:'Neutral Man', rankSymbol:'👨' },
@@ -5538,10 +5640,6 @@ const PROFILE_AVATAR_OPTIONS = [
   { id:'emoji_9', type:'emoji', value:'🧑', name:'Person', rankSymbol:'🧑' },
   { id:'emoji_10', type:'emoji', value:'👦', name:'Boy', rankSymbol:'👦' },
   { id:'emoji_11', type:'emoji', value:'👧', name:'Girl', rankSymbol:'👧' },
-  { id:'img_f0', type:'image', value:'female_0.png', name:'Game Woman', rankSymbol:'👩' },
-  { id:'img_m0', type:'image', value:'male_0.png', name:'Game Man', rankSymbol:'👨' },
-  { id:'img_f3', type:'image', value:'female_3.png', name:'Game Woman 2', rankSymbol:'👩' },
-  { id:'img_m3', type:'image', value:'male_3.png', name:'Game Man 2', rankSymbol:'👨' },
   { id:'emoji_12', type:'emoji', value:'🐶', name:'Dog', rankSymbol:'🐶' },
   { id:'emoji_13', type:'emoji', value:'🐱', name:'Cat', rankSymbol:'🐱' },
   { id:'emoji_14', type:'emoji', value:'🐼', name:'Panda', rankSymbol:'🐼' },
@@ -5791,11 +5889,17 @@ function renderProfilePopup() {
   if (foot) foot.textContent = '';
 
   if (hero) {
+    const currentName = sanitizePlayerName(localStorage.getItem(PLAYER_NAME_KEY)) || 'Guest';
     hero.innerHTML = `
       <button type="button" class="profile-hero-card profile-avatar-card is-clickable" onclick="openAvatarPickerPopup()" aria-label="Pick Avatar">
         <div class="profile-hero-label">Avatar</div>
         <div class="profile-avatar-visual-wrap">${renderAvatarVisual(avatarMeta, avatarMeta.type === 'image' ? 'profile-avatar-img' : 'profile-avatar-emoji')}</div>
         <div class="profile-avatar-hint">Tap to change</div>
+      </button>
+      <button type="button" class="profile-hero-card profile-name-card is-clickable" onclick="openProfileNameEditor()" aria-label="Edit Name">
+        <div class="profile-hero-label">Name</div>
+        <div class="profile-hero-value">${currentName}</div>
+        <div class="profile-name-edit">Tap to edit</div>
       </button>
       <div class="profile-hero-card">
         <div class="profile-hero-label">Best</div>
@@ -6876,7 +6980,7 @@ function gameOver(stageCleared = false) {
   window.setTimeout(() => {
     try {
       if (brainInfiniteActive) {
-        openNamePopup(window._finalScore, window._finalStage);
+        openNamePopup(window._finalScore, window._finalStage, { mode:'score', showOverlayAfterSave:true, scoreUnit:'Round' });
       } else {
         const overlay = document.getElementById('overlay');
         if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
@@ -7154,6 +7258,10 @@ function showComboToast(n) {
     defs.push({ id:'infinite_hard_20', label:'Infinite Hard 20R', unlocked:false });
     defs.push({ id:'infinite_round_10', label:'Infinite Infinite 10R', unlocked:false });
     defs.push({ id:'infinite_round_20', label:'Infinite Infinite 20R', unlocked:false });
+    defs.push({ id:'conveyor_10', label:'Conveyor 10T', unlocked:false });
+    defs.push({ id:'conveyor_25', label:'Conveyor 25T', unlocked:false });
+    defs.push({ id:'conveyor_50', label:'Conveyor 50T', unlocked:false });
+    defs.push({ id:'conveyor_100', label:'Conveyor 100T', unlocked:false });
     const owned = getSpeedBadges();
     return defs.map(d => ({ ...d, unlocked: owned.some(x => x.id === d.id) }));
   }
@@ -7945,6 +8053,10 @@ function showComboToast(n) {
     const infiniteLabel = speedState.infiniteMode === 'hard' ? 'Hard' : (speedState.infiniteMode === 'round' ? 'Infinite' : 'Normal');
     if (speedState.type === 'infinite' && score >= 10) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_10`, `${infiniteLabel} 10R`);
     if (speedState.type === 'infinite' && score >= 20) newBadges += addSpeedBadge(`infinite_${speedState.infiniteMode}_20`, `${infiniteLabel} 20R`);
+    if (speedState.type === 'conveyor' && score >= 10) newBadges += addSpeedBadge('conveyor_10', 'Conveyor 10T');
+    if (speedState.type === 'conveyor' && score >= 25) newBadges += addSpeedBadge('conveyor_25', 'Conveyor 25T');
+    if (speedState.type === 'conveyor' && score >= 50) newBadges += addSpeedBadge('conveyor_50', 'Conveyor 50T');
+    if (speedState.type === 'conveyor' && score >= 100) newBadges += addSpeedBadge('conveyor_100', 'Conveyor 100T');
     if (newBadges > 0 && typeof addPoints === 'function') addPoints(newBadges, 'Speed Badge');
 
     const title = document.getElementById('speedResultTitle');
@@ -7973,11 +8085,19 @@ function showComboToast(n) {
             : `${resultLabel} · Best ${best}R`);
     }
     if (badgeInfo) badgeInfo.textContent = speedState.type === 'conveyor'
-      ? (speedState.remaining <= 0 ? 'Time up' : 'Miss')
+      ? `${speedState.remaining <= 0 ? 'Time up' : 'Miss'} · New Badge ${newBadges} · Total ${getSpeedBadges().length}`
       : `New Badge ${newBadges} · Total ${getSpeedBadges().length}`;
     if (nextBtn) nextBtn.style.display = (speedState.type === 'stage' && success && stageIndexFor(speedState.selectedKeyCount, speedState.selectedLevelIdx) < 27) ? '' : 'none';
-    if (rankBtn) rankBtn.style.display = speedState.type === 'conveyor' ? 'none' : '';
-    if (badgeBtn) badgeBtn.style.display = speedState.type === 'conveyor' ? 'none' : '';
+    if (rankBtn) {
+      rankBtn.style.display = '';
+      rankBtn.onclick = speedState.type === 'conveyor'
+        ? function(){ document.getElementById('speedResultPopup')?.classList.remove('visible'); currentRankMode='infinity'; currentRankSubTab='infinity_conveyor'; currentRankPeriod='all'; openRanking({ fromSpeedResult:true }); }
+        : function(){ openSpeedInfiniteRanking(); };
+    }
+    if (badgeBtn) {
+      badgeBtn.style.display = '';
+      badgeBtn.onclick = function(){ openSpeedBadgePopup(); };
+    }
     document.getElementById('speedResultPopup')?.classList.add('visible');
   }
   window.restartSpeedCurrent = function() {
@@ -8138,6 +8258,7 @@ function showComboToast(n) {
       if (id.includes('normal')) return '⚡';
       if (id.includes('hard')) return '🔥';
       if (id.includes('round')) return '🌀';
+      if (id.includes('conveyor')) return '🛤️';
       return '🏅';
     };
     if (root) {
@@ -8219,6 +8340,15 @@ function showComboToast(n) {
   renderSpeedKeyOptions();
   renderSpeedLevelOptions();
   updateSpeedStageSummary();
+
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    try {
+      ensurePlayerIdentity(false);
+    } catch (e) {}
+  }, 240);
+});
+
 })();
 </script>
 
@@ -8340,6 +8470,15 @@ window.speedGoHome = window.speedGoHome || function(){
       if (fn) fn();
     }, true);
   });
+
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    try {
+      ensurePlayerIdentity(false);
+    } catch (e) {}
+  }, 240);
+});
+
 })();
 </script>
 
@@ -8357,6 +8496,31 @@ window.speedGoHome = window.speedGoHome || function(){
       e.stopPropagation();
     }, true);
   });
+
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    try {
+      ensurePlayerIdentity(false);
+    } catch (e) {}
+  }, 240);
+});
+
+})();
+</script>
+
+
+<script>
+(function(){
+  function ensureInitialNamePopup(){
+    try {
+      if (typeof ensurePlayerIdentity === 'function') ensurePlayerIdentity(false);
+    } catch(e) {}
+  }
+  if (document.readyState === 'complete') {
+    setTimeout(ensureInitialNamePopup, 300);
+  } else {
+    window.addEventListener('load', function(){ setTimeout(ensureInitialNamePopup, 300); }, { once:true });
+  }
 })();
 </script>
 

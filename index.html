@@ -4020,7 +4020,7 @@ body.popup-open {
       <div class="mission-open-wrap multi-tools-row">
         <button class="mission-open-btn" onclick="openMissionPopup()">📅 Mission <span class="mission-open-meta" id="dailyStampCountMini">Daily 0 / 3 · Weekly 0 / 3</span></button>
         <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 Profile</button>
-        <button class="mission-open-btn profile-open-btn" onclick="openRanking()">🏆 Hall of Fame</button>
+        <button class="mission-open-btn profile-open-btn" onclick="openRanking()">🏆 Rank</button>
       </div>
     </div>
 
@@ -4196,7 +4196,7 @@ body.popup-open {
           <div class="mode-choice-desc">Mode + Level</div>
           <div class="mode-choice-meta">Clear route</div>
         </button>
-        <div class="speed-stage-note" id="brainStageNote">Baby ~ Grad · Progress route</div>
+        <div class="speed-stage-note" id="brainStageNote">Baby 5R · Kinder 7R · School 10R</div>
         <div class="speed-start-actions">
           <button class="speed-ghost-btn" onclick="closeBrainModePopup()">Close</button>
           <button class="speed-primary-btn" onclick="openBrainStageFromPopup()">Open Stage</button>
@@ -4633,7 +4633,7 @@ body.popup-open {
 <div class="rank-popup" id="rankPopup" onclick="if(event.target===this) closeRanking()">
   <div class="rank-card hall-card">
     <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
-    <div class="rank-header">🏆 Hall of Fame</div>
+    <div class="rank-header">🏆 Rank</div>
     <div class="rank-subline">Stage mode is excluded from ranking.</div>
     <div class="rank-tabs rank-mode-grid">
       <button class="rank-tab active" id="rankModeBrain" onclick="setRankMode('brain')">BRAIN</button>
@@ -5900,6 +5900,10 @@ function getUnlockedStageMap() {
 let unlockedStageMap = getUnlockedStageMap();
 function getModeConfig(mode = difficulty) { return MODE_DEFS[mode] || MODE_DEFS.easy; }
 function getSelectedLevel() { return LEVELS[selectedLevelIdx] || LEVELS[0]; }
+function getBrainStageClearTarget(level = getSelectedLevel()) {
+  if (!level) return 10;
+  return Number(level.unlockScore != null ? level.unlockScore : 20);
+}
 function getUnlockedStageIdx(mode = difficulty) {
   const raw = Number(unlockedStageMap[mode]);
   if (Number.isNaN(raw)) return 0;
@@ -6689,6 +6693,15 @@ function handleInput(shape) {
       b.classList.add('correct');
       safeTimeout(() => b.classList.remove('correct'), 380);
     });
+    if (!brainInfiniteActive) {
+      const clearTarget = getBrainStageClearTarget();
+      if (round >= clearTarget) {
+        gameState = STATE.GAMEOVER;
+        setStatus('Stage clear.');
+        safeTimeout(() => gameOver(true), Math.max(220, Math.min(420, getDifficultyConfig().nextRoundDelay)));
+        return;
+      }
+    }
     setStatus('Good.');
     safeTimeout(nextRound, getDifficultyConfig().nextRoundDelay);
   }
@@ -6761,7 +6774,7 @@ function declineSecondChance() {
   safeTimeout(() => gameOver(), 60);
 }
 
-function gameOver() {
+function gameOver(stageCleared = false) {
   clearAllTimers();
   hideSecondChancePopup();
   pendingRetry = false;
@@ -6791,13 +6804,14 @@ function gameOver() {
 
   const msgs = MSGS[stage.name] || DEFAULT_MSGS;
   let msg = msgs[Math.floor(Math.random() * msgs.length)];
-  if (newBest && finalScore > 0) msg = 'New record. Great pace.';
+  if (!brainInfiniteActive && stageCleared) msg = 'Stage clear. Nice run.';
+  else if (newBest && finalScore > 0) msg = 'New record. Great pace.';
   else if (finalScore >= 15) msg = 'That was really good.';
   else if (finalScore >= 10) msg = 'A bit more for top rank.';
 
   document.getElementById('resultStageEmoji').textContent = brainInfiniteActive ? '♾️' : stage.emoji;
   document.getElementById('resultStageName').textContent = brainInfiniteActive ? finalStage : (finalStage + ' Level');
-  document.getElementById('resultLine').textContent = brainInfiniteActive ? `Mode ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Infinite · ${getModeConfig().buttons} Keys` : `Now ${modeLabel} · ${finalStage} · ${getModeConfig().buttons} Keys`;
+  document.getElementById('resultLine').textContent = brainInfiniteActive ? `Mode ${brainLimitMode === 'hard' ? 'Hard' : 'Normal'} · Infinite · ${getModeConfig().buttons} Keys` : `${stageCleared ? 'Clear' : 'Now'} · ${modeLabel} · ${finalStage} · ${getModeConfig().buttons} Keys`;
   document.getElementById('resultRound').textContent = finalScore;
   document.getElementById('resultBest').innerHTML = `Best Record <span>${brainInfiniteActive ? getBrainLimitBest() : best}</span> Rounds${newBest ? ' 🎉' : ''}`;
   document.getElementById('resultSeq').textContent = sequence.map(f => EMOJI[f]).join(' ');
@@ -6827,7 +6841,7 @@ function gameOver() {
   const rankBtn = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
   if (rankBtn) rankBtn.style.display = brainInfiniteActive ? '' : 'none';
   const nextBtn = document.querySelector('.result-action-row .result-next-btn');
-  if (nextBtn) nextBtn.style.display = brainInfiniteActive ? 'none' : '';
+  if (nextBtn) nextBtn.style.display = brainInfiniteActive ? 'none' : (stageCleared ? '' : 'none');
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
   const dailyTotalCount = missionUpdate.state.missions.length;
 
@@ -6931,7 +6945,8 @@ function goToNextStage() {
 
 function updateStageUI() {
   const stage = getSelectedLevel();
-  document.getElementById('stageBadge').textContent = `${stage.emoji} ${getDifficultyConfig().label} · ${stage.name} · ${getModeConfig().buttons} Keys`; syncPlaySpeedUI();
+  const clearTarget = getBrainStageClearTarget(stage);
+  document.getElementById('stageBadge').textContent = `${stage.emoji} ${getDifficultyConfig().label} · ${stage.name} · ${getModeConfig().buttons} Keys · Goal ${clearTarget}R`; syncPlaySpeedUI();
 
   // x경 씬 전환
   if (stage.scene !== currentSceneIdx) {

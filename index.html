@@ -5326,7 +5326,17 @@ function openRanking(options = {}) {
   currentRankPeriod = currentRankPeriod || 'all';
   setRankPeriod(currentRankPeriod, true);
   renderRanking();
+  try {
+    if ((typeof currentRankMode !== 'undefined' && currentRankMode === 'infinity') || (typeof currentRankSubTab !== 'undefined' && currentRankSubTab === 'infinity_conveyor')) {
+      __forceRefreshConveyorServerRanks();
+    }
+  } catch (e) {}
   document.getElementById('rankPopup').classList.add('visible');
+  try {
+    if ((typeof currentRankMode !== 'undefined' && currentRankMode === 'infinity') || (typeof currentRankSubTab !== 'undefined' && currentRankSubTab === 'infinity_conveyor')) {
+      __forceRefreshConveyorServerRanks();
+    }
+  } catch (e) {}
 }
 
 function closeRanking() {
@@ -5365,6 +5375,11 @@ function setRankMode(mode, skipRender) {
 
   refreshRankSubTabs();
   if (!skipRender) renderRanking();
+  try {
+    if ((typeof currentRankMode !== 'undefined' && currentRankMode === 'infinity') || (typeof currentRankSubTab !== 'undefined' && currentRankSubTab === 'infinity_conveyor')) {
+      __forceRefreshConveyorServerRanks();
+    }
+  } catch (e) {}
 }
 
 function setRankSubTab(tab) {
@@ -6507,8 +6522,8 @@ function initAudio() {
   return audioCtx;
 }
 
-const SOUND_BOOST = 3.2;
-const SOUND_MAX_GAIN = 0.22;
+const SOUND_BOOST = 1.9;
+const SOUND_MAX_GAIN = 0.09;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
 
@@ -6538,16 +6553,14 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.09, 'triangle', 0.11);
-      playTone(659, 0.11, 'triangle', 0.10, 0.06);
+      playTone(523, 0.08, 'triangle', 0.055);
+      playTone(659, 0.10, 'triangle', 0.05, 0.06);
       break;
     case 'light':
-      // Brain 문제 제시/시퀀스음 크게
-      playTone(660, 0.075, 'sine', 0.14);
+      playTone(660, 0.06, 'sine', 0.036);
       break;
     case 'tap':
-      // 클릭/터치음 2배 수준 상향
-      playTone(540, 0.07, 'triangle', 0.15);
+      playTone(540, 0.05, 'triangle', 0.05);
       break;
     case 'correct':
       playTone(523, 0.05, 'triangle', 0.045);
@@ -7363,13 +7376,17 @@ function showComboToast(n) {
 // 타이틀에서 시작버튼으로 진입
 
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -8693,13 +8710,17 @@ window.addEventListener('load', function() {
 
 })();
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -8762,13 +8783,17 @@ document.addEventListener('pointerdown', (e) => {
 })();
 
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -8841,13 +8866,17 @@ window.addEventListener('load', function() {
 
 })();
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -8876,13 +8905,17 @@ window.addEventListener('load', function() {
 
 })();
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -8904,13 +8937,17 @@ document.addEventListener('pointerdown', (e) => {
   }
 })();
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -8927,34 +8964,46 @@ window.addEventListener('DOMContentLoaded', function(){
   }, 450);
 }, { once:true });
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
 <script src="./js/config.js">
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 <script type="module" src="./js/game-connect.js">
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -8994,13 +9043,17 @@ window.getSpeedDelay = function() {
   return Math.max(300, 800 - (speedState.score || 0) * 2);
 };
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -9033,13 +9086,17 @@ function renderMyRankSummary(rank, total) {
   `;
 }
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 
@@ -9183,13 +9240,17 @@ document.addEventListener('pointerdown', (e) => {
 })();
 
 
-document.addEventListener('pointerdown', (e) => {
-  const modeBtn = e.target.closest('.mode-chip');
-  if (!modeBtn) return;
+function __forceRefreshConveyorServerRanks() {
   try {
-    if (typeof playUiSound === 'function') playUiSound('tap');
-  } catch (err) {}
-}, true);
+    if (typeof refreshConveyorRankingAndRender === 'function') {
+      refreshConveyorRankingAndRender(true).catch(() => {});
+      return;
+    }
+    if (typeof refreshCurrentServerRankingAndRender === 'function') {
+      refreshCurrentServerRankingAndRender(true).catch(() => {});
+    }
+  } catch (e) {}
+}
 
 </script>
 

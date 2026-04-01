@@ -5404,7 +5404,7 @@ function saveSpeedConveyorRankList(arr) {
 }
 function getConveyorRankingRecordsRaw() {
   const serverRows = getConveyorServerCache(currentRankPeriod);
-  if (Array.isArray(serverRows) && serverRows.length) return serverRows.slice();
+  if (Array.isArray(serverRows)) return serverRows.slice();
   return getSpeedConveyorRankList().map(r => ({
     name: r.name || 'Guest',
     avatar: r.avatar || '🙂',
@@ -5547,6 +5547,9 @@ function setRankMode(mode, skipRender) {
 
   refreshRankSubTabs();
   if (!skipRender) renderRanking();
+  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
+    refreshConveyorRankingAndRender(false);
+  }
 }
 
 function setRankSubTab(tab) {

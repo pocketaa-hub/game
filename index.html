@@ -65,7 +65,12 @@ body {
   .speed-chip-note { font-size: 11px; }
 }
 
+
 audio#bgm { display: none; }
+button, .mode-chip, .feedback-chip, .speed-chip, .speed-key-btn, .speed-level-btn, .start-btn, .restart-btn, .result-next-btn, .mission-tab, .modal-x-btn {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 
 /* ── 게임 컨테이너 ── */
 .game-wrapper {
@@ -6627,7 +6632,7 @@ function resumeLastPlay() {
   goToStageStep();
 }
 function openStartPopup() {
-  initAudio();
+  unlockAudioForMobile();
   playUiSound('tap');
   renderModeOptions();
   renderLevelOptions();
@@ -6643,7 +6648,7 @@ function closeStartPopup() {
 function enterGame() { openModeSelectPopup(); }
 function confirmStartGame() {
   brainInfiniteActive = false;
-  initAudio();
+  unlockAudioForMobile();
   playUiSound('start');
   pulseVibration([14, 24, 16]);
   saveProgressState();
@@ -6726,6 +6731,11 @@ function goHome() {
 }
 
 // ══ 소리 / 진동 시스템 ══
+// SOUND ASSET RECOMMENDATION:
+// tap: soft wood/click 느낌의 40~70ms UI click
+// wrong: 짧은 low buzz / error tone 80~120ms
+// warning: 아주 약한 tick 또는 미사용
+// 현재는 모두 코드 생성음으로 자동 최적화됨
 const SOUND_KEY = STORAGE_KEYS.soundOn;
 const VIBE_KEY = STORAGE_KEYS.vibrationOn;
 let soundOn = localStorage.getItem(SOUND_KEY) !== '0';
@@ -6744,10 +6754,48 @@ function initAudio() {
   return audioCtx;
 }
 
-const SOUND_BOOST = 1.9;
-const SOUND_MAX_GAIN = 0.09;
+
+function primeAudio() {
+  const ctx = initAudio();
+  if (!ctx || audioPrimed) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.value = 0.0001;
+    osc.frequency.value = 440;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const now = ctx.currentTime;
+    osc.start(now);
+    osc.stop(now + 0.01);
+    audioPrimed = true;
+  } catch (e) {}
+}
+
+function unlockAudioForMobile() {
+  initAudio();
+  primeAudio();
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(()=>{});
+  }
+}
+
+const SOUND_BOOST = 1.55;
+const SOUND_MAX_GAIN = 0.075;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isMobileAudio = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+const MOBILE_SFX_ATTENUATION = isMobileAudio ? 0.9 : 1;
+const SOUND_PROFILE = {
+  master: 1,
+  ui: 0.78,
+  start: 0.9,
+  correct: 0.82,
+  wrong: 0.92,
+  warning: 0.44,
+  gameover: 0.78
+};
 const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
+let audioPrimed = false;
 
 function triggerHapticFallback() {}
 
@@ -6759,7 +6807,7 @@ function playTone(freq=440, duration=0.08, type='sine', volume=0.03, startDelay=
   const now = ctx.currentTime + startDelay;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
-  const targetVolume = Math.min(volume * SOUND_BOOST, SOUND_MAX_GAIN);
+  const targetVolume = Math.min(volume * SOUND_BOOST * MOBILE_SFX_ATTENUATION * SOUND_PROFILE.master, SOUND_MAX_GAIN);
   osc.type = type;
   osc.frequency.setValueAtTime(freq, now);
   gain.gain.setValueAtTime(0.0001, now);
@@ -6775,40 +6823,43 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.08, 'triangle', 0.055);
-      playTone(659, 0.10, 'triangle', 0.05, 0.06);
+      playTone(523, 0.07, 'triangle', 0.05 * SOUND_PROFILE.start);
+      playTone(659, 0.09, 'triangle', 0.045 * SOUND_PROFILE.start, 0.055);
       break;
     case 'light':
-      playTone(660, 0.06, 'sine', 0.036);
+      playTone(660, 0.045, 'sine', 0.022 * SOUND_PROFILE.warning);
+      break;
+    case 'warning':
+      playTone(720, 0.035, 'sine', 0.02 * SOUND_PROFILE.warning);
       break;
     case 'tap':
-      playTone(540, 0.05, 'triangle', 0.05);
+      playTone(540, 0.04, 'triangle', 0.032 * SOUND_PROFILE.ui);
       break;
     case 'correct':
-      playTone(523, 0.05, 'triangle', 0.045);
-      playTone(659, 0.08, 'triangle', 0.042, 0.05);
+      playTone(523, 0.045, 'triangle', 0.038 * SOUND_PROFILE.correct);
+      playTone(659, 0.065, 'triangle', 0.034 * SOUND_PROFILE.correct, 0.045);
       break;
     case 'wrong':
-      playTone(240, 0.12, 'sawtooth', 0.055);
-      playTone(180, 0.16, 'sawtooth', 0.05, 0.04);
+      playTone(208, 0.07, 'square', 0.045 * SOUND_PROFILE.wrong);
+      playTone(156, 0.10, 'sawtooth', 0.038 * SOUND_PROFILE.wrong, 0.04);
       break;
     case 'combo':
-      playTone(659, 0.05, 'triangle', 0.045);
-      playTone(784, 0.07, 'triangle', 0.042, 0.05);
-      playTone(988, 0.09, 'triangle', 0.04, 0.11);
+      playTone(659, 0.05, 'triangle', 0.04 * SOUND_PROFILE.correct);
+      playTone(784, 0.07, 'triangle', 0.038 * SOUND_PROFILE.correct, 0.05);
+      playTone(988, 0.08, 'triangle', 0.034 * SOUND_PROFILE.correct, 0.11);
       break;
     case 'badge':
-      playTone(784, 0.07, 'triangle', 0.045);
-      playTone(988, 0.08, 'triangle', 0.042, 0.06);
-      playTone(1175, 0.12, 'triangle', 0.036, 0.12);
+      playTone(784, 0.07, 'triangle', 0.04 * SOUND_PROFILE.correct);
+      playTone(988, 0.08, 'triangle', 0.036 * SOUND_PROFILE.correct, 0.06);
+      playTone(1175, 0.11, 'triangle', 0.03 * SOUND_PROFILE.correct, 0.12);
       break;
     case 'mission':
-      playTone(587, 0.06, 'triangle', 0.045);
-      playTone(784, 0.08, 'triangle', 0.042, 0.07);
+      playTone(587, 0.05, 'triangle', 0.038 * SOUND_PROFILE.correct);
+      playTone(784, 0.07, 'triangle', 0.034 * SOUND_PROFILE.correct, 0.06);
       break;
     case 'gameover':
-      playTone(330, 0.1, 'triangle', 0.04);
-      playTone(262, 0.18, 'triangle', 0.042, 0.08);
+      playTone(330, 0.09, 'triangle', 0.032 * SOUND_PROFILE.gameover);
+      playTone(262, 0.16, 'triangle', 0.034 * SOUND_PROFILE.gameover, 0.08);
       break;
   }
 }
@@ -6891,7 +6942,10 @@ function toggleBgm() {
   }
 }
 
-document.addEventListener('pointerdown', () => { ensureBgmReady(); initAudio(); }, { passive:true, once:true });
+document.addEventListener('pointerdown', () => { ensureBgmReady(); unlockAudioForMobile(); }, { passive:true, once:true });
+document.addEventListener('touchstart', () => { ensureBgmReady(); unlockAudioForMobile(); }, { passive:true, once:true });
+document.addEventListener('click', () => { unlockAudioForMobile(); }, { passive:true, once:true });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) unlockAudioForMobile(); });
 
 document.addEventListener('click', (e) => {
   const popup = document.getElementById('missionPopup');
@@ -6903,6 +6957,15 @@ document.addEventListener('click', (e) => {
   const startPopup = document.getElementById('startPopup');
   if (startPopup && e.target === startPopup) closeStartPopup();
 });
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn, .result-next-btn, .rank-open-btn, .badge-open-btn, .mission-open-btn, .modal-x-btn, .speed-key-btn, .speed-level-btn, .speed-chip, .mission-tab, .profile-avatar-option, .avatar-popup-option, #brainModeTabStage, #brainModeTabInfinite, #speedStartBtn, #speedPauseBtn, #speedResumeBtn, #speedGiveUpBtn');
+  if (!btn) return;
+  if (btn.closest('#grid') || btn.closest('#speedGrid') || btn.classList.contains('btn') || btn.classList.contains('speed-play-btn')) return;
+  unlockAudioForMobile();
+  playUiSound('tap');
+}, { passive:true });
+
 
 // ── 메시지 정의 ──
 const MSGS = {
@@ -7067,7 +7130,7 @@ document.querySelectorAll('.btn').forEach(b => {
 });
 
 document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn, .result-next-btn, .rank-open-btn, .badge-open-btn, .mission-open-btn, .modal-x-btn').forEach(el => {
-  el.addEventListener('pointerdown', () => { initAudio(); }, { passive:true });
+  el.addEventListener('pointerdown', () => { unlockAudioForMobile(); playUiSound('tap'); }, { passive:true });
 });
 
 function safeTimeout(fn, delay) {
@@ -8280,12 +8343,12 @@ function showComboToast(n) {
     if (label) label.textContent = 'Time';
   }
   function maybePlayCountdown() {
+    if (speedState.type === 'conveyor') return;
     const sec = Math.ceil(speedState.remaining);
-    if (speedState.remaining > 10 || speedState.remaining <= 0) return;
+    if (speedState.remaining > 5 || speedState.remaining <= 0) return;
     if (speedState.tickSecond === sec) return;
     speedState.tickSecond = sec;
-    if (sec <= 5) playUiSound?.('wrong');
-    else playUiSound?.('light');
+    if (sec === 3 || sec === 1) playUiSound?.('warning');
   }
   function stopSpeedTimer() {
     if (speedState.timer) clearInterval(speedState.timer);

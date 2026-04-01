@@ -65,7 +65,12 @@ body {
   .speed-chip-note { font-size: 11px; }
 }
 
+
 audio#bgm { display: none; }
+button, .mode-chip, .feedback-chip, .speed-chip, .speed-key-btn, .speed-level-btn, .start-btn, .restart-btn, .result-next-btn, .mission-tab, .modal-x-btn {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
 
 /* ── 게임 컨테이너 ── */
 .game-wrapper {
@@ -1488,7 +1493,7 @@ body.second-chance-open .speed-screen #speedGrid {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   display:flex; align-items:center; gap:6px;
 }
-.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;object-position:center 18%;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
+.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;object-position:center 8%;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
 .rank-avatar-emoji{font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px}
 .rank-name-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .rank-stage {
@@ -4512,7 +4517,7 @@ body.popup-open {
     <button class="modal-x-btn" onclick="speedGoHome()" aria-label="Close">✕</button>
     <div class="speed-top-card">
       <div class="signboard">
-        <div class="sign-title">Speed Training</div>
+        <div class="sign-title" id="speedScreenTitle">Speed Training</div>
         <div class="sign-sub" id="speedScreenSub"></div>
       </div>
       <div class="speed-stage-badge" id="speedStageBadge">🍼 Baby · 3 Keys</div>
@@ -4712,8 +4717,8 @@ body.popup-open {
 <div class="rank-popup" id="rankPopup" onclick="if(event.target===this) closeRanking()">
   <div class="rank-card hall-card">
     <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
-    <div class="rank-header">🏆 Conveyor Rank</div>
-    <div class="rank-subline">Conveyor only · Taps ranking.</div>
+    <div class="rank-header" id="rankHeader">🏆 Conveyor Rank</div>
+    <div class="rank-subline" id="rankSubline">Conveyor only · Taps ranking.</div>
     <div class="rank-tabs rank-sub-grid" id="rankSubTabs" style="display:none;"></div>
     <div class="rank-tabs rank-period-tabs">
       <button class="rank-tab" id="rankPeriodTabWeekly" onclick="setRankPeriod('weekly')">Weekly</button>
@@ -5089,6 +5094,172 @@ let currentRankMode = 'brain';
 let currentRankSubTab = 'brain_normal';
 let currentSpeedRankPeriod = 'all';
 let reopenSpeedResultAfterHallRank = false;
+const SUPABASE_URL = 'https://idjrbowbnfeqqqagvepb.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_pjbwFYprfJtt5K4NWCvUNw_7ZvyJVCl';
+const SUPABASE_TABLE_RANKINGS = 'game_rankings';
+const conveyorServerRankCache = { all: null, weekly: null, monthly: null };
+let conveyorServerFetchInFlight = null;
+
+function getSupabaseHeaders() {
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json'
+  };
+}
+function formatDateKeyFromTs(ts) {
+  try { return new Date(Number(ts || Date.now())).toLocaleDateString('sv-SE'); }
+  catch(e) { return ''; }
+}
+function getConveyorServerCache(period = 'all') {
+  const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
+  return Array.isArray(conveyorServerRankCache[key]) ? conveyorServerRankCache[key].slice() : null;
+}
+function setConveyorServerCache(period, rows) {
+  const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
+  conveyorServerRankCache[key] = Array.isArray(rows) ? rows.slice() : [];
+}
+function clearConveyorServerCache() {
+  conveyorServerRankCache.all = null;
+  conveyorServerRankCache.weekly = null;
+  conveyorServerRankCache.monthly = null;
+}
+function parseStoredAvatarPayload(rawAvatar) {
+  const fallback = { avatar:'🙂', avatarId:'', avatarType:'emoji', avatarValue:'🙂' };
+  if (!rawAvatar) return fallback;
+  const raw = String(rawAvatar).trim();
+  if (!raw) return fallback;
+  if (raw.startsWith('{')) {
+    try {
+      const obj = JSON.parse(raw);
+      return {
+        avatar: obj.avatar || obj.avatarValue || '🙂',
+        avatarId: obj.avatarId || '',
+        avatarType: obj.avatarType || (obj.avatarValue && /\.(png|jpg|jpeg|webp|gif)$/i.test(String(obj.avatarValue)) ? 'image' : 'emoji'),
+        avatarValue: obj.avatarValue || obj.avatar || '🙂'
+      };
+    } catch(e) {}
+  }
+  return {
+    avatar: raw,
+    avatarId: '',
+    avatarType: /^(img_[a-z]\d+)$/.test(raw) || /\.(png|jpg|jpeg|webp|gif)$/i.test(raw) ? 'image' : 'emoji',
+    avatarValue: raw
+  };
+}
+function buildConveyorServerPayload(score) {
+  const profile = getPlayerRankProfile();
+  return {
+    mode: 'conveyor',
+    score: Math.max(0, Number(score || 0)),
+    name: String(profile.name || 'Guest').slice(0, 10),
+    avatar: JSON.stringify({
+      avatar: profile.avatar || '🙂',
+      avatarId: profile.avatarId || '',
+      avatarType: profile.avatarType || 'emoji',
+      avatarValue: profile.avatarValue || profile.avatar || '🙂'
+    })
+  };
+}
+async function saveConveyorScoreToSupabase(score) {
+  try {
+    const payload = buildConveyorServerPayload(score);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE_RANKINGS}`, {
+      method: 'POST',
+      headers: { ...getSupabaseHeaders(), Prefer: 'return=minimal' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      console.log('❌ Supabase save failed:', errText || res.status);
+      return false;
+    }
+    clearConveyorServerCache();
+    return true;
+  } catch (e) {
+    console.log('❌ Supabase save exception:', e);
+    return false;
+  }
+}
+function normalizeSupabaseRankingRow(row) {
+  const avatarInfo = parseStoredAvatarPayload(row?.avatar);
+  const ts = row?.created_at ? new Date(row.created_at).getTime() : Date.now();
+  return {
+    name: String(row?.name || 'Guest').slice(0, 10),
+    avatar: avatarInfo.avatar || '🙂',
+    avatarId: avatarInfo.avatarId || '',
+    avatarType: avatarInfo.avatarType || 'emoji',
+    avatarValue: avatarInfo.avatarValue || avatarInfo.avatar || '🙂',
+    score: Number(row?.score || 0),
+    label: 'Conveyor',
+    unit: 'T',
+    ts,
+    date: formatDateKeyFromTs(ts)
+  };
+}
+function getSupabaseCutoffIso(period) {
+  if (period === 'all') return '';
+  const now = Date.now();
+  const cutoff = period === 'weekly'
+    ? now - (7 * 24 * 60 * 60 * 1000)
+    : now - (30 * 24 * 60 * 60 * 1000);
+  return new Date(cutoff).toISOString();
+}
+async function fetchConveyorRankingFromSupabase(period = 'all', force = false) {
+  const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
+  const cached = getConveyorServerCache(key);
+  if (!force && cached) return cached;
+  if (conveyorServerFetchInFlight && !force) return conveyorServerFetchInFlight;
+  const params = new URLSearchParams();
+  params.set('select', 'name,score,avatar,created_at,mode');
+  params.set('mode', 'eq.conveyor');
+  params.set('order', 'score.desc,created_at.asc');
+  params.set('limit', '100');
+  const cutoffIso = getSupabaseCutoffIso(key);
+  if (cutoffIso) params.set('created_at', `gte.${cutoffIso}`);
+  conveyorServerFetchInFlight = fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE_RANKINGS}?${params.toString()}`, {
+    method: 'GET',
+    headers: getSupabaseHeaders()
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        throw new Error(errText || String(res.status));
+      }
+      return res.json();
+    })
+    .then((rows) => {
+      const normalized = Array.isArray(rows) ? rows.map(normalizeSupabaseRankingRow) : [];
+      setConveyorServerCache(key, normalized);
+      return normalized.slice();
+    })
+    .catch((err) => {
+      console.log('❌ Supabase load failed:', err);
+      return getSpeedConveyorRankList().map(r => ({
+        name: r.name || 'Guest',
+        avatar: r.avatar || '🙂',
+        avatarId: r.avatarId || '',
+        avatarType: r.avatarType || 'emoji',
+        avatarValue: r.avatarValue || r.avatar || '🙂',
+        score: Number(r.score || 0),
+        label: 'Conveyor',
+        unit: 'T',
+        ts: Number(r.ts || 0),
+        date: r.dateKey || ''
+      }));
+    })
+    .finally(() => {
+      conveyorServerFetchInFlight = null;
+    });
+  return conveyorServerFetchInFlight;
+}
+async function refreshConveyorRankingAndRender(force = false) {
+  const period = ['weekly', 'monthly', 'all'].includes(currentRankPeriod) ? currentRankPeriod : 'all';
+  await fetchConveyorRankingFromSupabase(period, force);
+  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor' && document.getElementById('rankPopup')?.classList.contains('visible')) {
+    renderRanking();
+  }
+}
 
 function getRanking() {
   try { return JSON.parse(localStorage.getItem(RANK_KEY) || '[]'); }
@@ -5237,6 +5408,8 @@ function saveSpeedConveyorRankList(arr) {
   localStorage.setItem(STORAGE_KEYS.speedConveyorRank, JSON.stringify(Array.isArray(arr) ? arr : []));
 }
 function getConveyorRankingRecordsRaw() {
+  const serverRows = getConveyorServerCache(currentRankPeriod);
+  if (Array.isArray(serverRows)) return serverRows.slice();
   return getSpeedConveyorRankList().map(r => ({
     name: r.name || 'Guest',
     avatar: r.avatar || '🙂',
@@ -5292,13 +5465,14 @@ function updateSpeedConveyorRanking(score) {
   const profile = getPlayerRankProfile();
   const list = getSpeedConveyorRankList();
   const entryTs = Date.now();
+  const scoreValue = Math.max(0, Number(score || 0));
   list.push({
     name: profile.name,
     avatar: profile.avatar || '🙂',
     avatarId: profile.avatarId || '',
     avatarType: profile.avatarType || 'emoji',
     avatarValue: profile.avatarValue || profile.avatar || '🙂',
-    score: Math.max(0, Number(score || 0)),
+    score: scoreValue,
     ts: entryTs,
     dateKey: new Date().toLocaleDateString('sv-SE')
   });
@@ -5309,11 +5483,16 @@ function updateSpeedConveyorRanking(score) {
   const improved = !!context.bestRank && (!!prevBestRank ? context.bestRank < prevBestRank : true);
   persistConveyorRankPulse({
     ts: entryTs,
-    score: Math.max(0, Number(score || 0)),
+    score: scoreValue,
     rank: context.currentIndex >= 0 ? context.currentIndex + 1 : null,
     bestRank: context.bestRank || null,
     improved,
     name: profile.name || 'Guest'
+  });
+  saveConveyorScoreToSupabase(scoreValue).then(() => {
+    if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
+      refreshConveyorRankingAndRender(true);
+    }
   });
 }
 
@@ -5321,22 +5500,20 @@ function openRanking(options = {}) {
   if (options && options.fromSpeedResult) reopenSpeedResultAfterHallRank = true;
   closeMissionPopup();
   closeStartPopup();
-  currentRankMode = 'infinity';
-  currentRankSubTab = 'infinity_conveyor';
+  const targetMode = options.mode || 'infinity';
+  const targetSubTab = options.subTab || (targetMode === 'brain'
+    ? 'brain_normal'
+    : (targetMode === 'speed' ? 'speed_normal' : 'infinity_conveyor'));
+  currentRankMode = targetMode;
+  currentRankSubTab = targetSubTab;
   currentRankPeriod = currentRankPeriod || 'all';
+  setRankMode(currentRankMode, true);
   setRankPeriod(currentRankPeriod, true);
   renderRanking();
-  try {
-    if ((typeof currentRankMode !== 'undefined' && currentRankMode === 'infinity') || (typeof currentRankSubTab !== 'undefined' && currentRankSubTab === 'infinity_conveyor')) {
-      __forceRefreshConveyorServerRanks();
-    }
-  } catch (e) {}
   document.getElementById('rankPopup').classList.add('visible');
-  try {
-    if ((typeof currentRankMode !== 'undefined' && currentRankMode === 'infinity') || (typeof currentRankSubTab !== 'undefined' && currentRankSubTab === 'infinity_conveyor')) {
-      __forceRefreshConveyorServerRanks();
-    }
-  } catch (e) {}
+  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
+    refreshConveyorRankingAndRender(false);
+  }
 }
 
 function closeRanking() {
@@ -5375,17 +5552,18 @@ function setRankMode(mode, skipRender) {
 
   refreshRankSubTabs();
   if (!skipRender) renderRanking();
-  try {
-    if ((typeof currentRankMode !== 'undefined' && currentRankMode === 'infinity') || (typeof currentRankSubTab !== 'undefined' && currentRankSubTab === 'infinity_conveyor')) {
-      __forceRefreshConveyorServerRanks();
-    }
-  } catch (e) {}
+  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
+    refreshConveyorRankingAndRender(false);
+  }
 }
 
 function setRankSubTab(tab) {
   currentRankSubTab = tab;
   refreshRankSubTabs();
   renderRanking();
+  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
+    refreshConveyorRankingAndRender(false);
+  }
 }
 
 function refreshRankSubTabs() {
@@ -5403,6 +5581,9 @@ function setRankPeriod(period, skipRender) {
   document.getElementById('rankPeriodTabMonthly')?.classList.toggle('active', period === 'monthly');
   document.getElementById('rankPeriodTabAll')?.classList.toggle('active', period === 'all');
   if (!skipRender) renderRanking();
+  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
+    refreshConveyorRankingAndRender(false);
+  }
 }
 
 function filterByPeriod(items, period) {
@@ -5434,6 +5615,9 @@ function getHallRankingRecords() {
     return getSpeedInfiniteRanking(key).map(r => ({
       name: r.name || 'Guest',
       avatar: r.avatar || '🙂',
+      avatarId: r.avatarId || '',
+      avatarType: r.avatarType || 'emoji',
+      avatarValue: r.avatarValue || r.avatar || '🙂',
       score: Number(r.score || 0),
       label,
       unit: 'R',
@@ -5445,6 +5629,9 @@ function getHallRankingRecords() {
     return getSpeedInfiniteRanking('round').map(r => ({
       name: r.name || 'Guest',
       avatar: r.avatar || '🙂',
+      avatarId: r.avatarId || '',
+      avatarType: r.avatarType || 'emoji',
+      avatarValue: r.avatarValue || r.avatar || '🙂',
       score: Number(r.score || 0),
       label: 'Infinity',
       unit: 'R',
@@ -5452,23 +5639,47 @@ function getHallRankingRecords() {
       date: r.dateKey || '',
     }));
   }
-  return getSpeedConveyorRankList().map(r => ({
+  return getConveyorRankingRecordsRaw().map(r => ({
     name: r.name || 'Guest',
     avatar: r.avatar || '🙂',
+    avatarId: r.avatarId || '',
+    avatarType: r.avatarType || 'emoji',
+    avatarValue: r.avatarValue || r.avatar || '🙂',
     score: Number(r.score || 0),
     label: 'Conveyor',
     unit: 'T',
     ts: Number(r.ts || 0),
-    date: r.dateKey || '',
+    date: r.date || r.dateKey || '',
   }));
 }
 
 function getRankMetaLabel() {
   const periodLabel = currentRankPeriod === 'weekly' ? 'Weekly' : (currentRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
-  return `Top 100 · ${periodLabel} · Conveyor`;
+  let modeLabel = 'Conveyor';
+  if (currentRankMode === 'brain') modeLabel = currentRankSubTab === 'brain_hard' ? 'Brain Hard' : 'Brain Normal';
+  else if (currentRankMode === 'speed') modeLabel = currentRankSubTab === 'speed_hard' ? 'Speed Hard' : 'Speed Normal';
+  else if (currentRankSubTab === 'infinity_infinite') modeLabel = 'Infinity';
+  return `Top 100 · ${periodLabel} · ${modeLabel}`;
+}
+
+
+function getRankHeaderLabel() {
+  if (currentRankMode === 'brain') return '🏆 Brain Rank';
+  if (currentRankMode === 'speed') return '🏆 Speed Rank';
+  if (currentRankSubTab === 'infinity_infinite') return '🏆 Infinity Rank';
+  return '🏆 Conveyor Rank';
+}
+function getRankSublineLabel() {
+  if (currentRankMode === 'brain') return 'Brain only · Rounds ranking.';
+  if (currentRankMode === 'speed') return 'Speed only · Rounds ranking.';
+  if (currentRankSubTab === 'infinity_infinite') return 'Infinity only · Rounds ranking.';
+  return 'Conveyor only · Taps ranking.';
 }
 
 function renderRankAvatarMarkup(record) {
+  const myProfile = typeof getPlayerRankProfile === 'function' ? getPlayerRankProfile() : null;
+  const samePlayer = myProfile && String(record?.name || '') === String(myProfile.name || '');
+
   const avatarId = String(record?.avatarId || '').trim();
   if (avatarId && typeof PROFILE_AVATAR_OPTIONS !== 'undefined') {
     const found = PROFILE_AVATAR_OPTIONS.find(item => item.id === avatarId);
@@ -5477,9 +5688,11 @@ function renderRankAvatarMarkup(record) {
       return `<span class="rank-avatar-emoji">${found.value || found.rankSymbol || '🙂'}</span>`;
     }
   }
+
   const avatarType = String(record?.avatarType || '').trim();
   const avatarValue = String(record?.avatarValue || '').trim();
   if (avatarType === 'image' && avatarValue) return `<img src="${avatarValue}" alt="" class="rank-avatar-icon">`;
+
   const raw = String(record?.avatar || '').trim();
   if (/^(img_[a-z]\d+)$/.test(raw) && typeof PROFILE_AVATAR_OPTIONS !== 'undefined') {
     const found = PROFILE_AVATAR_OPTIONS.find(item => item.id === raw);
@@ -5487,7 +5700,12 @@ function renderRankAvatarMarkup(record) {
     if (found) return `<span class="rank-avatar-emoji">${found.value || found.rankSymbol || '🙂'}</span>`;
   }
   if (/(\.png|\.jpg|\.jpeg|\.webp|\.gif)$/i.test(raw)) return `<img src="${raw}" alt="" class="rank-avatar-icon">`;
-  return `<span class="rank-avatar-emoji">${raw || '🙂'}</span>`;
+
+  if (samePlayer && myProfile?.avatarType === 'image' && myProfile?.avatarValue) {
+    return `<img src="${myProfile.avatarValue}" alt="" class="rank-avatar-icon">`;
+  }
+
+  return `<span class="rank-avatar-emoji">${raw || (samePlayer ? (myProfile?.avatar || '🙂') : '🙂')}</span>`;
 }
 
 function renderRanking() {
@@ -5495,6 +5713,10 @@ function renderRanking() {
   const meta = document.getElementById('rankMeta');
   const contextWrap = document.getElementById('rankContext');
   const toast = document.getElementById('rankUpdateToast');
+  const header = document.getElementById('rankHeader');
+  const subline = document.getElementById('rankSubline');
+  if (header) header.textContent = getRankHeaderLabel();
+  if (subline) subline.textContent = getRankSublineLabel();
   if (meta) meta.textContent = getRankMetaLabel();
 
   let records = filterByPeriod(getHallRankingRecords(), currentRankPeriod);
@@ -5550,7 +5772,12 @@ function renderRanking() {
 
   records = records.slice(0, 100);
   if (!records.length) {
-    list.innerHTML = `<div class="rank-empty">No conveyor ranking yet.</div>`;
+    const emptyLabel = currentRankMode === 'brain'
+      ? (currentRankSubTab === 'brain_hard' ? 'Brain Hard' : 'Brain Normal')
+      : (currentRankMode === 'speed'
+          ? (currentRankSubTab === 'speed_hard' ? 'Speed Hard' : 'Speed Normal')
+          : (currentRankSubTab === 'infinity_infinite' ? 'Infinity' : 'Conveyor'));
+    list.innerHTML = `<div class="rank-empty">No ${emptyLabel} ranking yet.</div>`;
     return;
   }
   const highlightTs = pulse?.ts || 0;
@@ -6405,7 +6632,7 @@ function resumeLastPlay() {
   goToStageStep();
 }
 function openStartPopup() {
-  initAudio();
+  unlockAudioForMobile();
   playUiSound('tap');
   renderModeOptions();
   renderLevelOptions();
@@ -6421,7 +6648,7 @@ function closeStartPopup() {
 function enterGame() { openModeSelectPopup(); }
 function confirmStartGame() {
   brainInfiniteActive = false;
-  initAudio();
+  unlockAudioForMobile();
   playUiSound('start');
   pulseVibration([14, 24, 16]);
   saveProgressState();
@@ -6504,6 +6731,11 @@ function goHome() {
 }
 
 // ══ 소리 / 진동 시스템 ══
+// SOUND ASSET RECOMMENDATION:
+// tap: soft wood/click 느낌의 40~70ms UI click
+// wrong: 짧은 low buzz / error tone 80~120ms
+// warning: 아주 약한 tick 또는 미사용
+// 현재는 모두 코드 생성음으로 자동 최적화됨
 const SOUND_KEY = STORAGE_KEYS.soundOn;
 const VIBE_KEY = STORAGE_KEYS.vibrationOn;
 let soundOn = localStorage.getItem(SOUND_KEY) !== '0';
@@ -6522,10 +6754,48 @@ function initAudio() {
   return audioCtx;
 }
 
-const SOUND_BOOST = 1.9;
-const SOUND_MAX_GAIN = 0.09;
+
+function primeAudio() {
+  const ctx = initAudio();
+  if (!ctx || audioPrimed) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.value = 0.0001;
+    osc.frequency.value = 440;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const now = ctx.currentTime;
+    osc.start(now);
+    osc.stop(now + 0.01);
+    audioPrimed = true;
+  } catch (e) {}
+}
+
+function unlockAudioForMobile() {
+  initAudio();
+  primeAudio();
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(()=>{});
+  }
+}
+
+const SOUND_BOOST = 1.55;
+const SOUND_MAX_GAIN = 0.075;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isMobileAudio = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
+const MOBILE_SFX_ATTENUATION = isMobileAudio ? 0.9 : 1;
+const SOUND_PROFILE = {
+  master: 1,
+  ui: 0.78,
+  start: 0.9,
+  correct: 0.82,
+  wrong: 0.92,
+  warning: 0.44,
+  gameover: 0.78
+};
 const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
+let audioPrimed = false;
 
 function triggerHapticFallback() {}
 
@@ -6537,7 +6807,7 @@ function playTone(freq=440, duration=0.08, type='sine', volume=0.03, startDelay=
   const now = ctx.currentTime + startDelay;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
-  const targetVolume = Math.min(volume * SOUND_BOOST, SOUND_MAX_GAIN);
+  const targetVolume = Math.min(volume * SOUND_BOOST * MOBILE_SFX_ATTENUATION * SOUND_PROFILE.master, SOUND_MAX_GAIN);
   osc.type = type;
   osc.frequency.setValueAtTime(freq, now);
   gain.gain.setValueAtTime(0.0001, now);
@@ -6553,40 +6823,42 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.08, 'triangle', 0.055);
-      playTone(659, 0.10, 'triangle', 0.05, 0.06);
+      playTone(523, 0.08, 'triangle', 0.065);
+      playTone(659, 0.10, 'triangle', 0.060, 0.06);
       break;
     case 'light':
-      playTone(660, 0.06, 'sine', 0.036);
+      // Brain 모드 문제 제시 전/시퀀스 사운드: 기존보다 2배 이상 체감되도록 상향
+      playTone(660, 0.07, 'sine', 0.078);
       break;
     case 'tap':
-      playTone(540, 0.05, 'triangle', 0.05);
+      // 터치음: 최소 1.5배 이상 체감되도록 상향
+      playTone(540, 0.06, 'triangle', 0.082);
       break;
     case 'correct':
-      playTone(523, 0.05, 'triangle', 0.045);
-      playTone(659, 0.08, 'triangle', 0.042, 0.05);
+      playTone(523, 0.06, 'triangle', 0.060);
+      playTone(659, 0.09, 'triangle', 0.056, 0.05);
       break;
     case 'wrong':
-      playTone(240, 0.12, 'sawtooth', 0.055);
-      playTone(180, 0.16, 'sawtooth', 0.05, 0.04);
+      playTone(240, 0.12, 'sawtooth', 0.060);
+      playTone(180, 0.09, 'square', 0.050, 0.04);
       break;
-    case 'combo':
-      playTone(659, 0.05, 'triangle', 0.045);
-      playTone(784, 0.07, 'triangle', 0.042, 0.05);
-      playTone(988, 0.09, 'triangle', 0.04, 0.11);
+    case 'warning':
+      // 시간 부족 경고음: 들릴 정도로 분명하게 상향
+      playTone(988, 0.08, 'square', 0.070);
+      playTone(880, 0.10, 'square', 0.056, 0.05);
       break;
-    case 'badge':
-      playTone(784, 0.07, 'triangle', 0.045);
-      playTone(988, 0.08, 'triangle', 0.042, 0.06);
-      playTone(1175, 0.12, 'triangle', 0.036, 0.12);
+    case 'clear':
+      playTone(784, 0.07, 'triangle', 0.060);
+      playTone(988, 0.08, 'triangle', 0.056, 0.06);
+      playTone(1175, 0.11, 'triangle', 0.048, 0.12);
       break;
     case 'mission':
-      playTone(587, 0.06, 'triangle', 0.045);
-      playTone(784, 0.08, 'triangle', 0.042, 0.07);
+      playTone(587, 0.05, 'triangle', 0.050);
+      playTone(784, 0.07, 'triangle', 0.046, 0.06);
       break;
     case 'gameover':
-      playTone(330, 0.1, 'triangle', 0.04);
-      playTone(262, 0.18, 'triangle', 0.042, 0.08);
+      playTone(330, 0.09, 'triangle', 0.045);
+      playTone(262, 0.16, 'triangle', 0.048, 0.08);
       break;
   }
 }
@@ -6669,7 +6941,10 @@ function toggleBgm() {
   }
 }
 
-document.addEventListener('pointerdown', () => { ensureBgmReady(); initAudio(); }, { passive:true, once:true });
+document.addEventListener('pointerdown', () => { ensureBgmReady(); unlockAudioForMobile(); }, { passive:true, once:true });
+document.addEventListener('touchstart', () => { ensureBgmReady(); unlockAudioForMobile(); }, { passive:true, once:true });
+document.addEventListener('click', () => { unlockAudioForMobile(); }, { passive:true, once:true });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) unlockAudioForMobile(); });
 
 document.addEventListener('click', (e) => {
   const popup = document.getElementById('missionPopup');
@@ -6681,6 +6956,15 @@ document.addEventListener('click', (e) => {
   const startPopup = document.getElementById('startPopup');
   if (startPopup && e.target === startPopup) closeStartPopup();
 });
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn, .result-next-btn, .rank-open-btn, .badge-open-btn, .mission-open-btn, .modal-x-btn, .speed-key-btn, .speed-level-btn, .speed-chip, .mission-tab, .profile-avatar-option, .avatar-popup-option, #brainModeTabStage, #brainModeTabInfinite, #speedStartBtn, #speedPauseBtn, #speedResumeBtn, #speedGiveUpBtn');
+  if (!btn) return;
+  if (btn.closest('#grid') || btn.closest('#speedGrid') || btn.classList.contains('btn') || btn.classList.contains('speed-play-btn')) return;
+  unlockAudioForMobile();
+  playUiSound('tap');
+}, { passive:true });
+
 
 // ── 메시지 정의 ──
 const MSGS = {
@@ -6845,7 +7129,7 @@ document.querySelectorAll('.btn').forEach(b => {
 });
 
 document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn, .result-next-btn, .rank-open-btn, .badge-open-btn, .mission-open-btn, .modal-x-btn').forEach(el => {
-  el.addEventListener('pointerdown', () => { initAudio(); }, { passive:true });
+  el.addEventListener('pointerdown', () => { unlockAudioForMobile(); playUiSound('tap'); }, { passive:true });
 });
 
 function safeTimeout(fn, delay) {
@@ -6905,6 +7189,7 @@ function startGame() {
   retryCount = 0;
   pendingRetry = false;
   hideSecondChancePopup();
+  hideComboToast();
   // 모든 팝업 닫기
   const rankBtnHome = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
   if (rankBtnHome) rankBtnHome.style.display = brainInfiniteActive ? '' : 'none';
@@ -7149,6 +7434,7 @@ function declineSecondChance() {
 function gameOver(stageCleared = false) {
   clearAllTimers();
   hideSecondChancePopup();
+  hideComboToast();
   pendingRetry = false;
   playUiSound('gameover');
 
@@ -7211,7 +7497,12 @@ function gameOver(stageCleared = false) {
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
   updateNextStageButton();
   const rankBtn = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
-  if (rankBtn) rankBtn.style.display = brainInfiniteActive ? '' : 'none';
+  if (rankBtn) {
+    rankBtn.style.display = brainInfiniteActive ? '' : 'none';
+    rankBtn.onclick = brainInfiniteActive
+      ? function(){ openRanking({ mode:'brain', subTab: brainLimitMode === 'hard' ? 'brain_hard' : 'brain_normal' }); }
+      : function(){ openRanking(); };
+  }
   const nextBtn = document.querySelector('.result-action-row .result-next-btn');
   if (nextBtn) nextBtn.style.display = brainInfiniteActive ? 'none' : (stageCleared ? '' : 'none');
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
@@ -7247,12 +7538,12 @@ function gameOver(stageCleared = false) {
 
   window.setTimeout(() => {
     try {
+      const overlay = document.getElementById('overlay');
       if (brainInfiniteActive) {
-        openNamePopup(window._finalScore, window._finalStage, { mode:'score', showOverlayAfterSave:true, scoreUnit:'Round' });
-      } else {
-        const overlay = document.getElementById('overlay');
-        if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
+        const savedName = sanitizePlayerName(localStorage.getItem(PLAYER_NAME_KEY)) || getPlayerRankProfile().name || 'Guest';
+        addRankRecord(savedName, window._finalScore, window._finalStage);
       }
+      if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
     } catch (e) {
       const overlay = document.getElementById('overlay');
       if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
@@ -7351,6 +7642,13 @@ function updateComboBadge(n) {
   badge.classList.add('pulse-anim');
 }
 
+function hideComboToast() {
+  const toast = document.getElementById('comboToast');
+  if (!toast) return;
+  toast.classList.remove('show', 'hide');
+  toast.style.display = 'none';
+}
+
 function showComboToast(n) {
   const data  = COMBO_DATA[n];
   const toast = document.getElementById('comboToast');
@@ -7374,19 +7672,6 @@ function showComboToast(n) {
 
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
-
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
 
 </script>
 
@@ -7579,7 +7864,7 @@ function __forceRefreshConveyorServerRanks() {
     const key = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     const list = Array.isArray(map[key]) ? map[key] : [];
     const profile = getPlayerRankProfile();
-    list.push({ score: Number(score || 0), ts: Date.now(), avatar: profile.avatar || getProfileAvatarRankSymbol?.() || '🙂', name: profile.name || 'Guest', dateKey: new Date().toLocaleDateString('sv-SE') });
+    list.push({ score: Number(score || 0), ts: Date.now(), avatar: profile.avatar || getProfileAvatarRankSymbol?.() || '🙂', avatarId: profile.avatarId || '', avatarType: profile.avatarType || 'emoji', avatarValue: profile.avatarValue || profile.avatar || '🙂', name: profile.name || 'Guest', dateKey: new Date().toLocaleDateString('sv-SE') });
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
     map[key] = list.slice(0, 10);
     saveSpeedInfiniteRankMap(map);
@@ -7998,10 +8283,12 @@ function __forceRefreshConveyorServerRanks() {
     const round = document.getElementById('speedRound');
     const best = document.getElementById('speedBest');
     const sub = document.getElementById('speedScreenSub');
+    const title = document.getElementById('speedScreenTitle');
     const screen = document.getElementById('speedScreen');
     const laneWrap = document.getElementById('conveyorLaneWrap');
     if (screen) screen.classList.toggle('conveyor-mode', speedState.type === 'conveyor');
     if (laneWrap) laneWrap.classList.toggle('hidden', speedState.type !== 'conveyor');
+    if (title) title.textContent = speedState.type === 'conveyor' ? 'Conveyor' : 'Speed Training';
     if (badge) {
       const left = speedState.type === 'stage'
         ? `${level.emoji || '🏁'} ${getLevelNameEn(level.name)} · ${speedState.selectedKeyCount} Keys`
@@ -8055,12 +8342,12 @@ function __forceRefreshConveyorServerRanks() {
     if (label) label.textContent = 'Time';
   }
   function maybePlayCountdown() {
+    if (speedState.type === 'conveyor') return;
     const sec = Math.ceil(speedState.remaining);
-    if (speedState.remaining > 10 || speedState.remaining <= 0) return;
+    if (speedState.remaining > 5 || speedState.remaining <= 0) return;
     if (speedState.tickSecond === sec) return;
     speedState.tickSecond = sec;
-    if (sec <= 5) playUiSound?.('wrong');
-    else playUiSound?.('light');
+    if (sec === 3 || sec === 1) playUiSound?.('warning');
   }
   function stopSpeedTimer() {
     if (speedState.timer) clearInterval(speedState.timer);
@@ -8709,19 +8996,6 @@ window.addEventListener('load', function() {
 });
 
 })();
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
 </script>
 
 <script>
@@ -8781,19 +9055,6 @@ function __forceRefreshConveyorServerRanks() {
     e.preventDefault();
   }, { passive: false });
 })();
-
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
 
 </script>
 
@@ -8865,19 +9126,6 @@ window.addEventListener('load', function() {
 });
 
 })();
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
 </script>
 
 <script>
@@ -8904,19 +9152,6 @@ window.addEventListener('load', function() {
 });
 
 })();
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
 </script>
 
 
@@ -8936,19 +9171,6 @@ function __forceRefreshConveyorServerRanks() {
     window.addEventListener('load', function(){ setTimeout(ensureInitialNamePopup, 300); }, { once:true });
   }
 })();
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
 </script>
 
 
@@ -8963,49 +9185,10 @@ window.addEventListener('DOMContentLoaded', function(){
     } catch(e) {}
   }, 450);
 }, { once:true });
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
 </script>
 
-<script src="./js/config.js">
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
-</script>
-<script type="module" src="./js/game-connect.js">
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
-</script>
+<script src="./js/config.js"></script>
+<script type="module" src="./js/game-connect.js"></script>
 
 
 
@@ -9042,19 +9225,6 @@ window.getSpeedDelay = function() {
   if (!window.speedState) return 800;
   return Math.max(300, 800 - (speedState.score || 0) * 2);
 };
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
 </script>
 
 
@@ -9085,19 +9255,6 @@ function renderMyRankSummary(rank, total) {
     <div><div class="sub">/ ${total}</div></div>
   `;
 }
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
-
 </script>
 
 
@@ -9238,19 +9395,6 @@ function __forceRefreshConveyorServerRanks() {
     initHallRankFix();
   }
 })();
-
-
-function __forceRefreshConveyorServerRanks() {
-  try {
-    if (typeof refreshConveyorRankingAndRender === 'function') {
-      refreshConveyorRankingAndRender(true).catch(() => {});
-      return;
-    }
-    if (typeof refreshCurrentServerRankingAndRender === 'function') {
-      refreshCurrentServerRankingAndRender(true).catch(() => {});
-    }
-  } catch (e) {}
-}
 
 </script>
 

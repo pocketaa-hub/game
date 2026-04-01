@@ -6780,15 +6780,15 @@ function unlockAudioForMobile() {
   }
 }
 
-const SOUND_BOOST = 1.55;
-const SOUND_MAX_GAIN = 0.075;
+const SOUND_BOOST = 2.4;
+const SOUND_MAX_GAIN = 0.14;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const isMobileAudio = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
 const MOBILE_SFX_ATTENUATION = isMobileAudio ? 0.9 : 1;
 const SOUND_PROFILE = {
   master: 1,
-  ui: 0.78,
-  start: 0.9,
+  ui: 1.6,
+  start: 1.3,
   correct: 0.82,
   wrong: 0.92,
   warning: 0.44,
@@ -6823,27 +6823,24 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.08, 'triangle', 0.065);
-      playTone(659, 0.10, 'triangle', 0.060, 0.06);
+      playTone(523, 0.09, 'triangle', 0.12);
+      playTone(659, 0.11, 'triangle', 0.11, 0.06);
       break;
     case 'light':
-      // Brain 모드 문제 제시 전/시퀀스 사운드: 기존보다 2배 이상 체감되도록 상향
-      playTone(660, 0.07, 'sine', 0.078);
+      playTone(660, 0.075, 'sine', 0.14);
       break;
     case 'tap':
-      // 터치음: 최소 1.5배 이상 체감되도록 상향
-      playTone(540, 0.06, 'triangle', 0.082);
+      playTone(540, 0.07, 'triangle', 0.16);
       break;
     case 'correct':
-      playTone(523, 0.06, 'triangle', 0.060);
-      playTone(659, 0.09, 'triangle', 0.056, 0.05);
+      playTone(523, 0.06, 'triangle', 0.078);
+      playTone(659, 0.09, 'triangle', 0.07, 0.05);
       break;
     case 'wrong':
       playTone(240, 0.12, 'sawtooth', 0.060);
       playTone(180, 0.09, 'square', 0.050, 0.04);
       break;
     case 'warning':
-      // 시간 부족 경고음: 들릴 정도로 분명하게 상향
       playTone(988, 0.08, 'square', 0.070);
       playTone(880, 0.10, 'square', 0.056, 0.05);
       break;
@@ -7673,6 +7670,14 @@ function showComboToast(n) {
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
 
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -8075,6 +8080,8 @@ function showComboToast(n) {
     setTimeout(startGame, 400);
   };
   window.selectTrainingMode = function(mode) {
+    try { unlockAudioForMobile(); } catch (e) {}
+    try { playUiSound('tap'); } catch (e) {}
     if (mode === 'speed') {
       openSpeedStartPopup();
       return;
@@ -8757,25 +8764,103 @@ function showComboToast(n) {
     document.getElementById('speedPeriodTabAll')?.classList.toggle('active', currentSpeedRankPeriod === 'all');
     if (!skipRender) setSpeedRankTab(currentSpeedRankTab);
   };
+
+  function getSpeedRankProfile() {
+    try {
+      return typeof getPlayerRankProfile === 'function'
+        ? getPlayerRankProfile()
+        : {
+            name: ((localStorage.getItem('limitgame_player_name') || localStorage.getItem('limitgame_last_player') || 'Guest').trim().slice(0,10)) || 'Guest',
+            avatar: '🙂',
+            avatarId: '',
+            avatarType: 'emoji',
+            avatarValue: '🙂'
+          };
+    } catch (e) {
+      return { name: 'Guest', avatar: '🙂', avatarId: '', avatarType: 'emoji', avatarValue: '🙂' };
+    }
+  }
+
+  function getSpeedRankAvatarMarkup(rawAvatar, nickname) {
+    const profile = getSpeedRankProfile();
+    const safeName = String(nickname || 'Guest').slice(0,10);
+    const myName = String(profile.name || 'Guest').slice(0,10);
+
+    if (safeName === myName && typeof renderRankAvatarMarkup === 'function') {
+      return renderRankAvatarMarkup({
+        name: myName,
+        avatar: profile.avatar || '🙂',
+        avatarId: profile.avatarId || '',
+        avatarType: profile.avatarType || 'emoji',
+        avatarValue: profile.avatarValue || profile.avatar || '🙂'
+      });
+    }
+
+    try {
+      if (typeof renderRankAvatarMarkup === 'function') {
+        if (rawAvatar && typeof rawAvatar === 'string' && rawAvatar.trim().startsWith('{')) {
+          const parsed = JSON.parse(rawAvatar);
+          return renderRankAvatarMarkup({
+            name: safeName,
+            avatar: parsed.avatar || parsed.avatarValue || '🙂',
+            avatarId: parsed.avatarId || '',
+            avatarType: parsed.avatarType || 'emoji',
+            avatarValue: parsed.avatarValue || parsed.avatar || '🙂'
+          });
+        }
+        if (rawAvatar) {
+          return renderRankAvatarMarkup({
+            name: safeName,
+            avatar: String(rawAvatar),
+            avatarId: '',
+            avatarType: /^(img_[a-z]\d+)$/.test(String(rawAvatar)) || /(\.png|\.jpg|\.jpeg|\.webp|\.gif)$/i.test(String(rawAvatar)) ? 'image' : 'emoji',
+            avatarValue: String(rawAvatar)
+          });
+        }
+      }
+    } catch (e) {}
+
+    return '🙂';
+  }
+
+  function filterSpeedRankByPeriod(list, period) {
+    if (period === 'all') return list.slice();
+    const now = new Date();
+    const weekStart = (() => {
+      const d = new Date(now);
+      const day = (d.getDay() + 6) % 7;
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() - day);
+      return d.getTime();
+    })();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+    return list.filter((r) => {
+      if (period === 'weekly') {
+        return Number(r.ts || 0) >= weekStart;
+      }
+      if (period === 'monthly') {
+        return String(r.dateKey || '').slice(0,7) === monthKey;
+      }
+      return true;
+    });
+  }
+
   window.setSpeedRankTab = async function(tab) {
     currentSpeedRankTab = tab === 'hard' ? 'hard' : (tab === 'round' ? 'round' : 'normal');
     document.getElementById('speedRankTabNormal')?.classList.toggle('active', currentSpeedRankTab === 'normal');
     document.getElementById('speedRankTabHard')?.classList.toggle('active', currentSpeedRankTab === 'hard');
     document.getElementById('speedRankTabRound')?.classList.toggle('active', currentSpeedRankTab === 'round');
+
     const root = document.getElementById('speedRankList');
     const meta = document.getElementById('speedRankMeta');
     const mySummary = document.getElementById('speedMySummary');
     const title = currentSpeedRankTab === 'hard' ? 'Hard' : (currentSpeedRankTab === 'round' ? 'Infinite' : 'Normal');
     const periodLabel = currentSpeedRankPeriod === 'weekly' ? 'Weekly' : (currentSpeedRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
-    const myName = ((localStorage.getItem('limitgame_player_name') || localStorage.getItem('limitgame_last_player') || 'Guest').trim().slice(0,10)) || 'Guest';
-    const myAvatar = (() => {
-      try {
-        const raw = localStorage.getItem('limitgame_profile_avatar_v1') || localStorage.getItem('limitgame_avatar');
-        if (!raw) return '🙂';
-        const parsed = JSON.parse(raw);
-        return parsed?.emoji || raw || '🙂';
-      } catch { return '🙂'; }
-    })();
+
+    const profile = getSpeedRankProfile();
+    const myName = String(profile.name || 'Guest').slice(0,10);
+    const myAvatarMarkup = getSpeedRankAvatarMarkup(profile.avatarValue || profile.avatar, myName);
 
     if (meta) meta.textContent = `Top 100 · ${periodLabel} · ${title}`;
     if (mySummary) {
@@ -8789,7 +8874,7 @@ function showComboToast(n) {
       mySummary.innerHTML = `
         <div>
           <div class="label">My Rank</div>
-          <div class="sub">${myAvatar} ${myName}</div>
+          <div class="sub">${myAvatarMarkup} ${myName}</div>
         </div>
         <div class="value">#${rank || '-'}</div>
         <div>
@@ -8801,9 +8886,7 @@ function showComboToast(n) {
 
     try {
       if (window.gameConnect?.fetchRanking) {
-        const speedGameType = currentSpeedRankTab === 'round'
-          ? 'speed_infinite'
-          : 'speed_time_attack';
+        const speedGameType = currentSpeedRankTab === 'round' ? 'speed_infinite' : 'speed_time_attack';
 
         const rows = await window.gameConnect.fetchRanking(speedGameType, currentSpeedRankTab, {
           period: currentSpeedRankPeriod,
@@ -8821,7 +8904,7 @@ function showComboToast(n) {
             items.map((r,i)=>`
               <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
                 <div class="speed-rank-pos">#${i+1}</div>
-                <div class="speed-rank-label">${r.avatar || '🙂'} ${String(r.nickname || 'Guest').slice(0,10)}</div>
+                <div class="speed-rank-label">${getSpeedRankAvatarMarkup(r.avatar, r.nickname || r.name)} ${String(r.nickname || r.name || 'Guest').slice(0,10)}</div>
                 <div class="speed-rank-score">${Number(r.score || r.round || 0)}R</div>
               </div>
             `).join('')
@@ -8829,41 +8912,39 @@ function showComboToast(n) {
           if (myEntry) renderSummary(myEntry.rank, Number(myEntry.score || myEntry.round || 0), totalCount);
           return;
         }
-
-        if (currentSpeedRankPeriod !== 'all') {
-          root.innerHTML = '<div class="speed-empty small-note">No server record yet for this period.</div>';
-          return;
-        }
       }
     } catch (e) {
       console.warn('speed rank server fallback', e);
     }
 
-    const list = getSpeedInfiniteRanking(currentSpeedRankTab);
+    const list = filterSpeedRankByPeriod(getSpeedInfiniteRanking(currentSpeedRankTab), currentSpeedRankPeriod);
     const deduped = [];
     const seen = new Set();
     for (const r of list) {
-      const key = String((r.name || 'Guest'));
+      const key = String(r.name || 'Guest');
       if (seen.has(key)) continue;
       seen.add(key);
       deduped.push(r);
     }
-    const top = deduped.slice(0,100);
-    const myIndex = top.findIndex(r => String(r.name || '') === myName);
+
+    const top = deduped.slice(0, 100);
+    const myIndex = top.findIndex(r => String(r.name || '').slice(0,10) === myName);
     if (myIndex >= 0) renderSummary(myIndex + 1, top[myIndex].score, top.length);
 
     const renderRows = (arr) => {
-      if (!arr.length) return '<div class="speed-empty small-note">No local all-time record yet.</div>';
+      if (!arr.length) return `<div class="speed-empty small-note">No ${currentSpeedRankPeriod === 'all' ? 'local all-time' : currentSpeedRankPeriod} record yet.</div>`;
       return arr.map((r,i)=>`
         <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
           <div class="speed-rank-pos">#${i+1}</div>
-          <div class="speed-rank-label">${myIndex===i ? myAvatar : '🙂'} ${r.name || (i===0 ? 'Best' : 'Run')}</div>
-          <div class="speed-rank-score">${r.score}R</div>
+          <div class="speed-rank-label">${getSpeedRankAvatarMarkup(r.avatarValue || r.avatar, r.name)} ${String(r.name || (i===0 ? 'Best' : 'Run')).slice(0,10)}</div>
+          <div class="speed-rank-score">${Number(r.score || 0)}R</div>
         </div>
       `).join('');
     };
-    root.innerHTML = `<div class="speed-rank-section">${currentSpeedRankPeriod === 'all' ? renderRows(top) : '<div class="speed-empty small-note">No server record yet for this period.</div>'}</div>`;
+
+    root.innerHTML = `<div class="speed-rank-section">${renderRows(top)}</div>`;
   };
+
   window.openSpeedInfiniteRanking = function(mode) {
     currentSpeedRankTab = mode ? (mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal')) : speedState.infiniteMode;
     window.setSpeedRankPeriod(currentSpeedRankPeriod || 'all', true);
@@ -8996,6 +9077,14 @@ window.addEventListener('load', function() {
 });
 
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
 <script>
@@ -9055,6 +9144,14 @@ window.addEventListener('load', function() {
     e.preventDefault();
   }, { passive: false });
 })();
+
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
 
 </script>
 
@@ -9126,6 +9223,14 @@ window.addEventListener('load', function() {
 });
 
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
 <script>
@@ -9152,6 +9257,14 @@ window.addEventListener('load', function() {
 });
 
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -9171,6 +9284,14 @@ window.addEventListener('load', function() {
     window.addEventListener('load', function(){ setTimeout(ensureInitialNamePopup, 300); }, { once:true });
   }
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -9185,10 +9306,34 @@ window.addEventListener('DOMContentLoaded', function(){
     } catch(e) {}
   }, 450);
 }, { once:true });
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
-<script src="./js/config.js"></script>
-<script type="module" src="./js/game-connect.js"></script>
+<script src="./js/config.js">
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
+</script>
+<script type="module" src="./js/game-connect.js">
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
+</script>
 
 
 
@@ -9225,6 +9370,14 @@ window.getSpeedDelay = function() {
   if (!window.speedState) return 800;
   return Math.max(300, 800 - (speedState.score || 0) * 2);
 };
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -9255,6 +9408,14 @@ function renderMyRankSummary(rank, total) {
     <div><div class="sub">/ ${total}</div></div>
   `;
 }
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -9395,6 +9556,14 @@ function renderMyRankSummary(rank, total) {
     initHallRankFix();
   }
 })();
+
+
+document.addEventListener('pointerdown', (e) => {
+  const btn = e.target.closest('.mode-choice-btn');
+  if (!btn) return;
+  try { unlockAudioForMobile(); } catch (err) {}
+  try { playUiSound('tap'); } catch (err) {}
+}, true);
 
 </script>
 

@@ -5097,25 +5097,8 @@ let reopenSpeedResultAfterHallRank = false;
 const SUPABASE_URL = 'https://idjrbowbnfeqqqagvepb.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_pjbwFYprfJtt5K4NWCvUNw_7ZvyJVCl';
 const SUPABASE_TABLE_RANKINGS = 'game_rankings';
-const serverRankCache = {};
-const serverRankFetchInFlight = {};
-
-function getServerRankModeKey(modeKey) {
-  return ['brain_normal','brain_hard','speed_normal','speed_hard','infinity','conveyor'].includes(String(modeKey || ''))
-    ? String(modeKey)
-    : 'conveyor';
-}
-function getCurrentServerRankModeKey() {
-  if (currentRankMode === 'brain') return currentRankSubTab === 'brain_hard' ? 'brain_hard' : 'brain_normal';
-  if (currentRankMode === 'speed') return currentRankSubTab === 'speed_hard' ? 'speed_hard' : 'speed_normal';
-  if (currentRankSubTab === 'infinity_infinite') return 'infinity';
-  return 'conveyor';
-}
-function ensureServerRankBucket(modeKey) {
-  const key = getServerRankModeKey(modeKey);
-  if (!serverRankCache[key]) serverRankCache[key] = { all: null, weekly: null, monthly: null };
-  return serverRankCache[key];
-}
+const conveyorServerRankCache = { all: null, weekly: null, monthly: null };
+let conveyorServerFetchInFlight = null;
 
 function getSupabaseHeaders() {
   return {
@@ -5128,25 +5111,18 @@ function formatDateKeyFromTs(ts) {
   try { return new Date(Number(ts || Date.now())).toLocaleDateString('sv-SE'); }
   catch(e) { return ''; }
 }
-function getServerRankCache(modeKey, period = 'all') {
+function getConveyorServerCache(period = 'all') {
   const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
-  const bucket = ensureServerRankBucket(modeKey);
-  return Array.isArray(bucket[key]) ? bucket[key].slice() : null;
+  return Array.isArray(conveyorServerRankCache[key]) ? conveyorServerRankCache[key].slice() : null;
 }
-function setServerRankCache(modeKey, period, rows) {
+function setConveyorServerCache(period, rows) {
   const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
-  const bucket = ensureServerRankBucket(modeKey);
-  bucket[key] = Array.isArray(rows) ? rows.slice() : [];
+  conveyorServerRankCache[key] = Array.isArray(rows) ? rows.slice() : [];
 }
-function clearServerRankCache(modeKey = null) {
-  if (modeKey) {
-    const bucket = ensureServerRankBucket(modeKey);
-    bucket.all = null; bucket.weekly = null; bucket.monthly = null;
-    return;
-  }
-  Object.keys(serverRankCache).forEach((k) => {
-    serverRankCache[k] = { all: null, weekly: null, monthly: null };
-  });
+function clearConveyorServerCache() {
+  conveyorServerRankCache.all = null;
+  conveyorServerRankCache.weekly = null;
+  conveyorServerRankCache.monthly = null;
 }
 function parseStoredAvatarPayload(rawAvatar) {
   const fallback = { avatar:'🙂', avatarId:'', avatarType:'emoji', avatarValue:'🙂' };
@@ -5171,10 +5147,10 @@ function parseStoredAvatarPayload(rawAvatar) {
     avatarValue: raw
   };
 }
-function buildServerRankPayload(modeKey, score) {
+function buildConveyorServerPayload(score) {
   const profile = getPlayerRankProfile();
   return {
-    mode: getServerRankModeKey(modeKey),
+    mode: 'conveyor',
     score: Math.max(0, Number(score || 0)),
     name: String(profile.name || 'Guest').slice(0, 10),
     avatar: JSON.stringify({
@@ -5185,9 +5161,9 @@ function buildServerRankPayload(modeKey, score) {
     })
   };
 }
-async function saveScoreToSupabase(modeKey, score) {
+async function saveConveyorScoreToSupabase(score) {
   try {
-    const payload = buildServerRankPayload(modeKey, score);
+    const payload = buildConveyorServerPayload(score);
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE_RANKINGS}`, {
       method: 'POST',
       headers: { ...getSupabaseHeaders(), Prefer: 'return=minimal' },
@@ -5195,18 +5171,15 @@ async function saveScoreToSupabase(modeKey, score) {
     });
     if (!res.ok) {
       const errText = await res.text().catch(() => '');
-      console.log('❌ Supabase save failed:', payload.mode, errText || res.status);
+      console.log('❌ Supabase save failed:', errText || res.status);
       return false;
     }
-    clearServerRankCache(payload.mode);
+    clearConveyorServerCache();
     return true;
   } catch (e) {
-    console.log('❌ Supabase save exception:', modeKey, e);
+    console.log('❌ Supabase save exception:', e);
     return false;
   }
-}
-async function saveConveyorScoreToSupabase(score) {
-  return saveScoreToSupabase('conveyor', score);
 }
 function normalizeSupabaseRankingRow(row) {
   const avatarInfo = parseStoredAvatarPayload(row?.avatar);
@@ -5232,83 +5205,19 @@ function getSupabaseCutoffIso(period) {
     : now - (30 * 24 * 60 * 60 * 1000);
   return new Date(cutoff).toISOString();
 }
-function getLocalRankFallbackRecords(modeKey) {
-  const key = getServerRankModeKey(modeKey);
-  if (key === 'brain_normal' || key === 'brain_hard') {
-    const hard = key === 'brain_hard';
-    return getRanking()
-      .filter(r => /Brain Infinite · (Normal|Hard)/.test(String(r.stage || '')))
-      .filter(r => hard ? /Brain Infinite · Hard/.test(String(r.stage || '')) : /Brain Infinite · Normal/.test(String(r.stage || '')))
-      .map(r => ({
-        name: r.name || 'Guest',
-        avatar: r.avatar || '🙂',
-        avatarId: r.avatarId || '',
-        avatarType: r.avatarType || 'emoji',
-        avatarValue: r.avatarValue || r.avatar || '🙂',
-        score: Number(r.score || 0),
-        label: hard ? 'Hard' : 'Normal',
-        unit: 'R',
-        ts: Number(r.ts || 0),
-        date: r.date || '',
-      }));
-  }
-  if (key === 'speed_normal' || key === 'speed_hard') {
-    const mode = key === 'speed_hard' ? 'hard' : 'normal';
-    const label = mode === 'hard' ? 'Hard' : 'Normal';
-    return getSpeedInfiniteRanking(mode).map(r => ({
-      name: r.name || 'Guest',
-      avatar: r.avatar || '🙂',
-      avatarId: r.avatarId || '',
-      avatarType: r.avatarType || 'emoji',
-      avatarValue: r.avatarValue || r.avatar || '🙂',
-      score: Number(r.score || 0),
-      label,
-      unit: 'R',
-      ts: Number(r.ts || 0),
-      date: r.dateKey || '',
-    }));
-  }
-  if (key === 'infinity') {
-    return getSpeedInfiniteRanking('round').map(r => ({
-      name: r.name || 'Guest',
-      avatar: r.avatar || '🙂',
-      avatarId: r.avatarId || '',
-      avatarType: r.avatarType || 'emoji',
-      avatarValue: r.avatarValue || r.avatar || '🙂',
-      score: Number(r.score || 0),
-      label: 'Infinity',
-      unit: 'R',
-      ts: Number(r.ts || 0),
-      date: r.dateKey || '',
-    }));
-  }
-  return getSpeedConveyorRankList().map(r => ({
-    name: r.name || 'Guest',
-    avatar: r.avatar || '🙂',
-    avatarId: r.avatarId || '',
-    avatarType: r.avatarType || 'emoji',
-    avatarValue: r.avatarValue || r.avatar || '🙂',
-    score: Number(r.score || 0),
-    label: 'Conveyor',
-    unit: 'T',
-    ts: Number(r.ts || 0),
-    date: r.dateKey || '',
-  }));
-}
-async function fetchRankingFromSupabase(modeKey, period = 'all', force = false) {
-  const mode = getServerRankModeKey(modeKey);
+async function fetchConveyorRankingFromSupabase(period = 'all', force = false) {
   const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
-  const cached = getServerRankCache(mode, key);
+  const cached = getConveyorServerCache(key);
   if (!force && cached) return cached;
-  if (serverRankFetchInFlight[`${mode}:${key}`] && !force) return serverRankFetchInFlight[`${mode}:${key}`];
+  if (conveyorServerFetchInFlight && !force) return conveyorServerFetchInFlight;
   const params = new URLSearchParams();
   params.set('select', 'name,score,avatar,created_at,mode');
-  params.set('mode', `eq.${mode}`);
+  params.set('mode', 'eq.conveyor');
   params.set('order', 'score.desc,created_at.asc');
   params.set('limit', '100');
   const cutoffIso = getSupabaseCutoffIso(key);
   if (cutoffIso) params.set('created_at', `gte.${cutoffIso}`);
-  serverRankFetchInFlight[`${mode}:${key}`] = fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE_RANKINGS}?${params.toString()}`, {
+  conveyorServerFetchInFlight = fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE_RANKINGS}?${params.toString()}`, {
     method: 'GET',
     headers: getSupabaseHeaders()
   })
@@ -5320,33 +5229,33 @@ async function fetchRankingFromSupabase(modeKey, period = 'all', force = false) 
       return res.json();
     })
     .then((rows) => {
-      const normalized = Array.isArray(rows) ? rows.map(normalizeSupabaseRankingRow).map((r) => ({
-        ...r,
-        label: mode === 'brain_hard' ? 'Hard' : mode === 'brain_normal' ? 'Normal' : mode === 'speed_hard' ? 'Hard' : mode === 'speed_normal' ? 'Normal' : mode === 'infinity' ? 'Infinity' : 'Conveyor',
-        unit: mode === 'conveyor' ? 'T' : 'R'
-      })) : [];
-      setServerRankCache(mode, key, normalized);
+      const normalized = Array.isArray(rows) ? rows.map(normalizeSupabaseRankingRow) : [];
+      setConveyorServerCache(key, normalized);
       return normalized.slice();
     })
     .catch((err) => {
-      console.log('❌ Supabase load failed:', mode, err);
-      return getLocalRankFallbackRecords(mode);
+      console.log('❌ Supabase load failed:', err);
+      return getSpeedConveyorRankList().map(r => ({
+        name: r.name || 'Guest',
+        avatar: r.avatar || '🙂',
+        avatarId: r.avatarId || '',
+        avatarType: r.avatarType || 'emoji',
+        avatarValue: r.avatarValue || r.avatar || '🙂',
+        score: Number(r.score || 0),
+        label: 'Conveyor',
+        unit: 'T',
+        ts: Number(r.ts || 0),
+        date: r.dateKey || ''
+      }));
     })
     .finally(() => {
-      serverRankFetchInFlight[`${mode}:${key}`] = null;
+      conveyorServerFetchInFlight = null;
     });
-  return serverRankFetchInFlight[`${mode}:${key}`];
-}
-async function refreshCurrentServerRankingAndRender(force = false) {
-  const period = ['weekly', 'monthly', 'all'].includes(currentRankPeriod) ? currentRankPeriod : 'all';
-  const mode = getCurrentServerRankModeKey();
-  await fetchRankingFromSupabase(mode, period, force);
-  if (document.getElementById('rankPopup')?.classList.contains('visible')) {
-    renderRanking();
-  }
+  return conveyorServerFetchInFlight;
 }
 async function refreshConveyorRankingAndRender(force = false) {
-  await fetchRankingFromSupabase('conveyor', ['weekly', 'monthly', 'all'].includes(currentRankPeriod) ? currentRankPeriod : 'all', force);
+  const period = ['weekly', 'monthly', 'all'].includes(currentRankPeriod) ? currentRankPeriod : 'all';
+  await fetchConveyorRankingFromSupabase(period, force);
   if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor' && document.getElementById('rankPopup')?.classList.contains('visible')) {
     renderRanking();
   }
@@ -5602,7 +5511,6 @@ function openRanking(options = {}) {
   setRankPeriod(currentRankPeriod, true);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
-  refreshCurrentServerRankingAndRender(true).catch(()=>{});
   if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
     refreshConveyorRankingAndRender(false);
   }
@@ -5643,10 +5551,7 @@ function setRankMode(mode, skipRender) {
   if (mode === 'infinity' && !String(currentRankSubTab).startsWith('infinity_')) currentRankSubTab = 'infinity_infinite';
 
   refreshRankSubTabs();
-  if (!skipRender) {
-    renderRanking();
-    refreshCurrentServerRankingAndRender(true).catch(()=>{});
-  }
+  if (!skipRender) renderRanking();
   if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
     refreshConveyorRankingAndRender(false);
   }
@@ -5689,13 +5594,63 @@ function filterByPeriod(items, period) {
 }
 
 function getHallRankingRecords() {
-  const mode = getCurrentServerRankModeKey();
-  const cached = getServerRankCache(mode, currentRankPeriod);
-  if (Array.isArray(cached)) return cached.slice();
-  if (currentRankMode === 'brain') return getLocalRankFallbackRecords(currentRankSubTab === 'brain_hard' ? 'brain_hard' : 'brain_normal');
-  if (currentRankMode === 'speed') return getLocalRankFallbackRecords(currentRankSubTab === 'speed_hard' ? 'speed_hard' : 'speed_normal');
-  if (currentRankSubTab === 'infinity_infinite') return getLocalRankFallbackRecords('infinity');
-  return getLocalRankFallbackRecords('conveyor');
+  if (currentRankMode === 'brain') {
+    const hard = currentRankSubTab === 'brain_hard';
+    return getRanking()
+      .filter(r => /Brain Infinite · (Normal|Hard)/.test(String(r.stage || '')))
+      .filter(r => hard ? /Brain Infinite · Hard/.test(String(r.stage || '')) : /Brain Infinite · Normal/.test(String(r.stage || '')))
+      .map(r => ({
+        name: r.name || 'Guest',
+        avatar: r.avatar || '🙂',
+        score: Number(r.score || 0),
+        label: hard ? 'Hard' : 'Normal',
+        unit: 'R',
+        ts: Number(r.ts || 0),
+        date: r.date || '',
+      }));
+  }
+  if (currentRankMode === 'speed') {
+    const key = currentRankSubTab === 'speed_hard' ? 'hard' : 'normal';
+    const label = key === 'hard' ? 'Hard' : 'Normal';
+    return getSpeedInfiniteRanking(key).map(r => ({
+      name: r.name || 'Guest',
+      avatar: r.avatar || '🙂',
+      avatarId: r.avatarId || '',
+      avatarType: r.avatarType || 'emoji',
+      avatarValue: r.avatarValue || r.avatar || '🙂',
+      score: Number(r.score || 0),
+      label,
+      unit: 'R',
+      ts: Number(r.ts || 0),
+      date: r.dateKey || '',
+    }));
+  }
+  if (currentRankSubTab === 'infinity_infinite') {
+    return getSpeedInfiniteRanking('round').map(r => ({
+      name: r.name || 'Guest',
+      avatar: r.avatar || '🙂',
+      avatarId: r.avatarId || '',
+      avatarType: r.avatarType || 'emoji',
+      avatarValue: r.avatarValue || r.avatar || '🙂',
+      score: Number(r.score || 0),
+      label: 'Infinity',
+      unit: 'R',
+      ts: Number(r.ts || 0),
+      date: r.dateKey || '',
+    }));
+  }
+  return getConveyorRankingRecordsRaw().map(r => ({
+    name: r.name || 'Guest',
+    avatar: r.avatar || '🙂',
+    avatarId: r.avatarId || '',
+    avatarType: r.avatarType || 'emoji',
+    avatarValue: r.avatarValue || r.avatar || '🙂',
+    score: Number(r.score || 0),
+    label: 'Conveyor',
+    unit: 'T',
+    ts: Number(r.ts || 0),
+    date: r.date || r.dateKey || '',
+  }));
 }
 
 function getRankMetaLabel() {
@@ -6868,43 +6823,42 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.07, 'triangle', 0.05 * SOUND_PROFILE.start);
-      playTone(659, 0.09, 'triangle', 0.045 * SOUND_PROFILE.start, 0.055);
+      playTone(523, 0.08, 'triangle', 0.065);
+      playTone(659, 0.10, 'triangle', 0.060, 0.06);
       break;
     case 'light':
-      playTone(660, 0.045, 'sine', 0.022 * SOUND_PROFILE.warning);
-      break;
-    case 'warning':
-      playTone(720, 0.035, 'sine', 0.02 * SOUND_PROFILE.warning);
+      // Brain 모드 문제 제시 전/시퀀스 사운드: 기존보다 2배 이상 체감되도록 상향
+      playTone(660, 0.07, 'sine', 0.078);
       break;
     case 'tap':
-      playTone(540, 0.04, 'triangle', 0.032 * SOUND_PROFILE.ui);
+      // 터치음: 최소 1.5배 이상 체감되도록 상향
+      playTone(540, 0.06, 'triangle', 0.082);
       break;
     case 'correct':
-      playTone(523, 0.045, 'triangle', 0.038 * SOUND_PROFILE.correct);
-      playTone(659, 0.065, 'triangle', 0.034 * SOUND_PROFILE.correct, 0.045);
+      playTone(523, 0.06, 'triangle', 0.060);
+      playTone(659, 0.09, 'triangle', 0.056, 0.05);
       break;
     case 'wrong':
-      playTone(208, 0.07, 'square', 0.045 * SOUND_PROFILE.wrong);
-      playTone(156, 0.10, 'sawtooth', 0.038 * SOUND_PROFILE.wrong, 0.04);
+      playTone(240, 0.12, 'sawtooth', 0.060);
+      playTone(180, 0.09, 'square', 0.050, 0.04);
       break;
-    case 'combo':
-      playTone(659, 0.05, 'triangle', 0.04 * SOUND_PROFILE.correct);
-      playTone(784, 0.07, 'triangle', 0.038 * SOUND_PROFILE.correct, 0.05);
-      playTone(988, 0.08, 'triangle', 0.034 * SOUND_PROFILE.correct, 0.11);
+    case 'warning':
+      // 시간 부족 경고음: 들릴 정도로 분명하게 상향
+      playTone(988, 0.08, 'square', 0.070);
+      playTone(880, 0.10, 'square', 0.056, 0.05);
       break;
-    case 'badge':
-      playTone(784, 0.07, 'triangle', 0.04 * SOUND_PROFILE.correct);
-      playTone(988, 0.08, 'triangle', 0.036 * SOUND_PROFILE.correct, 0.06);
-      playTone(1175, 0.11, 'triangle', 0.03 * SOUND_PROFILE.correct, 0.12);
+    case 'clear':
+      playTone(784, 0.07, 'triangle', 0.060);
+      playTone(988, 0.08, 'triangle', 0.056, 0.06);
+      playTone(1175, 0.11, 'triangle', 0.048, 0.12);
       break;
     case 'mission':
-      playTone(587, 0.05, 'triangle', 0.038 * SOUND_PROFILE.correct);
-      playTone(784, 0.07, 'triangle', 0.034 * SOUND_PROFILE.correct, 0.06);
+      playTone(587, 0.05, 'triangle', 0.050);
+      playTone(784, 0.07, 'triangle', 0.046, 0.06);
       break;
     case 'gameover':
-      playTone(330, 0.09, 'triangle', 0.032 * SOUND_PROFILE.gameover);
-      playTone(262, 0.16, 'triangle', 0.034 * SOUND_PROFILE.gameover, 0.08);
+      playTone(330, 0.09, 'triangle', 0.045);
+      playTone(262, 0.16, 'triangle', 0.048, 0.08);
       break;
   }
 }
@@ -7588,7 +7542,6 @@ function gameOver(stageCleared = false) {
       if (brainInfiniteActive) {
         const savedName = sanitizePlayerName(localStorage.getItem(PLAYER_NAME_KEY)) || getPlayerRankProfile().name || 'Guest';
         addRankRecord(savedName, window._finalScore, window._finalStage);
-        saveScoreToSupabase(brainLimitMode === 'hard' ? 'brain_hard' : 'brain_normal', window._finalScore).catch(()=>{});
       }
       if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
     } catch (e) {
@@ -7915,8 +7868,6 @@ function showComboToast(n) {
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
     map[key] = list.slice(0, 10);
     saveSpeedInfiniteRankMap(map);
-    const serverMode = key === 'hard' ? 'speed_hard' : (key === 'round' ? 'infinity' : 'speed_normal');
-    saveScoreToSupabase(serverMode, score).catch(()=>{});
   }
   function getSpeedInfiniteRanking(mode) {
     const map = getSpeedInfiniteRankMap();

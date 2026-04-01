@@ -1488,7 +1488,7 @@ body.second-chance-open .speed-screen #speedGrid {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   display:flex; align-items:center; gap:6px;
 }
-.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;object-position:center 8%;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
+.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;object-position:center 18%;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
 .rank-avatar-emoji{font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px}
 .rank-name-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .rank-stage {
@@ -4512,7 +4512,7 @@ body.popup-open {
     <button class="modal-x-btn" onclick="speedGoHome()" aria-label="Close">✕</button>
     <div class="speed-top-card">
       <div class="signboard">
-        <div class="sign-title" id="speedScreenTitle">Speed Training</div>
+        <div class="sign-title">Speed Training</div>
         <div class="sign-sub" id="speedScreenSub"></div>
       </div>
       <div class="speed-stage-badge" id="speedStageBadge">🍼 Baby · 3 Keys</div>
@@ -4712,8 +4712,8 @@ body.popup-open {
 <div class="rank-popup" id="rankPopup" onclick="if(event.target===this) closeRanking()">
   <div class="rank-card hall-card">
     <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
-    <div class="rank-header" id="rankHeader">🏆 Conveyor Rank</div>
-    <div class="rank-subline" id="rankSubline">Conveyor only · Taps ranking.</div>
+    <div class="rank-header">🏆 Conveyor Rank</div>
+    <div class="rank-subline">Conveyor only · Taps ranking.</div>
     <div class="rank-tabs rank-sub-grid" id="rankSubTabs" style="display:none;"></div>
     <div class="rank-tabs rank-period-tabs">
       <button class="rank-tab" id="rankPeriodTabWeekly" onclick="setRankPeriod('weekly')">Weekly</button>
@@ -5321,14 +5321,9 @@ function openRanking(options = {}) {
   if (options && options.fromSpeedResult) reopenSpeedResultAfterHallRank = true;
   closeMissionPopup();
   closeStartPopup();
-  const targetMode = options.mode || 'infinity';
-  const targetSubTab = options.subTab || (targetMode === 'brain'
-    ? 'brain_normal'
-    : (targetMode === 'speed' ? 'speed_normal' : 'infinity_conveyor'));
-  currentRankMode = targetMode;
-  currentRankSubTab = targetSubTab;
+  currentRankMode = 'infinity';
+  currentRankSubTab = 'infinity_conveyor';
   currentRankPeriod = currentRankPeriod || 'all';
-  setRankMode(currentRankMode, true);
   setRankPeriod(currentRankPeriod, true);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
@@ -5424,9 +5419,6 @@ function getHallRankingRecords() {
     return getSpeedInfiniteRanking(key).map(r => ({
       name: r.name || 'Guest',
       avatar: r.avatar || '🙂',
-      avatarId: r.avatarId || '',
-      avatarType: r.avatarType || 'emoji',
-      avatarValue: r.avatarValue || r.avatar || '🙂',
       score: Number(r.score || 0),
       label,
       unit: 'R',
@@ -5438,9 +5430,6 @@ function getHallRankingRecords() {
     return getSpeedInfiniteRanking('round').map(r => ({
       name: r.name || 'Guest',
       avatar: r.avatar || '🙂',
-      avatarId: r.avatarId || '',
-      avatarType: r.avatarType || 'emoji',
-      avatarValue: r.avatarValue || r.avatar || '🙂',
       score: Number(r.score || 0),
       label: 'Infinity',
       unit: 'R',
@@ -5461,31 +5450,10 @@ function getHallRankingRecords() {
 
 function getRankMetaLabel() {
   const periodLabel = currentRankPeriod === 'weekly' ? 'Weekly' : (currentRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
-  let modeLabel = 'Conveyor';
-  if (currentRankMode === 'brain') modeLabel = currentRankSubTab === 'brain_hard' ? 'Brain Hard' : 'Brain Normal';
-  else if (currentRankMode === 'speed') modeLabel = currentRankSubTab === 'speed_hard' ? 'Speed Hard' : 'Speed Normal';
-  else if (currentRankSubTab === 'infinity_infinite') modeLabel = 'Infinity';
-  return `Top 100 · ${periodLabel} · ${modeLabel}`;
-}
-
-
-function getRankHeaderLabel() {
-  if (currentRankMode === 'brain') return '🏆 Brain Rank';
-  if (currentRankMode === 'speed') return '🏆 Speed Rank';
-  if (currentRankSubTab === 'infinity_infinite') return '🏆 Infinity Rank';
-  return '🏆 Conveyor Rank';
-}
-function getRankSublineLabel() {
-  if (currentRankMode === 'brain') return 'Brain only · Rounds ranking.';
-  if (currentRankMode === 'speed') return 'Speed only · Rounds ranking.';
-  if (currentRankSubTab === 'infinity_infinite') return 'Infinity only · Rounds ranking.';
-  return 'Conveyor only · Taps ranking.';
+  return `Top 100 · ${periodLabel} · Conveyor`;
 }
 
 function renderRankAvatarMarkup(record) {
-  const myProfile = typeof getPlayerRankProfile === 'function' ? getPlayerRankProfile() : null;
-  const samePlayer = myProfile && String(record?.name || '') === String(myProfile.name || '');
-
   const avatarId = String(record?.avatarId || '').trim();
   if (avatarId && typeof PROFILE_AVATAR_OPTIONS !== 'undefined') {
     const found = PROFILE_AVATAR_OPTIONS.find(item => item.id === avatarId);
@@ -5494,11 +5462,9 @@ function renderRankAvatarMarkup(record) {
       return `<span class="rank-avatar-emoji">${found.value || found.rankSymbol || '🙂'}</span>`;
     }
   }
-
   const avatarType = String(record?.avatarType || '').trim();
   const avatarValue = String(record?.avatarValue || '').trim();
   if (avatarType === 'image' && avatarValue) return `<img src="${avatarValue}" alt="" class="rank-avatar-icon">`;
-
   const raw = String(record?.avatar || '').trim();
   if (/^(img_[a-z]\d+)$/.test(raw) && typeof PROFILE_AVATAR_OPTIONS !== 'undefined') {
     const found = PROFILE_AVATAR_OPTIONS.find(item => item.id === raw);
@@ -5506,12 +5472,7 @@ function renderRankAvatarMarkup(record) {
     if (found) return `<span class="rank-avatar-emoji">${found.value || found.rankSymbol || '🙂'}</span>`;
   }
   if (/(\.png|\.jpg|\.jpeg|\.webp|\.gif)$/i.test(raw)) return `<img src="${raw}" alt="" class="rank-avatar-icon">`;
-
-  if (samePlayer && myProfile?.avatarType === 'image' && myProfile?.avatarValue) {
-    return `<img src="${myProfile.avatarValue}" alt="" class="rank-avatar-icon">`;
-  }
-
-  return `<span class="rank-avatar-emoji">${raw || (samePlayer ? (myProfile?.avatar || '🙂') : '🙂')}</span>`;
+  return `<span class="rank-avatar-emoji">${raw || '🙂'}</span>`;
 }
 
 function renderRanking() {
@@ -5519,10 +5480,6 @@ function renderRanking() {
   const meta = document.getElementById('rankMeta');
   const contextWrap = document.getElementById('rankContext');
   const toast = document.getElementById('rankUpdateToast');
-  const header = document.getElementById('rankHeader');
-  const subline = document.getElementById('rankSubline');
-  if (header) header.textContent = getRankHeaderLabel();
-  if (subline) subline.textContent = getRankSublineLabel();
   if (meta) meta.textContent = getRankMetaLabel();
 
   let records = filterByPeriod(getHallRankingRecords(), currentRankPeriod);
@@ -5578,12 +5535,7 @@ function renderRanking() {
 
   records = records.slice(0, 100);
   if (!records.length) {
-    const emptyLabel = currentRankMode === 'brain'
-      ? (currentRankSubTab === 'brain_hard' ? 'Brain Hard' : 'Brain Normal')
-      : (currentRankMode === 'speed'
-          ? (currentRankSubTab === 'speed_hard' ? 'Speed Hard' : 'Speed Normal')
-          : (currentRankSubTab === 'infinity_infinite' ? 'Infinity' : 'Conveyor'));
-    list.innerHTML = `<div class="rank-empty">No ${emptyLabel} ranking yet.</div>`;
+    list.innerHTML = `<div class="rank-empty">No conveyor ranking yet.</div>`;
     return;
   }
   const highlightTs = pulse?.ts || 0;
@@ -6555,8 +6507,8 @@ function initAudio() {
   return audioCtx;
 }
 
-const SOUND_BOOST = 1.9;
-const SOUND_MAX_GAIN = 0.09;
+const SOUND_BOOST = 3.2;
+const SOUND_MAX_GAIN = 0.22;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
 
@@ -6586,14 +6538,16 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.08, 'triangle', 0.055);
-      playTone(659, 0.10, 'triangle', 0.05, 0.06);
+      playTone(523, 0.09, 'triangle', 0.11);
+      playTone(659, 0.11, 'triangle', 0.10, 0.06);
       break;
     case 'light':
-      playTone(660, 0.06, 'sine', 0.036);
+      // Brain 문제 제시/시퀀스음 크게
+      playTone(660, 0.075, 'sine', 0.14);
       break;
     case 'tap':
-      playTone(540, 0.05, 'triangle', 0.05);
+      // 클릭/터치음 2배 수준 상향
+      playTone(540, 0.07, 'triangle', 0.15);
       break;
     case 'correct':
       playTone(523, 0.05, 'triangle', 0.045);
@@ -6938,7 +6892,6 @@ function startGame() {
   retryCount = 0;
   pendingRetry = false;
   hideSecondChancePopup();
-  hideComboToast();
   // 모든 팝업 닫기
   const rankBtnHome = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
   if (rankBtnHome) rankBtnHome.style.display = brainInfiniteActive ? '' : 'none';
@@ -7183,7 +7136,6 @@ function declineSecondChance() {
 function gameOver(stageCleared = false) {
   clearAllTimers();
   hideSecondChancePopup();
-  hideComboToast();
   pendingRetry = false;
   playUiSound('gameover');
 
@@ -7246,12 +7198,7 @@ function gameOver(stageCleared = false) {
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
   updateNextStageButton();
   const rankBtn = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
-  if (rankBtn) {
-    rankBtn.style.display = brainInfiniteActive ? '' : 'none';
-    rankBtn.onclick = brainInfiniteActive
-      ? function(){ openRanking({ mode:'brain', subTab: brainLimitMode === 'hard' ? 'brain_hard' : 'brain_normal' }); }
-      : function(){ openRanking(); };
-  }
+  if (rankBtn) rankBtn.style.display = brainInfiniteActive ? '' : 'none';
   const nextBtn = document.querySelector('.result-action-row .result-next-btn');
   if (nextBtn) nextBtn.style.display = brainInfiniteActive ? 'none' : (stageCleared ? '' : 'none');
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
@@ -7287,12 +7234,12 @@ function gameOver(stageCleared = false) {
 
   window.setTimeout(() => {
     try {
-      const overlay = document.getElementById('overlay');
       if (brainInfiniteActive) {
-        const savedName = sanitizePlayerName(localStorage.getItem(PLAYER_NAME_KEY)) || getPlayerRankProfile().name || 'Guest';
-        addRankRecord(savedName, window._finalScore, window._finalStage);
+        openNamePopup(window._finalScore, window._finalStage, { mode:'score', showOverlayAfterSave:true, scoreUnit:'Round' });
+      } else {
+        const overlay = document.getElementById('overlay');
+        if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
       }
-      if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
     } catch (e) {
       const overlay = document.getElementById('overlay');
       if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
@@ -7391,13 +7338,6 @@ function updateComboBadge(n) {
   badge.classList.add('pulse-anim');
 }
 
-function hideComboToast() {
-  const toast = document.getElementById('comboToast');
-  if (!toast) return;
-  toast.classList.remove('show', 'hide');
-  toast.style.display = 'none';
-}
-
 function showComboToast(n) {
   const data  = COMBO_DATA[n];
   const toast = document.getElementById('comboToast');
@@ -7421,6 +7361,15 @@ function showComboToast(n) {
 
 // ── 시작 ──
 // 타이틀에서 시작버튼으로 진입
+
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
 
 </script>
 
@@ -7613,7 +7562,7 @@ function showComboToast(n) {
     const key = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     const list = Array.isArray(map[key]) ? map[key] : [];
     const profile = getPlayerRankProfile();
-    list.push({ score: Number(score || 0), ts: Date.now(), avatar: profile.avatar || getProfileAvatarRankSymbol?.() || '🙂', avatarId: profile.avatarId || '', avatarType: profile.avatarType || 'emoji', avatarValue: profile.avatarValue || profile.avatar || '🙂', name: profile.name || 'Guest', dateKey: new Date().toLocaleDateString('sv-SE') });
+    list.push({ score: Number(score || 0), ts: Date.now(), avatar: profile.avatar || getProfileAvatarRankSymbol?.() || '🙂', name: profile.name || 'Guest', dateKey: new Date().toLocaleDateString('sv-SE') });
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
     map[key] = list.slice(0, 10);
     saveSpeedInfiniteRankMap(map);
@@ -8032,12 +7981,10 @@ function showComboToast(n) {
     const round = document.getElementById('speedRound');
     const best = document.getElementById('speedBest');
     const sub = document.getElementById('speedScreenSub');
-    const title = document.getElementById('speedScreenTitle');
     const screen = document.getElementById('speedScreen');
     const laneWrap = document.getElementById('conveyorLaneWrap');
     if (screen) screen.classList.toggle('conveyor-mode', speedState.type === 'conveyor');
     if (laneWrap) laneWrap.classList.toggle('hidden', speedState.type !== 'conveyor');
-    if (title) title.textContent = speedState.type === 'conveyor' ? 'Conveyor' : 'Speed Training';
     if (badge) {
       const left = speedState.type === 'stage'
         ? `${level.emoji || '🏁'} ${getLevelNameEn(level.name)} · ${speedState.selectedKeyCount} Keys`
@@ -8499,60 +8446,6 @@ function showComboToast(n) {
   
   
   let currentSpeedRankTab = 'normal';
-  function getSpeedRankProfile() {
-    try {
-      return typeof getPlayerRankProfile === 'function'
-        ? getPlayerRankProfile()
-        : { name: ((localStorage.getItem('limitgame_player_name') || localStorage.getItem('limitgame_last_player') || 'Guest').trim().slice(0,10)) || 'Guest', avatar: '🙂' };
-    } catch (e) {
-      return { name: 'Guest', avatar: '🙂' };
-    }
-  }
-  function getSpeedRankAvatarMarkup(rawAvatar, nickname) {
-    const profile = getSpeedRankProfile();
-    const safeName = String(nickname || 'Guest').slice(0, 10);
-    const isMine = safeName === String(profile.name || 'Guest').slice(0, 10);
-    if (isMine && typeof renderRankAvatarMarkup === 'function') {
-      return renderRankAvatarMarkup({
-        avatar: profile.avatar || '🙂',
-        avatarId: profile.avatarId || '',
-        avatarType: profile.avatarType || 'emoji',
-        avatarValue: profile.avatarValue || profile.avatar || '🙂'
-      });
-    }
-    try {
-      if (rawAvatar && typeof renderRankAvatarMarkup === 'function') {
-        if (typeof rawAvatar === 'string' && rawAvatar.trim().startsWith('{')) {
-          const parsed = JSON.parse(rawAvatar);
-          return renderRankAvatarMarkup(parsed);
-        }
-        return renderRankAvatarMarkup({ avatar: rawAvatar });
-      }
-    } catch (e) {}
-    return '🙂';
-  }
-  function filterSpeedRankByPeriod(list, period) {
-    if (period === 'all') return list.slice();
-    const now = new Date();
-    const weekStart = (() => {
-      const d = new Date(now);
-      const day = (d.getDay() + 6) % 7;
-      d.setHours(0,0,0,0);
-      d.setDate(d.getDate() - day);
-      return d.getTime();
-    })();
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}`;
-    return list.filter((r) => {
-      if (period === 'weekly') {
-        const ts = Number(r.ts || 0);
-        return ts >= weekStart;
-      }
-      if (period === 'monthly') {
-        return String(r.dateKey || '').slice(0,7) === monthKey;
-      }
-      return true;
-    });
-  }
   window.setSpeedRankPeriod = function(period, skipRender) {
     currentSpeedRankPeriod = ['weekly','monthly','all'].includes(period) ? period : 'all';
     document.getElementById('speedPeriodTabWeekly')?.classList.toggle('active', currentSpeedRankPeriod === 'weekly');
@@ -8570,9 +8463,15 @@ function showComboToast(n) {
     const mySummary = document.getElementById('speedMySummary');
     const title = currentSpeedRankTab === 'hard' ? 'Hard' : (currentSpeedRankTab === 'round' ? 'Infinite' : 'Normal');
     const periodLabel = currentSpeedRankPeriod === 'weekly' ? 'Weekly' : (currentSpeedRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
-    const profile = getSpeedRankProfile();
-    const myName = String(profile.name || 'Guest').slice(0, 10);
-    const myAvatarMarkup = getSpeedRankAvatarMarkup(profile.avatar || '🙂', myName);
+    const myName = ((localStorage.getItem('limitgame_player_name') || localStorage.getItem('limitgame_last_player') || 'Guest').trim().slice(0,10)) || 'Guest';
+    const myAvatar = (() => {
+      try {
+        const raw = localStorage.getItem('limitgame_profile_avatar_v1') || localStorage.getItem('limitgame_avatar');
+        if (!raw) return '🙂';
+        const parsed = JSON.parse(raw);
+        return parsed?.emoji || raw || '🙂';
+      } catch { return '🙂'; }
+    })();
 
     if (meta) meta.textContent = `Top 100 · ${periodLabel} · ${title}`;
     if (mySummary) {
@@ -8586,7 +8485,7 @@ function showComboToast(n) {
       mySummary.innerHTML = `
         <div>
           <div class="label">My Rank</div>
-          <div class="sub">${myAvatarMarkup} ${myName}</div>
+          <div class="sub">${myAvatar} ${myName}</div>
         </div>
         <div class="value">#${rank || '-'}</div>
         <div>
@@ -8618,7 +8517,7 @@ function showComboToast(n) {
             items.map((r,i)=>`
               <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
                 <div class="speed-rank-pos">#${i+1}</div>
-                <div class="speed-rank-label">${getSpeedRankAvatarMarkup(r.avatar, r.nickname || r.name)} ${String(r.nickname || r.name || 'Guest').slice(0,10)}</div>
+                <div class="speed-rank-label">${r.avatar || '🙂'} ${String(r.nickname || 'Guest').slice(0,10)}</div>
                 <div class="speed-rank-score">${Number(r.score || r.round || 0)}R</div>
               </div>
             `).join('')
@@ -8626,12 +8525,17 @@ function showComboToast(n) {
           if (myEntry) renderSummary(myEntry.rank, Number(myEntry.score || myEntry.round || 0), totalCount);
           return;
         }
+
+        if (currentSpeedRankPeriod !== 'all') {
+          root.innerHTML = '<div class="speed-empty small-note">No server record yet for this period.</div>';
+          return;
+        }
       }
     } catch (e) {
       console.warn('speed rank server fallback', e);
     }
 
-    const list = filterSpeedRankByPeriod(getSpeedInfiniteRanking(currentSpeedRankTab), currentSpeedRankPeriod);
+    const list = getSpeedInfiniteRanking(currentSpeedRankTab);
     const deduped = [];
     const seen = new Set();
     for (const r of list) {
@@ -8645,16 +8549,16 @@ function showComboToast(n) {
     if (myIndex >= 0) renderSummary(myIndex + 1, top[myIndex].score, top.length);
 
     const renderRows = (arr) => {
-      if (!arr.length) return `<div class="speed-empty small-note">No ${currentSpeedRankPeriod === 'all' ? 'local all-time' : currentSpeedRankPeriod} record yet.</div>`;
+      if (!arr.length) return '<div class="speed-empty small-note">No local all-time record yet.</div>';
       return arr.map((r,i)=>`
         <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
           <div class="speed-rank-pos">#${i+1}</div>
-          <div class="speed-rank-label">${getSpeedRankAvatarMarkup(r.avatarValue || r.avatar, r.name)} ${r.name || (i===0 ? 'Best' : 'Run')}</div>
+          <div class="speed-rank-label">${myIndex===i ? myAvatar : '🙂'} ${r.name || (i===0 ? 'Best' : 'Run')}</div>
           <div class="speed-rank-score">${r.score}R</div>
         </div>
       `).join('');
     };
-    root.innerHTML = `<div class="speed-rank-section">${renderRows(top)}</div>`;
+    root.innerHTML = `<div class="speed-rank-section">${currentSpeedRankPeriod === 'all' ? renderRows(top) : '<div class="speed-empty small-note">No server record yet for this period.</div>'}</div>`;
   };
   window.openSpeedInfiniteRanking = function(mode) {
     currentSpeedRankTab = mode ? (mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal')) : speedState.infiniteMode;
@@ -8788,6 +8692,15 @@ window.addEventListener('load', function() {
 });
 
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
 </script>
 
 <script>
@@ -8847,6 +8760,15 @@ window.addEventListener('load', function() {
     e.preventDefault();
   }, { passive: false });
 })();
+
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
 
 </script>
 
@@ -8918,6 +8840,15 @@ window.addEventListener('load', function() {
 });
 
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
 </script>
 
 <script>
@@ -8944,6 +8875,15 @@ window.addEventListener('load', function() {
 });
 
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -8963,6 +8903,15 @@ window.addEventListener('load', function() {
     window.addEventListener('load', function(){ setTimeout(ensureInitialNamePopup, 300); }, { once:true });
   }
 })();
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -8977,10 +8926,37 @@ window.addEventListener('DOMContentLoaded', function(){
     } catch(e) {}
   }, 450);
 }, { once:true });
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
 </script>
 
-<script src="./js/config.js"></script>
-<script type="module" src="./js/game-connect.js"></script>
+<script src="./js/config.js">
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
+</script>
+<script type="module" src="./js/game-connect.js">
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
+</script>
 
 
 
@@ -9017,6 +8993,15 @@ window.getSpeedDelay = function() {
   if (!window.speedState) return 800;
   return Math.max(300, 800 - (speedState.score || 0) * 2);
 };
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -9047,6 +9032,15 @@ function renderMyRankSummary(rank, total) {
     <div><div class="sub">/ ${total}</div></div>
   `;
 }
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
+
 </script>
 
 
@@ -9187,6 +9181,15 @@ function renderMyRankSummary(rank, total) {
     initHallRankFix();
   }
 })();
+
+
+document.addEventListener('pointerdown', (e) => {
+  const modeBtn = e.target.closest('.mode-chip');
+  if (!modeBtn) return;
+  try {
+    if (typeof playUiSound === 'function') playUiSound('tap');
+  } catch (err) {}
+}, true);
 
 </script>
 

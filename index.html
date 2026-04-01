@@ -65,12 +65,7 @@ body {
   .speed-chip-note { font-size: 11px; }
 }
 
-
 audio#bgm { display: none; }
-button, .mode-chip, .feedback-chip, .speed-chip, .speed-key-btn, .speed-level-btn, .start-btn, .restart-btn, .result-next-btn, .mission-tab, .modal-x-btn {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
 
 /* ── 게임 컨테이너 ── */
 .game-wrapper {
@@ -5094,172 +5089,6 @@ let currentRankMode = 'brain';
 let currentRankSubTab = 'brain_normal';
 let currentSpeedRankPeriod = 'all';
 let reopenSpeedResultAfterHallRank = false;
-const SUPABASE_URL = 'https://idjrbowbnfeqqqagvepb.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_pjbwFYprfJtt5K4NWCvUNw_7ZvyJVCl';
-const SUPABASE_TABLE_RANKINGS = 'game_rankings';
-const conveyorServerRankCache = { all: null, weekly: null, monthly: null };
-let conveyorServerFetchInFlight = null;
-
-function getSupabaseHeaders() {
-  return {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    'Content-Type': 'application/json'
-  };
-}
-function formatDateKeyFromTs(ts) {
-  try { return new Date(Number(ts || Date.now())).toLocaleDateString('sv-SE'); }
-  catch(e) { return ''; }
-}
-function getConveyorServerCache(period = 'all') {
-  const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
-  return Array.isArray(conveyorServerRankCache[key]) ? conveyorServerRankCache[key].slice() : null;
-}
-function setConveyorServerCache(period, rows) {
-  const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
-  conveyorServerRankCache[key] = Array.isArray(rows) ? rows.slice() : [];
-}
-function clearConveyorServerCache() {
-  conveyorServerRankCache.all = null;
-  conveyorServerRankCache.weekly = null;
-  conveyorServerRankCache.monthly = null;
-}
-function parseStoredAvatarPayload(rawAvatar) {
-  const fallback = { avatar:'🙂', avatarId:'', avatarType:'emoji', avatarValue:'🙂' };
-  if (!rawAvatar) return fallback;
-  const raw = String(rawAvatar).trim();
-  if (!raw) return fallback;
-  if (raw.startsWith('{')) {
-    try {
-      const obj = JSON.parse(raw);
-      return {
-        avatar: obj.avatar || obj.avatarValue || '🙂',
-        avatarId: obj.avatarId || '',
-        avatarType: obj.avatarType || (obj.avatarValue && /\.(png|jpg|jpeg|webp|gif)$/i.test(String(obj.avatarValue)) ? 'image' : 'emoji'),
-        avatarValue: obj.avatarValue || obj.avatar || '🙂'
-      };
-    } catch(e) {}
-  }
-  return {
-    avatar: raw,
-    avatarId: '',
-    avatarType: /^(img_[a-z]\d+)$/.test(raw) || /\.(png|jpg|jpeg|webp|gif)$/i.test(raw) ? 'image' : 'emoji',
-    avatarValue: raw
-  };
-}
-function buildConveyorServerPayload(score) {
-  const profile = getPlayerRankProfile();
-  return {
-    mode: 'conveyor',
-    score: Math.max(0, Number(score || 0)),
-    name: String(profile.name || 'Guest').slice(0, 10),
-    avatar: JSON.stringify({
-      avatar: profile.avatar || '🙂',
-      avatarId: profile.avatarId || '',
-      avatarType: profile.avatarType || 'emoji',
-      avatarValue: profile.avatarValue || profile.avatar || '🙂'
-    })
-  };
-}
-async function saveConveyorScoreToSupabase(score) {
-  try {
-    const payload = buildConveyorServerPayload(score);
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE_RANKINGS}`, {
-      method: 'POST',
-      headers: { ...getSupabaseHeaders(), Prefer: 'return=minimal' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      const errText = await res.text().catch(() => '');
-      console.log('❌ Supabase save failed:', errText || res.status);
-      return false;
-    }
-    clearConveyorServerCache();
-    return true;
-  } catch (e) {
-    console.log('❌ Supabase save exception:', e);
-    return false;
-  }
-}
-function normalizeSupabaseRankingRow(row) {
-  const avatarInfo = parseStoredAvatarPayload(row?.avatar);
-  const ts = row?.created_at ? new Date(row.created_at).getTime() : Date.now();
-  return {
-    name: String(row?.name || 'Guest').slice(0, 10),
-    avatar: avatarInfo.avatar || '🙂',
-    avatarId: avatarInfo.avatarId || '',
-    avatarType: avatarInfo.avatarType || 'emoji',
-    avatarValue: avatarInfo.avatarValue || avatarInfo.avatar || '🙂',
-    score: Number(row?.score || 0),
-    label: 'Conveyor',
-    unit: 'T',
-    ts,
-    date: formatDateKeyFromTs(ts)
-  };
-}
-function getSupabaseCutoffIso(period) {
-  if (period === 'all') return '';
-  const now = Date.now();
-  const cutoff = period === 'weekly'
-    ? now - (7 * 24 * 60 * 60 * 1000)
-    : now - (30 * 24 * 60 * 60 * 1000);
-  return new Date(cutoff).toISOString();
-}
-async function fetchConveyorRankingFromSupabase(period = 'all', force = false) {
-  const key = ['weekly', 'monthly', 'all'].includes(period) ? period : 'all';
-  const cached = getConveyorServerCache(key);
-  if (!force && cached) return cached;
-  if (conveyorServerFetchInFlight && !force) return conveyorServerFetchInFlight;
-  const params = new URLSearchParams();
-  params.set('select', 'name,score,avatar,created_at,mode');
-  params.set('mode', 'eq.conveyor');
-  params.set('order', 'score.desc,created_at.asc');
-  params.set('limit', '100');
-  const cutoffIso = getSupabaseCutoffIso(key);
-  if (cutoffIso) params.set('created_at', `gte.${cutoffIso}`);
-  conveyorServerFetchInFlight = fetch(`${SUPABASE_URL}/rest/v1/${SUPABASE_TABLE_RANKINGS}?${params.toString()}`, {
-    method: 'GET',
-    headers: getSupabaseHeaders()
-  })
-    .then(async (res) => {
-      if (!res.ok) {
-        const errText = await res.text().catch(() => '');
-        throw new Error(errText || String(res.status));
-      }
-      return res.json();
-    })
-    .then((rows) => {
-      const normalized = Array.isArray(rows) ? rows.map(normalizeSupabaseRankingRow) : [];
-      setConveyorServerCache(key, normalized);
-      return normalized.slice();
-    })
-    .catch((err) => {
-      console.log('❌ Supabase load failed:', err);
-      return getSpeedConveyorRankList().map(r => ({
-        name: r.name || 'Guest',
-        avatar: r.avatar || '🙂',
-        avatarId: r.avatarId || '',
-        avatarType: r.avatarType || 'emoji',
-        avatarValue: r.avatarValue || r.avatar || '🙂',
-        score: Number(r.score || 0),
-        label: 'Conveyor',
-        unit: 'T',
-        ts: Number(r.ts || 0),
-        date: r.dateKey || ''
-      }));
-    })
-    .finally(() => {
-      conveyorServerFetchInFlight = null;
-    });
-  return conveyorServerFetchInFlight;
-}
-async function refreshConveyorRankingAndRender(force = false) {
-  const period = ['weekly', 'monthly', 'all'].includes(currentRankPeriod) ? currentRankPeriod : 'all';
-  await fetchConveyorRankingFromSupabase(period, force);
-  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor' && document.getElementById('rankPopup')?.classList.contains('visible')) {
-    renderRanking();
-  }
-}
 
 function getRanking() {
   try { return JSON.parse(localStorage.getItem(RANK_KEY) || '[]'); }
@@ -5408,8 +5237,6 @@ function saveSpeedConveyorRankList(arr) {
   localStorage.setItem(STORAGE_KEYS.speedConveyorRank, JSON.stringify(Array.isArray(arr) ? arr : []));
 }
 function getConveyorRankingRecordsRaw() {
-  const serverRows = getConveyorServerCache(currentRankPeriod);
-  if (Array.isArray(serverRows)) return serverRows.slice();
   return getSpeedConveyorRankList().map(r => ({
     name: r.name || 'Guest',
     avatar: r.avatar || '🙂',
@@ -5465,14 +5292,13 @@ function updateSpeedConveyorRanking(score) {
   const profile = getPlayerRankProfile();
   const list = getSpeedConveyorRankList();
   const entryTs = Date.now();
-  const scoreValue = Math.max(0, Number(score || 0));
   list.push({
     name: profile.name,
     avatar: profile.avatar || '🙂',
     avatarId: profile.avatarId || '',
     avatarType: profile.avatarType || 'emoji',
     avatarValue: profile.avatarValue || profile.avatar || '🙂',
-    score: scoreValue,
+    score: Math.max(0, Number(score || 0)),
     ts: entryTs,
     dateKey: new Date().toLocaleDateString('sv-SE')
   });
@@ -5483,16 +5309,11 @@ function updateSpeedConveyorRanking(score) {
   const improved = !!context.bestRank && (!!prevBestRank ? context.bestRank < prevBestRank : true);
   persistConveyorRankPulse({
     ts: entryTs,
-    score: scoreValue,
+    score: Math.max(0, Number(score || 0)),
     rank: context.currentIndex >= 0 ? context.currentIndex + 1 : null,
     bestRank: context.bestRank || null,
     improved,
     name: profile.name || 'Guest'
-  });
-  saveConveyorScoreToSupabase(scoreValue).then(() => {
-    if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
-      refreshConveyorRankingAndRender(true);
-    }
   });
 }
 
@@ -5511,9 +5332,6 @@ function openRanking(options = {}) {
   setRankPeriod(currentRankPeriod, true);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
-  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
-    refreshConveyorRankingAndRender(false);
-  }
 }
 
 function closeRanking() {
@@ -5552,18 +5370,12 @@ function setRankMode(mode, skipRender) {
 
   refreshRankSubTabs();
   if (!skipRender) renderRanking();
-  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
-    refreshConveyorRankingAndRender(false);
-  }
 }
 
 function setRankSubTab(tab) {
   currentRankSubTab = tab;
   refreshRankSubTabs();
   renderRanking();
-  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
-    refreshConveyorRankingAndRender(false);
-  }
 }
 
 function refreshRankSubTabs() {
@@ -5581,9 +5393,6 @@ function setRankPeriod(period, skipRender) {
   document.getElementById('rankPeriodTabMonthly')?.classList.toggle('active', period === 'monthly');
   document.getElementById('rankPeriodTabAll')?.classList.toggle('active', period === 'all');
   if (!skipRender) renderRanking();
-  if (currentRankMode === 'infinity' && currentRankSubTab === 'infinity_conveyor') {
-    refreshConveyorRankingAndRender(false);
-  }
 }
 
 function filterByPeriod(items, period) {
@@ -5639,17 +5448,14 @@ function getHallRankingRecords() {
       date: r.dateKey || '',
     }));
   }
-  return getConveyorRankingRecordsRaw().map(r => ({
+  return getSpeedConveyorRankList().map(r => ({
     name: r.name || 'Guest',
     avatar: r.avatar || '🙂',
-    avatarId: r.avatarId || '',
-    avatarType: r.avatarType || 'emoji',
-    avatarValue: r.avatarValue || r.avatar || '🙂',
     score: Number(r.score || 0),
     label: 'Conveyor',
     unit: 'T',
     ts: Number(r.ts || 0),
-    date: r.date || r.dateKey || '',
+    date: r.dateKey || '',
   }));
 }
 
@@ -6632,7 +6438,7 @@ function resumeLastPlay() {
   goToStageStep();
 }
 function openStartPopup() {
-  unlockAudioForMobile();
+  initAudio();
   playUiSound('tap');
   renderModeOptions();
   renderLevelOptions();
@@ -6648,7 +6454,7 @@ function closeStartPopup() {
 function enterGame() { openModeSelectPopup(); }
 function confirmStartGame() {
   brainInfiniteActive = false;
-  unlockAudioForMobile();
+  initAudio();
   playUiSound('start');
   pulseVibration([14, 24, 16]);
   saveProgressState();
@@ -6731,11 +6537,6 @@ function goHome() {
 }
 
 // ══ 소리 / 진동 시스템 ══
-// SOUND ASSET RECOMMENDATION:
-// tap: soft wood/click 느낌의 40~70ms UI click
-// wrong: 짧은 low buzz / error tone 80~120ms
-// warning: 아주 약한 tick 또는 미사용
-// 현재는 모두 코드 생성음으로 자동 최적화됨
 const SOUND_KEY = STORAGE_KEYS.soundOn;
 const VIBE_KEY = STORAGE_KEYS.vibrationOn;
 let soundOn = localStorage.getItem(SOUND_KEY) !== '0';
@@ -6754,48 +6555,10 @@ function initAudio() {
   return audioCtx;
 }
 
-
-function primeAudio() {
-  const ctx = initAudio();
-  if (!ctx || audioPrimed) return;
-  try {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    gain.gain.value = 0.0001;
-    osc.frequency.value = 440;
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    const now = ctx.currentTime;
-    osc.start(now);
-    osc.stop(now + 0.01);
-    audioPrimed = true;
-  } catch (e) {}
-}
-
-function unlockAudioForMobile() {
-  initAudio();
-  primeAudio();
-  if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume().catch(()=>{});
-  }
-}
-
-const SOUND_BOOST = 1.55;
-const SOUND_MAX_GAIN = 0.075;
+const SOUND_BOOST = 1.9;
+const SOUND_MAX_GAIN = 0.09;
 const isLikelyIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const isMobileAudio = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 0;
-const MOBILE_SFX_ATTENUATION = isMobileAudio ? 0.9 : 1;
-const SOUND_PROFILE = {
-  master: 1,
-  ui: 0.78,
-  start: 0.9,
-  correct: 0.82,
-  wrong: 0.92,
-  warning: 0.44,
-  gameover: 0.78
-};
 const vibrationSupported = ('vibrate' in navigator) && !isLikelyIOS;
-let audioPrimed = false;
 
 function triggerHapticFallback() {}
 
@@ -6807,7 +6570,7 @@ function playTone(freq=440, duration=0.08, type='sine', volume=0.03, startDelay=
   const now = ctx.currentTime + startDelay;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
-  const targetVolume = Math.min(volume * SOUND_BOOST * MOBILE_SFX_ATTENUATION * SOUND_PROFILE.master, SOUND_MAX_GAIN);
+  const targetVolume = Math.min(volume * SOUND_BOOST, SOUND_MAX_GAIN);
   osc.type = type;
   osc.frequency.setValueAtTime(freq, now);
   gain.gain.setValueAtTime(0.0001, now);
@@ -6823,42 +6586,40 @@ function playUiSound(kind) {
   if (!soundOn) return;
   switch (kind) {
     case 'start':
-      playTone(523, 0.08, 'triangle', 0.065);
-      playTone(659, 0.10, 'triangle', 0.060, 0.06);
+      playTone(523, 0.08, 'triangle', 0.055);
+      playTone(659, 0.10, 'triangle', 0.05, 0.06);
       break;
     case 'light':
-      // Brain 모드 문제 제시 전/시퀀스 사운드: 기존보다 2배 이상 체감되도록 상향
-      playTone(660, 0.07, 'sine', 0.078);
+      playTone(660, 0.06, 'sine', 0.036);
       break;
     case 'tap':
-      // 터치음: 최소 1.5배 이상 체감되도록 상향
-      playTone(540, 0.06, 'triangle', 0.082);
+      playTone(540, 0.05, 'triangle', 0.05);
       break;
     case 'correct':
-      playTone(523, 0.06, 'triangle', 0.060);
-      playTone(659, 0.09, 'triangle', 0.056, 0.05);
+      playTone(523, 0.05, 'triangle', 0.045);
+      playTone(659, 0.08, 'triangle', 0.042, 0.05);
       break;
     case 'wrong':
-      playTone(240, 0.12, 'sawtooth', 0.060);
-      playTone(180, 0.09, 'square', 0.050, 0.04);
+      playTone(240, 0.12, 'sawtooth', 0.055);
+      playTone(180, 0.16, 'sawtooth', 0.05, 0.04);
       break;
-    case 'warning':
-      // 시간 부족 경고음: 들릴 정도로 분명하게 상향
-      playTone(988, 0.08, 'square', 0.070);
-      playTone(880, 0.10, 'square', 0.056, 0.05);
+    case 'combo':
+      playTone(659, 0.05, 'triangle', 0.045);
+      playTone(784, 0.07, 'triangle', 0.042, 0.05);
+      playTone(988, 0.09, 'triangle', 0.04, 0.11);
       break;
-    case 'clear':
-      playTone(784, 0.07, 'triangle', 0.060);
-      playTone(988, 0.08, 'triangle', 0.056, 0.06);
-      playTone(1175, 0.11, 'triangle', 0.048, 0.12);
+    case 'badge':
+      playTone(784, 0.07, 'triangle', 0.045);
+      playTone(988, 0.08, 'triangle', 0.042, 0.06);
+      playTone(1175, 0.12, 'triangle', 0.036, 0.12);
       break;
     case 'mission':
-      playTone(587, 0.05, 'triangle', 0.050);
-      playTone(784, 0.07, 'triangle', 0.046, 0.06);
+      playTone(587, 0.06, 'triangle', 0.045);
+      playTone(784, 0.08, 'triangle', 0.042, 0.07);
       break;
     case 'gameover':
-      playTone(330, 0.09, 'triangle', 0.045);
-      playTone(262, 0.16, 'triangle', 0.048, 0.08);
+      playTone(330, 0.1, 'triangle', 0.04);
+      playTone(262, 0.18, 'triangle', 0.042, 0.08);
       break;
   }
 }
@@ -6941,10 +6702,7 @@ function toggleBgm() {
   }
 }
 
-document.addEventListener('pointerdown', () => { ensureBgmReady(); unlockAudioForMobile(); }, { passive:true, once:true });
-document.addEventListener('touchstart', () => { ensureBgmReady(); unlockAudioForMobile(); }, { passive:true, once:true });
-document.addEventListener('click', () => { unlockAudioForMobile(); }, { passive:true, once:true });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) unlockAudioForMobile(); });
+document.addEventListener('pointerdown', () => { ensureBgmReady(); initAudio(); }, { passive:true, once:true });
 
 document.addEventListener('click', (e) => {
   const popup = document.getElementById('missionPopup');
@@ -6956,15 +6714,6 @@ document.addEventListener('click', (e) => {
   const startPopup = document.getElementById('startPopup');
   if (startPopup && e.target === startPopup) closeStartPopup();
 });
-
-document.addEventListener('pointerdown', (e) => {
-  const btn = e.target.closest('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn, .result-next-btn, .rank-open-btn, .badge-open-btn, .mission-open-btn, .modal-x-btn, .speed-key-btn, .speed-level-btn, .speed-chip, .mission-tab, .profile-avatar-option, .avatar-popup-option, #brainModeTabStage, #brainModeTabInfinite, #speedStartBtn, #speedPauseBtn, #speedResumeBtn, #speedGiveUpBtn');
-  if (!btn) return;
-  if (btn.closest('#grid') || btn.closest('#speedGrid') || btn.classList.contains('btn') || btn.classList.contains('speed-play-btn')) return;
-  unlockAudioForMobile();
-  playUiSound('tap');
-}, { passive:true });
-
 
 // ── 메시지 정의 ──
 const MSGS = {
@@ -7129,7 +6878,7 @@ document.querySelectorAll('.btn').forEach(b => {
 });
 
 document.querySelectorAll('.mode-chip, .feedback-chip, .start-btn, .restart-btn, .start-confirm-btn, .result-next-btn, .rank-open-btn, .badge-open-btn, .mission-open-btn, .modal-x-btn').forEach(el => {
-  el.addEventListener('pointerdown', () => { unlockAudioForMobile(); playUiSound('tap'); }, { passive:true });
+  el.addEventListener('pointerdown', () => { initAudio(); }, { passive:true });
 });
 
 function safeTimeout(fn, delay) {
@@ -8342,12 +8091,12 @@ function showComboToast(n) {
     if (label) label.textContent = 'Time';
   }
   function maybePlayCountdown() {
-    if (speedState.type === 'conveyor') return;
     const sec = Math.ceil(speedState.remaining);
-    if (speedState.remaining > 5 || speedState.remaining <= 0) return;
+    if (speedState.remaining > 10 || speedState.remaining <= 0) return;
     if (speedState.tickSecond === sec) return;
     speedState.tickSecond = sec;
-    if (sec === 3 || sec === 1) playUiSound?.('warning');
+    if (sec <= 5) playUiSound?.('wrong');
+    else playUiSound?.('light');
   }
   function stopSpeedTimer() {
     if (speedState.timer) clearInterval(speedState.timer);
@@ -8750,6 +8499,60 @@ function showComboToast(n) {
   
   
   let currentSpeedRankTab = 'normal';
+  function getSpeedRankProfile() {
+    try {
+      return typeof getPlayerRankProfile === 'function'
+        ? getPlayerRankProfile()
+        : { name: ((localStorage.getItem('limitgame_player_name') || localStorage.getItem('limitgame_last_player') || 'Guest').trim().slice(0,10)) || 'Guest', avatar: '🙂' };
+    } catch (e) {
+      return { name: 'Guest', avatar: '🙂' };
+    }
+  }
+  function getSpeedRankAvatarMarkup(rawAvatar, nickname) {
+    const profile = getSpeedRankProfile();
+    const safeName = String(nickname || 'Guest').slice(0, 10);
+    const isMine = safeName === String(profile.name || 'Guest').slice(0, 10);
+    if (isMine && typeof renderRankAvatarMarkup === 'function') {
+      return renderRankAvatarMarkup({
+        avatar: profile.avatar || '🙂',
+        avatarId: profile.avatarId || '',
+        avatarType: profile.avatarType || 'emoji',
+        avatarValue: profile.avatarValue || profile.avatar || '🙂'
+      });
+    }
+    try {
+      if (rawAvatar && typeof renderRankAvatarMarkup === 'function') {
+        if (typeof rawAvatar === 'string' && rawAvatar.trim().startsWith('{')) {
+          const parsed = JSON.parse(rawAvatar);
+          return renderRankAvatarMarkup(parsed);
+        }
+        return renderRankAvatarMarkup({ avatar: rawAvatar });
+      }
+    } catch (e) {}
+    return '🙂';
+  }
+  function filterSpeedRankByPeriod(list, period) {
+    if (period === 'all') return list.slice();
+    const now = new Date();
+    const weekStart = (() => {
+      const d = new Date(now);
+      const day = (d.getDay() + 6) % 7;
+      d.setHours(0,0,0,0);
+      d.setDate(d.getDate() - day);
+      return d.getTime();
+    })();
+    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}`;
+    return list.filter((r) => {
+      if (period === 'weekly') {
+        const ts = Number(r.ts || 0);
+        return ts >= weekStart;
+      }
+      if (period === 'monthly') {
+        return String(r.dateKey || '').slice(0,7) === monthKey;
+      }
+      return true;
+    });
+  }
   window.setSpeedRankPeriod = function(period, skipRender) {
     currentSpeedRankPeriod = ['weekly','monthly','all'].includes(period) ? period : 'all';
     document.getElementById('speedPeriodTabWeekly')?.classList.toggle('active', currentSpeedRankPeriod === 'weekly');
@@ -8767,15 +8570,9 @@ function showComboToast(n) {
     const mySummary = document.getElementById('speedMySummary');
     const title = currentSpeedRankTab === 'hard' ? 'Hard' : (currentSpeedRankTab === 'round' ? 'Infinite' : 'Normal');
     const periodLabel = currentSpeedRankPeriod === 'weekly' ? 'Weekly' : (currentSpeedRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
-    const myName = ((localStorage.getItem('limitgame_player_name') || localStorage.getItem('limitgame_last_player') || 'Guest').trim().slice(0,10)) || 'Guest';
-    const myAvatar = (() => {
-      try {
-        const raw = localStorage.getItem('limitgame_profile_avatar_v1') || localStorage.getItem('limitgame_avatar');
-        if (!raw) return '🙂';
-        const parsed = JSON.parse(raw);
-        return parsed?.emoji || raw || '🙂';
-      } catch { return '🙂'; }
-    })();
+    const profile = getSpeedRankProfile();
+    const myName = String(profile.name || 'Guest').slice(0, 10);
+    const myAvatarMarkup = getSpeedRankAvatarMarkup(profile.avatar || '🙂', myName);
 
     if (meta) meta.textContent = `Top 100 · ${periodLabel} · ${title}`;
     if (mySummary) {
@@ -8789,7 +8586,7 @@ function showComboToast(n) {
       mySummary.innerHTML = `
         <div>
           <div class="label">My Rank</div>
-          <div class="sub">${myAvatar} ${myName}</div>
+          <div class="sub">${myAvatarMarkup} ${myName}</div>
         </div>
         <div class="value">#${rank || '-'}</div>
         <div>
@@ -8821,7 +8618,7 @@ function showComboToast(n) {
             items.map((r,i)=>`
               <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
                 <div class="speed-rank-pos">#${i+1}</div>
-                <div class="speed-rank-label">${r.avatar || '🙂'} ${String(r.nickname || 'Guest').slice(0,10)}</div>
+                <div class="speed-rank-label">${getSpeedRankAvatarMarkup(r.avatar, r.nickname || r.name)} ${String(r.nickname || r.name || 'Guest').slice(0,10)}</div>
                 <div class="speed-rank-score">${Number(r.score || r.round || 0)}R</div>
               </div>
             `).join('')
@@ -8829,17 +8626,12 @@ function showComboToast(n) {
           if (myEntry) renderSummary(myEntry.rank, Number(myEntry.score || myEntry.round || 0), totalCount);
           return;
         }
-
-        if (currentSpeedRankPeriod !== 'all') {
-          root.innerHTML = '<div class="speed-empty small-note">No server record yet for this period.</div>';
-          return;
-        }
       }
     } catch (e) {
       console.warn('speed rank server fallback', e);
     }
 
-    const list = getSpeedInfiniteRanking(currentSpeedRankTab);
+    const list = filterSpeedRankByPeriod(getSpeedInfiniteRanking(currentSpeedRankTab), currentSpeedRankPeriod);
     const deduped = [];
     const seen = new Set();
     for (const r of list) {
@@ -8853,16 +8645,16 @@ function showComboToast(n) {
     if (myIndex >= 0) renderSummary(myIndex + 1, top[myIndex].score, top.length);
 
     const renderRows = (arr) => {
-      if (!arr.length) return '<div class="speed-empty small-note">No local all-time record yet.</div>';
+      if (!arr.length) return `<div class="speed-empty small-note">No ${currentSpeedRankPeriod === 'all' ? 'local all-time' : currentSpeedRankPeriod} record yet.</div>`;
       return arr.map((r,i)=>`
         <div class="speed-rank-row ${i===0 ? 'top1' : ''}">
           <div class="speed-rank-pos">#${i+1}</div>
-          <div class="speed-rank-label">${myIndex===i ? myAvatar : '🙂'} ${r.name || (i===0 ? 'Best' : 'Run')}</div>
+          <div class="speed-rank-label">${getSpeedRankAvatarMarkup(r.avatarValue || r.avatar, r.name)} ${r.name || (i===0 ? 'Best' : 'Run')}</div>
           <div class="speed-rank-score">${r.score}R</div>
         </div>
       `).join('');
     };
-    root.innerHTML = `<div class="speed-rank-section">${currentSpeedRankPeriod === 'all' ? renderRows(top) : '<div class="speed-empty small-note">No server record yet for this period.</div>'}</div>`;
+    root.innerHTML = `<div class="speed-rank-section">${renderRows(top)}</div>`;
   };
   window.openSpeedInfiniteRanking = function(mode) {
     currentSpeedRankTab = mode ? (mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal')) : speedState.infiniteMode;

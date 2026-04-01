@@ -1488,7 +1488,7 @@ body.second-chance-open .speed-screen #speedGrid {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   display:flex; align-items:center; gap:6px;
 }
-.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;object-position:center 18%;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
+.rank-avatar-icon{width:22px;height:22px;flex:0 0 22px;border-radius:50%;object-fit:cover;object-position:center 8%;display:inline-block;vertical-align:middle;background:#f4ead7;border:1px solid rgba(200,138,48,.45)}
 .rank-avatar-emoji{font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px}
 .rank-name-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
 .rank-stage {
@@ -4512,7 +4512,7 @@ body.popup-open {
     <button class="modal-x-btn" onclick="speedGoHome()" aria-label="Close">✕</button>
     <div class="speed-top-card">
       <div class="signboard">
-        <div class="sign-title">Speed Training</div>
+        <div class="sign-title" id="speedScreenTitle">Speed Training</div>
         <div class="sign-sub" id="speedScreenSub"></div>
       </div>
       <div class="speed-stage-badge" id="speedStageBadge">🍼 Baby · 3 Keys</div>
@@ -4712,8 +4712,8 @@ body.popup-open {
 <div class="rank-popup" id="rankPopup" onclick="if(event.target===this) closeRanking()">
   <div class="rank-card hall-card">
     <button class="modal-x-btn" onclick="closeRanking()" aria-label="Close">✕</button>
-    <div class="rank-header">🏆 Conveyor Rank</div>
-    <div class="rank-subline">Conveyor only · Taps ranking.</div>
+    <div class="rank-header" id="rankHeader">🏆 Conveyor Rank</div>
+    <div class="rank-subline" id="rankSubline">Conveyor only · Taps ranking.</div>
     <div class="rank-tabs rank-sub-grid" id="rankSubTabs" style="display:none;"></div>
     <div class="rank-tabs rank-period-tabs">
       <button class="rank-tab" id="rankPeriodTabWeekly" onclick="setRankPeriod('weekly')">Weekly</button>
@@ -5321,9 +5321,14 @@ function openRanking(options = {}) {
   if (options && options.fromSpeedResult) reopenSpeedResultAfterHallRank = true;
   closeMissionPopup();
   closeStartPopup();
-  currentRankMode = 'infinity';
-  currentRankSubTab = 'infinity_conveyor';
+  const targetMode = options.mode || 'infinity';
+  const targetSubTab = options.subTab || (targetMode === 'brain'
+    ? 'brain_normal'
+    : (targetMode === 'speed' ? 'speed_normal' : 'infinity_conveyor'));
+  currentRankMode = targetMode;
+  currentRankSubTab = targetSubTab;
   currentRankPeriod = currentRankPeriod || 'all';
+  setRankMode(currentRankMode, true);
   setRankPeriod(currentRankPeriod, true);
   renderRanking();
   document.getElementById('rankPopup').classList.add('visible');
@@ -5419,6 +5424,9 @@ function getHallRankingRecords() {
     return getSpeedInfiniteRanking(key).map(r => ({
       name: r.name || 'Guest',
       avatar: r.avatar || '🙂',
+      avatarId: r.avatarId || '',
+      avatarType: r.avatarType || 'emoji',
+      avatarValue: r.avatarValue || r.avatar || '🙂',
       score: Number(r.score || 0),
       label,
       unit: 'R',
@@ -5430,6 +5438,9 @@ function getHallRankingRecords() {
     return getSpeedInfiniteRanking('round').map(r => ({
       name: r.name || 'Guest',
       avatar: r.avatar || '🙂',
+      avatarId: r.avatarId || '',
+      avatarType: r.avatarType || 'emoji',
+      avatarValue: r.avatarValue || r.avatar || '🙂',
       score: Number(r.score || 0),
       label: 'Infinity',
       unit: 'R',
@@ -5450,10 +5461,31 @@ function getHallRankingRecords() {
 
 function getRankMetaLabel() {
   const periodLabel = currentRankPeriod === 'weekly' ? 'Weekly' : (currentRankPeriod === 'monthly' ? 'Monthly' : 'All-time');
-  return `Top 100 · ${periodLabel} · Conveyor`;
+  let modeLabel = 'Conveyor';
+  if (currentRankMode === 'brain') modeLabel = currentRankSubTab === 'brain_hard' ? 'Brain Hard' : 'Brain Normal';
+  else if (currentRankMode === 'speed') modeLabel = currentRankSubTab === 'speed_hard' ? 'Speed Hard' : 'Speed Normal';
+  else if (currentRankSubTab === 'infinity_infinite') modeLabel = 'Infinity';
+  return `Top 100 · ${periodLabel} · ${modeLabel}`;
+}
+
+
+function getRankHeaderLabel() {
+  if (currentRankMode === 'brain') return '🏆 Brain Rank';
+  if (currentRankMode === 'speed') return '🏆 Speed Rank';
+  if (currentRankSubTab === 'infinity_infinite') return '🏆 Infinity Rank';
+  return '🏆 Conveyor Rank';
+}
+function getRankSublineLabel() {
+  if (currentRankMode === 'brain') return 'Brain only · Rounds ranking.';
+  if (currentRankMode === 'speed') return 'Speed only · Rounds ranking.';
+  if (currentRankSubTab === 'infinity_infinite') return 'Infinity only · Rounds ranking.';
+  return 'Conveyor only · Taps ranking.';
 }
 
 function renderRankAvatarMarkup(record) {
+  const myProfile = typeof getPlayerRankProfile === 'function' ? getPlayerRankProfile() : null;
+  const samePlayer = myProfile && String(record?.name || '') === String(myProfile.name || '');
+
   const avatarId = String(record?.avatarId || '').trim();
   if (avatarId && typeof PROFILE_AVATAR_OPTIONS !== 'undefined') {
     const found = PROFILE_AVATAR_OPTIONS.find(item => item.id === avatarId);
@@ -5462,9 +5494,11 @@ function renderRankAvatarMarkup(record) {
       return `<span class="rank-avatar-emoji">${found.value || found.rankSymbol || '🙂'}</span>`;
     }
   }
+
   const avatarType = String(record?.avatarType || '').trim();
   const avatarValue = String(record?.avatarValue || '').trim();
   if (avatarType === 'image' && avatarValue) return `<img src="${avatarValue}" alt="" class="rank-avatar-icon">`;
+
   const raw = String(record?.avatar || '').trim();
   if (/^(img_[a-z]\d+)$/.test(raw) && typeof PROFILE_AVATAR_OPTIONS !== 'undefined') {
     const found = PROFILE_AVATAR_OPTIONS.find(item => item.id === raw);
@@ -5472,7 +5506,12 @@ function renderRankAvatarMarkup(record) {
     if (found) return `<span class="rank-avatar-emoji">${found.value || found.rankSymbol || '🙂'}</span>`;
   }
   if (/(\.png|\.jpg|\.jpeg|\.webp|\.gif)$/i.test(raw)) return `<img src="${raw}" alt="" class="rank-avatar-icon">`;
-  return `<span class="rank-avatar-emoji">${raw || '🙂'}</span>`;
+
+  if (samePlayer && myProfile?.avatarType === 'image' && myProfile?.avatarValue) {
+    return `<img src="${myProfile.avatarValue}" alt="" class="rank-avatar-icon">`;
+  }
+
+  return `<span class="rank-avatar-emoji">${raw || (samePlayer ? (myProfile?.avatar || '🙂') : '🙂')}</span>`;
 }
 
 function renderRanking() {
@@ -5480,6 +5519,10 @@ function renderRanking() {
   const meta = document.getElementById('rankMeta');
   const contextWrap = document.getElementById('rankContext');
   const toast = document.getElementById('rankUpdateToast');
+  const header = document.getElementById('rankHeader');
+  const subline = document.getElementById('rankSubline');
+  if (header) header.textContent = getRankHeaderLabel();
+  if (subline) subline.textContent = getRankSublineLabel();
   if (meta) meta.textContent = getRankMetaLabel();
 
   let records = filterByPeriod(getHallRankingRecords(), currentRankPeriod);
@@ -5535,7 +5578,12 @@ function renderRanking() {
 
   records = records.slice(0, 100);
   if (!records.length) {
-    list.innerHTML = `<div class="rank-empty">No conveyor ranking yet.</div>`;
+    const emptyLabel = currentRankMode === 'brain'
+      ? (currentRankSubTab === 'brain_hard' ? 'Brain Hard' : 'Brain Normal')
+      : (currentRankMode === 'speed'
+          ? (currentRankSubTab === 'speed_hard' ? 'Speed Hard' : 'Speed Normal')
+          : (currentRankSubTab === 'infinity_infinite' ? 'Infinity' : 'Conveyor'));
+    list.innerHTML = `<div class="rank-empty">No ${emptyLabel} ranking yet.</div>`;
     return;
   }
   const highlightTs = pulse?.ts || 0;
@@ -6890,6 +6938,7 @@ function startGame() {
   retryCount = 0;
   pendingRetry = false;
   hideSecondChancePopup();
+  hideComboToast();
   // 모든 팝업 닫기
   const rankBtnHome = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
   if (rankBtnHome) rankBtnHome.style.display = brainInfiniteActive ? '' : 'none';
@@ -7134,6 +7183,7 @@ function declineSecondChance() {
 function gameOver(stageCleared = false) {
   clearAllTimers();
   hideSecondChancePopup();
+  hideComboToast();
   pendingRetry = false;
   playUiSound('gameover');
 
@@ -7196,7 +7246,12 @@ function gameOver(stageCleared = false) {
   document.getElementById('resultSummaryBadges').textContent = newBadges.length;
   updateNextStageButton();
   const rankBtn = document.querySelector('.result-secondary-grid .rank-open-btn:not(.home-btn)');
-  if (rankBtn) rankBtn.style.display = brainInfiniteActive ? '' : 'none';
+  if (rankBtn) {
+    rankBtn.style.display = brainInfiniteActive ? '' : 'none';
+    rankBtn.onclick = brainInfiniteActive
+      ? function(){ openRanking({ mode:'brain', subTab: brainLimitMode === 'hard' ? 'brain_hard' : 'brain_normal' }); }
+      : function(){ openRanking(); };
+  }
   const nextBtn = document.querySelector('.result-action-row .result-next-btn');
   if (nextBtn) nextBtn.style.display = brainInfiniteActive ? 'none' : (stageCleared ? '' : 'none');
   const dailyDoneCount = missionUpdate.state.missions.filter(m => m.completed).length;
@@ -7232,12 +7287,12 @@ function gameOver(stageCleared = false) {
 
   window.setTimeout(() => {
     try {
+      const overlay = document.getElementById('overlay');
       if (brainInfiniteActive) {
-        openNamePopup(window._finalScore, window._finalStage, { mode:'score', showOverlayAfterSave:true, scoreUnit:'Round' });
-      } else {
-        const overlay = document.getElementById('overlay');
-        if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
+        const savedName = sanitizePlayerName(localStorage.getItem(PLAYER_NAME_KEY)) || getPlayerRankProfile().name || 'Guest';
+        addRankRecord(savedName, window._finalScore, window._finalStage);
       }
+      if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
     } catch (e) {
       const overlay = document.getElementById('overlay');
       if (overlay) { overlay.style.display = ''; overlay.classList.add('visible'); }
@@ -7334,6 +7389,13 @@ function updateComboBadge(n) {
   badge.classList.remove('pulse-anim');
   void badge.offsetWidth; // reflow
   badge.classList.add('pulse-anim');
+}
+
+function hideComboToast() {
+  const toast = document.getElementById('comboToast');
+  if (!toast) return;
+  toast.classList.remove('show', 'hide');
+  toast.style.display = 'none';
 }
 
 function showComboToast(n) {
@@ -7551,7 +7613,7 @@ function showComboToast(n) {
     const key = mode === 'hard' ? 'hard' : (mode === 'round' ? 'round' : 'normal');
     const list = Array.isArray(map[key]) ? map[key] : [];
     const profile = getPlayerRankProfile();
-    list.push({ score: Number(score || 0), ts: Date.now(), avatar: profile.avatar || getProfileAvatarRankSymbol?.() || '🙂', name: profile.name || 'Guest', dateKey: new Date().toLocaleDateString('sv-SE') });
+    list.push({ score: Number(score || 0), ts: Date.now(), avatar: profile.avatar || getProfileAvatarRankSymbol?.() || '🙂', avatarId: profile.avatarId || '', avatarType: profile.avatarType || 'emoji', avatarValue: profile.avatarValue || profile.avatar || '🙂', name: profile.name || 'Guest', dateKey: new Date().toLocaleDateString('sv-SE') });
     list.sort((a,b) => (b.score||0) - (a.score||0) || (a.ts||0) - (b.ts||0));
     map[key] = list.slice(0, 10);
     saveSpeedInfiniteRankMap(map);
@@ -7970,10 +8032,12 @@ function showComboToast(n) {
     const round = document.getElementById('speedRound');
     const best = document.getElementById('speedBest');
     const sub = document.getElementById('speedScreenSub');
+    const title = document.getElementById('speedScreenTitle');
     const screen = document.getElementById('speedScreen');
     const laneWrap = document.getElementById('conveyorLaneWrap');
     if (screen) screen.classList.toggle('conveyor-mode', speedState.type === 'conveyor');
     if (laneWrap) laneWrap.classList.toggle('hidden', speedState.type !== 'conveyor');
+    if (title) title.textContent = speedState.type === 'conveyor' ? 'Conveyor' : 'Speed Training';
     if (badge) {
       const left = speedState.type === 'stage'
         ? `${level.emoji || '🏁'} ${getLevelNameEn(level.name)} · ${speedState.selectedKeyCount} Keys`

@@ -4110,60 +4110,64 @@ body.popup-open {
   <div class="title-bg-slide" id="tbg-5" style="background-image:url('bg_5.jpg')"></div>
   <div class="title-bg-slide" id="tbg-6" style="background-image:url('bg_6.jpg')"></div>
 
-  <!-- 콘텐츠 영역 -->
-  <div class="title-content">
-    <!-- 타이틀 텍스트 -->
-    <div class="title-panel">
-      <div class="title-main">Memory Rush</div>
-      <div class="title-sub">Watch → Remember → Tap Fast</div>
-      <div class="title-sub" style="margin-top:6px; opacity:.98; color:#ffe6a8;">Fast. Simple. Addictive.</div>
+ <!-- 콘텐츠 영역 -->
+<div class="title-content">
+  <!-- 타이틀 텍스트 -->
+  <div class="title-panel">
+    <div class="title-main">Memory Rush</div>
+    <div class="title-sub">Watch → Remember → Tap Fast</div>
+    <div class="title-sub" style="margin-top:6px; opacity:.98; color:#ffe6a8;">Fast. Simple. Addictive.</div>
+  </div>
+
+  <!-- 캐릭터 + 시작버튼 묶음 -->
+  <div class="title-char-group">
+    <!-- Woman 캐릭터들 (왼쪽) -->
+    <img class="title-char title-char-f active" id="tchar-f-0" src="female_0.png" alt="">
+    <img class="title-char title-char-f" id="tchar-f-1" src="female_1.png" alt="">
+    <img class="title-char title-char-f" id="tchar-f-2" src="female_2.png" alt="">
+    <img class="title-char title-char-f" id="tchar-f-3" src="female_3.png" alt="">
+    <img class="title-char title-char-f" id="tchar-f-4" src="female_4.png" alt="">
+    <img class="title-char title-char-f" id="tchar-f-5" src="female_5.png" alt="">
+    <img class="title-char title-char-f" id="tchar-f-6" src="female_6.png" alt="">
+
+    <!-- Man 캐릭터들 (오른쪽) -->
+    <img class="title-char title-char-m active" id="tchar-m-0" src="male_0.png" alt="">
+    <img class="title-char title-char-m" id="tchar-m-1" src="male_1.png" alt="">
+    <img class="title-char title-char-m" id="tchar-m-2" src="male_2.png" alt="">
+    <img class="title-char title-char-m" id="tchar-m-3" src="male_3.png" alt="">
+    <img class="title-char title-char-m" id="tchar-m-4" src="male_4.png" alt="">
+    <img class="title-char title-char-m" id="tchar-m-5" src="male_5.png" alt="">
+    <img class="title-char title-char-m" id="tchar-m-6" src="male_6.png" alt="">
+
+    <!-- 시작 버튼 — 캐릭터 가운데 고정 -->
+    <button class="start-btn" onclick="enterGame()">PLAY NOW</button>
+  </div>
+
+  <div class="title-mode-picker title-mode-picker-compact">
+    <div class="title-feedback-row">
+      <button class="feedback-chip" id="soundChip" onclick="toggleSound()">🔊 Sound ON</button>
+      <button class="feedback-chip" id="bgmChip" onclick="toggleBgm()">🎵 BGM ON</button>
     </div>
 
-    <!-- 캐릭터 + 시작버튼 묶음 -->
-    <div class="title-char-group">
-      <!-- Woman 캐릭터들 (왼쪽) -->
-      <img class="title-char title-char-f active" id="tchar-f-0" src="female_0.png" alt="">
-      <img class="title-char title-char-f" id="tchar-f-1" src="female_1.png" alt="">
-      <img class="title-char title-char-f" id="tchar-f-2" src="female_2.png" alt="">
-      <img class="title-char title-char-f" id="tchar-f-3" src="female_3.png" alt="">
-      <img class="title-char title-char-f" id="tchar-f-4" src="female_4.png" alt="">
-      <img class="title-char title-char-f" id="tchar-f-5" src="female_5.png" alt="">
-      <img class="title-char title-char-f" id="tchar-f-6" src="female_6.png" alt="">
-      <!-- Man 캐릭터들 (오른쪽) -->
-      <img class="title-char title-char-m active" id="tchar-m-0" src="male_0.png" alt="">
-      <img class="title-char title-char-m" id="tchar-m-1" src="male_1.png" alt="">
-      <img class="title-char title-char-m" id="tchar-m-2" src="male_2.png" alt="">
-      <img class="title-char title-char-m" id="tchar-m-3" src="male_3.png" alt="">
-      <img class="title-char title-char-m" id="tchar-m-4" src="male_4.png" alt="">
-      <img class="title-char title-char-m" id="tchar-m-5" src="male_5.png" alt="">
-      <img class="title-char title-char-m" id="tchar-m-6" src="male_6.png" alt="">
-      <!-- 시작 버튼 — 캐릭터 가운데 고정 -->
-      <button class="start-btn" onclick="enterGame()">PLAY NOW</button>
-    <!-- 정책 링크 추가 -->
-<div style="position:absolute; bottom:-40px; left:50%; transform:translateX(-50%); text-align:center;">
-  <a href="https://pocketaa-hub.github.io/privacy-policy/" target="_blank"
-     style="display:inline-block; margin:0 6px; font-size:12px; color:#fff; text-decoration:underline; opacity:0.8;">
-    Privacy Policy
-  </a>
-  <a href="https://pocketaa-hub.github.io/privacy/" target="_blank"
-     style="display:inline-block; margin:0 6px; font-size:12px; color:#fff; text-decoration:underline; opacity:0.8;">
-    Data Deletion
-  </a>
+    <div class="mission-open-wrap multi-tools-row">
+      <button class="mission-open-btn" onclick="openMissionPopup()">📅 Mission</button>
+      <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 Profile</button>
+      <button class="mission-open-btn profile-open-btn" onclick="openRanking()">🏆 Rank</button>
     </div>
+  </div>
 
-    <div class="title-mode-picker title-mode-picker-compact">
-      
-      <div class="title-feedback-row">
-        <button class="feedback-chip" id="soundChip" onclick="toggleSound()">🔊 Sound ON</button>
-        <button class="feedback-chip" id="bgmChip" onclick="toggleBgm()">🎵 BGM ON</button>
-      </div>
-      
-      <div class="mission-open-wrap multi-tools-row">
-        <button class="mission-open-btn" onclick="openMissionPopup()">📅 Mission</button>
-        <button class="mission-open-btn profile-open-btn" onclick="openProfilePopup()">👤 Profile</button>
-        <button class="mission-open-btn profile-open-btn" onclick="openRanking()">🏆 Rank</button>
-      </div>
-    </div>
+  <!-- 정책 링크 -->
+  <div style="margin-top:8px; text-align:center; position:relative; z-index:4;">
+    <a href="https://pocketaa-hub.github.io/privacy-policy/" target="_blank" rel="noopener noreferrer"
+       style="display:inline-block; margin:0 8px; font-size:12px; color:#fff; text-decoration:underline; opacity:0.88;">
+      Privacy Policy
+    </a>
+    <a href="https://pocketaa-hub.github.io/privacy/" target="_blank" rel="noopener noreferrer"
+       style="display:inline-block; margin:0 8px; font-size:12px; color:#fff; text-decoration:underline; opacity:0.88;">
+      Data Deletion
+    </a>
+  </div>
+</div>
 
 
     <!-- 인디케이터 -->
